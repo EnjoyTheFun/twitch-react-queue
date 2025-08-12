@@ -5,6 +5,7 @@ import { useAppSelector } from '../../app/hooks';
 import { selectClipById } from './clipQueueSlice';
 import type { PlatformType } from '../../common/utils';
 import Platform from '../../common/components/BrandPlatforms';
+import { selectHighlightedClipId } from './clipQueueSlice';
 
 interface ClipProps {
   clipId: string;
@@ -14,15 +15,22 @@ interface ClipProps {
 
   className?: string;
   card?: boolean;
+  queueIndex?: number;
 }
 
-function Clip({ clipId, onClick, onCrossClick, className, card, platform }: ClipProps) {
+function Clip({ clipId, onClick, onCrossClick, className, card, platform, queueIndex }: ClipProps) {
   const { title, thumbnailUrl = '', author, submitters } = useAppSelector(selectClipById(clipId));
+  const highlightedClipId = useAppSelector(selectHighlightedClipId);
+
+  const isHighlighted = highlightedClipId === clipId;
 
   return (
     <Box
       sx={(theme) => ({
         position: 'relative',
+        border: '3px solid transparent',
+        borderRadius: 8,
+        transition: 'border 0.3s, box-shadow 0.3s',
         height: '100%',
         width: '100%',
         maxWidth: '100%',
@@ -30,8 +38,49 @@ function Clip({ clipId, onClick, onCrossClick, className, card, platform }: Clip
         '& .clip--action-icon': { display: 'none' },
         '&:hover .clip--action-icon': { display: 'block' },
         '&:hover .clip--title': { color: onClick ? theme.colors.indigo[5] : undefined },
+        ...(isHighlighted && {
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            borderRadius: 8,
+            padding: '2px',
+            background: 'linear-gradient(270deg, #00f2fe, #4facfe, #00f2fe)',
+            backgroundSize: '400% 400%',
+            animation: 'gradient-border 2s ease infinite',
+            WebkitMask:
+              'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+            WebkitMaskComposite: 'xor',
+            pointerEvents: 'none',
+            zIndex: 1,
+          },
+          '@keyframes gradient-border': {
+            '0%': { backgroundPosition: '0% 50%' },
+            '50%': { backgroundPosition: '100% 50%' },
+            '100%': { backgroundPosition: '0% 50%' },
+          },
+        }),
       })}
     >
+      {queueIndex && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 1,
+            left: 1,
+            background: 'rgba(8, 7, 83, 0.6)',
+            color: 'white',
+            borderRadius: 4,
+            padding: '2px 6px',
+            fontSize: 12,
+            fontWeight: 'bold',
+            zIndex: 2,
+            pointerEvents: 'none',
+          }}
+        >
+          {queueIndex}
+        </Box>
+      )}
       <Group
         align="flex-start"
         spacing="xs"
@@ -42,9 +91,9 @@ function Clip({ clipId, onClick, onCrossClick, className, card, platform }: Clip
           cursor: onClick ? 'pointer' : undefined,
           '&:active': onClick
             ? {
-                paddingTop: 1,
-                marginBottom: -1,
-              }
+              paddingTop: 1,
+              marginBottom: -1,
+            }
             : {},
         }}
         onClick={onClick}

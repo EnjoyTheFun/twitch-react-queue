@@ -6,6 +6,9 @@ import twitchClipProvider from './twitchClip/twitchClipProvider';
 import twitchVodProvider from './twitchVod/twitchVodProvider';
 import youtubeProvider from './youtube/youtubeProvider';
 import kickClipProvider from './kickClip/kickClipProvider';
+import tiktokProvider from './tiktok/tiktokProvider';
+import twitterProvider from './twitter/twitterProvider';
+import instagramProvider from './instagram/instagramProvider';
 const logger = createLogger('CombinedClipProvider');
 
 export interface ClipProvider {
@@ -26,6 +29,9 @@ class CombinedClipProvider implements ClipProvider {
     [streamableProvider.name]: streamableProvider,
     [afreecaClipProvider.name]: afreecaClipProvider,
     [kickClipProvider.name]: kickClipProvider,
+    [tiktokProvider.name]: tiktokProvider,
+    [twitterProvider.name]: twitterProvider,
+    [instagramProvider.name]: instagramProvider,
   };
   enabledProviders: string[] = [];
 

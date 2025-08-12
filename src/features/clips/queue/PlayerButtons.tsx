@@ -18,7 +18,7 @@ function PlayerButtons({ className }: { className?: string }) {
   const autoplayEnabled = useAppSelector(selectAutoplayEnabled);
   const hasPrevious = useAppSelector(selectHasPrevious);
   return (
-    <Group align="flex-start" className={className}>
+    <Group align="flex-start" className={className} sx={{ flexShrink: 0 }}>
       <Group>
         <Switch
           label="Autoplay"

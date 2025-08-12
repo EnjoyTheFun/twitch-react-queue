@@ -6,6 +6,8 @@ import { legacyDataMigrated } from '../migration/legacyMigration';
 import { settingsChanged } from '../settings/settingsSlice';
 import { userTimedOut } from '../twitchChat/actions';
 import type { PlatformType } from '../../common/utils';
+import { createAsyncThunk } from '@reduxjs/toolkit';
+
 export interface Clip {
   id: string;
   submitters: string[];
@@ -29,6 +31,7 @@ interface ClipQueueState {
   currentId?: string;
   queueIds: string[];
   historyIds: string[];
+  highlightedClipId: string | null;
   watchedClipCount: number;
 
   isOpen: boolean;
@@ -49,12 +52,13 @@ const initialState: ClipQueueState = {
   queueIds: [],
   historyIds: [],
   watchedClipCount: 0,
-  providers: ['twitch-clip', 'twitch-vod', 'youtube'],
+  providers: ['twitch-clip', 'twitch-vod', 'youtube', 'tiktok', 'twitter'],
   layout: 'classic',
   isOpen: false,
   autoplay: false,
   autoplayDelay: 5000,
   watchedHistory: [],
+  highlightedClipId: null,
 };
 
 const addClipToQueue = (state: ClipQueueState, clip: Clip) => {
@@ -222,6 +226,17 @@ const clipQueueSlice = createSlice({
       addClipToHistory(state, payload);
       updateClip(state, payload, { status: 'removed' });
     },
+    queueClipRemoveByIndex: (state, { payload }: PayloadAction<string>) => {
+      const idx = Number.parseInt(payload, 10);
+      if (!isNaN(idx) && idx > 0) {
+        const clipId = state.queueIds[idx - 1];
+        if (clipId) {
+          removeClipFromQueue(state, clipId);
+          addClipToHistory(state, clipId);
+          updateClip(state, clipId, { status: 'removed' });
+        }
+      }
+    },
     memoryClipRemoved: (state, { payload }: PayloadAction<string>) => {
       removeClipFromQueue(state, payload);
       state.historyIds = state.historyIds.filter((id) => id !== payload);
@@ -274,6 +289,22 @@ const clipQueueSlice = createSlice({
       state.autoplay = false;
       state.autoplayUrl = undefined;
       state.autoplayTimeoutHandle = undefined;
+    },
+    bumpClipToTop: (state, { payload }: PayloadAction<string>) => {
+      const idx = Number.parseInt(payload, 10);
+      if (!isNaN(idx) && idx > 0 && idx <= state.queueIds.length) {
+        const clipId = state.queueIds[idx - 1];
+        if (clipId) {
+          state.queueIds.splice(idx - 1, 1); // Remove from current position
+          state.queueIds.unshift(clipId);    // Add to the top
+        }
+      }
+    },
+    highlightClip: (state, { payload }: PayloadAction<string>) => {
+      state.highlightedClipId = payload;
+    },
+    clearHighlight: (state) => {
+      state.highlightedClipId = null;
     },
   },
   extraReducers: (builder) => {
@@ -331,6 +362,7 @@ export const selectAutoplayTimeoutHandle = (state: RootState) => state.clipQueue
 export const selectAutoplayDelay = (state: RootState) => state.clipQueue.autoplayDelay;
 export const selectAutoplayUrl = (state: RootState) => state.clipQueue.autoplayUrl;
 export const selectClipById = (id: string) => (state: RootState) => state.clipQueue.byId[id];
+export const selectHighlightedClipId = (state: RootState) => state.clipQueue.highlightedClipId;
 export const selectNextId = createSelector([selectQueueIds], (queueIds) => queueIds[0]);
 export const selectCurrentClip = createSelector([selectByIds, selectCurrentId], (byIds, id) =>
   id ? byIds[id] : undefined
@@ -354,6 +386,18 @@ export const selectHasPrevious = (state: RootState) => {
   return currentId && historyIds && watchedHistory.length > 1;
 };
 
+export const highlightClipFrame = createAsyncThunk<void, void, { state: RootState }>(
+  'clipQueue/highlightClipFrame',
+  async (_, { dispatch, getState }) => {
+    const queueIds = selectQueueIds(getState());
+    const topClipId = queueIds[0];
+    if (topClipId) {
+      dispatch(highlightClip(topClipId));
+      setTimeout(() => dispatch(clearHighlight()), 3000);
+    }
+  }
+);
+
 export const {
   queueCleared,
   memoryPurged,
@@ -365,6 +409,7 @@ export const {
   clipDetailsReceived,
   clipDetailsFailed,
   queueClipRemoved,
+  queueClipRemoveByIndex,
   memoryClipRemoved,
   isOpenChanged,
   autoplayChanged,
@@ -372,6 +417,9 @@ export const {
   autoplayUrlReceived,
   autoplayUrlFailed,
   previousClipWatched,
+  bumpClipToTop,
+  highlightClip,
+  clearHighlight
 } = clipQueueSlice.actions;
 
 const clipQueueReducer = persistReducer(

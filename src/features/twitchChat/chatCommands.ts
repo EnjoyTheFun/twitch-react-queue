@@ -6,6 +6,9 @@ import {
   isOpenChanged,
   memoryPurged,
   queueCleared,
+  queueClipRemoveByIndex,
+  bumpClipToTop,
+  highlightClipFrame,
 } from '../clips/clipQueueSlice';
 import { settingsChanged } from '../settings/settingsSlice';
 import { createLogger } from '../../common/logging';
@@ -29,6 +32,13 @@ const commands: Record<string, CommmandFunction> = {
   next: (dispatch) => dispatch(currentClipWatched()),
   skip: (dispatch) => dispatch(currentClipSkipped()),
   remove: (dispatch, [url]) => url && dispatch(urlDeleted(url)),
+  removeidx: (dispatch, [idx]) => idx && dispatch(queueClipRemoveByIndex(idx)),
+  ht: (dispatch, [idxStr]) => {
+    if (idxStr) {
+      dispatch(bumpClipToTop(idxStr));
+      dispatch(highlightClipFrame());
+    }
+  },
   clear: (dispatch) => dispatch(queueCleared()),
   purgememory: (dispatch) => dispatch(memoryPurged()),
   autoplay: (dispatch, [enabled]) => {

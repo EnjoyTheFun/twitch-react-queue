@@ -9,6 +9,7 @@ import IfAuthenticated from '../features/auth/IfAuthenticated';
 import { useAppDispatch } from './hooks';
 import { login } from '../features/auth/authSlice';
 import AppMenu from './AppMenu';
+import ImportLinksButton from '../features/clips/queue/ImportLinksButton';
 
 export function TitleIcon() {
   return (
@@ -22,7 +23,7 @@ export function TitleText() {
   return (
     <Group direction="column" spacing={0}>
       <Text size="xl" weight={800}>
-        Clip Queue
+        React Queue
       </Text>
       <MyCredits />
     </Group>
@@ -81,7 +82,10 @@ function AppHeader({ noNav = false }: { noNav?: boolean }) {
             </Group>
           }
         >
-          <AppMenu />
+          <Group spacing="xs" align="center">
+            <ImportLinksButton />
+            <AppMenu />
+          </Group>
         </IfAuthenticated>
       </Group>
     </Header>

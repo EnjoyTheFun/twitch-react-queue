@@ -8,7 +8,7 @@ function HomePage() {
   return (
     <Container py="md">
       <Box>
-        <Title order={1}>Clip Queue</Title>
+        <Title order={1}>React Queue</Title>
         <MyCredits />
         <Text component="p">Enqueue and play clips from your Twitch Chat using nothing more than your web browser</Text>
       </Box>

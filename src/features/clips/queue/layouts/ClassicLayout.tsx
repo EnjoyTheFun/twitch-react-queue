@@ -12,7 +12,7 @@ function ClassicLayout() {
         <Grid.Col xs={14} sm={15} md={15} lg={17} xl={19} span={19}>
           <Stack justify="flex-start" spacing="xs" sx={{ height: '100%' }}>
             <Player />
-            <Group position="apart">
+            <Group position="apart" sx={{ alignItems: 'center', width: '100%' }}>
               <PlayerTitle />
               <PlayerButtons />
             </Group>

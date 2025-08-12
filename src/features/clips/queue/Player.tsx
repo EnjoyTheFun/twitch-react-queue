@@ -12,6 +12,10 @@ import {
 import clipProvider from '../providers/providers';
 import AutoplayOverlay from './AutoplayOverlay';
 import VideoPlayer from './VideoPlayer';
+import TikTokPlayer from './TikTokPlayer';
+import TwitterImagePlayer from './TwitterImagePlayer';
+import InstagramEmbedWithTimeout from './InstagramEmbed';
+import XEmbedWithTimeout from './XEmbed';
 
 interface PlayerProps {
   className?: string;
@@ -26,34 +30,96 @@ const getPlayerComponent = (
 ) => {
   if (!currentClip) return null;
 
-  const KickClip = currentClip.Platform === 'Kick';
+  const { Platform, id, title, url } = currentClip;
+  if (!id) return null;
+  const embedUrl = videoSrc || clipProvider.getEmbedUrl(id) || "";
 
-  if (autoplayEnabled && currentClip.id) {
-    return (
-      <VideoPlayer
-        key={`${currentClip.id}-${videoSrc}`}
-        src={videoSrc}
-        onEnded={() => nextClipId && dispatch(autoplayTimeoutHandleChanged({ set: true }))}
-      />
-    );
+  const handleEnded = autoplayEnabled && nextClipId
+    ? () => dispatch(autoplayTimeoutHandleChanged({ set: true }))
+    : undefined;
+
+
+  switch (Platform) {
+    case 'YouTube':
+    case 'Twitch':
+    case 'Afreeca':
+    case 'Streamable':
+      return autoplayEnabled ? (
+        <VideoPlayer
+          key={`${id}-${videoSrc}`}
+          src={videoSrc}
+          onEnded={handleEnded}
+        />
+      ) : (
+        <iframe
+          key={id}
+          src={clipProvider.getEmbedUrl(id) || embedUrl}
+          title={title}
+          style={{ height: '100%', width: '100%' }}
+          frameBorder="0"
+          allow="autoplay"
+          allowFullScreen
+        />);
+    case 'Kick':
+      return <VideoPlayer key={id} src={url} onEnded={handleEnded} />;
+    case 'Instagram':
+      return (
+        <InstagramEmbedWithTimeout
+          key={id}
+          url={embedUrl}
+          autoplayEnabled={autoplayEnabled}
+          dispatch={dispatch}
+          height="100%"
+          captioned
+        />
+      );
+    case 'TikTok':
+      return (
+        <TikTokPlayer
+          key={id}
+          src={videoSrc ? videoSrc + (autoplayEnabled ? '?autoplay=1&rel=0' : '?autoplay=1&rel=0&') : clipProvider.getEmbedUrl(id) + (autoplayEnabled ? '?autoplay=1&rel=0' : '?autoplay=1&rel=0&')}
+          title={title}
+          autoplayEnabled={autoplayEnabled}
+        />
+      );
+    case 'Twitter':
+      if (videoSrc?.endsWith('.jpg') || videoSrc?.endsWith('.png')) {
+        return (
+          <TwitterImagePlayer
+            key={`${id}-${videoSrc}`}
+            src={videoSrc}
+            title={title}
+            autoplayEnabled={autoplayEnabled}
+            dispatch={dispatch}
+          />
+        );
+      }
+      if (videoSrc?.endsWith('.mp4')) {
+        return (
+          <VideoPlayer
+            key={`${id}-${videoSrc}`}
+            src={videoSrc}
+            onEnded={handleEnded}
+          />
+        );
+      }
+      // Not sure if raw tweets with no media should be displayed. Temp solution:
+      return <XEmbedWithTimeout key={`${id}-${videoSrc}`} url={embedUrl} style={{
+        maxWidth: '100%', maxHeight: '100%', width: 500, height: '100%'
+      }} autoplayEnabled={autoplayEnabled} dispatch={dispatch} />;
+    default:
+      return (
+        <iframe
+          key={id}
+          src={embedUrl}
+          title={title}
+          style={{ height: '100%', width: '100%' }}
+          frameBorder="0"
+          allow="autoplay"
+          allowFullScreen
+        />
+      );
   }
-
-  if (KickClip) {
-    return <VideoPlayer key={currentClip.id} src={currentClip.url} />;
-  }
-
-  const embedUrl = clipProvider.getEmbedUrl(currentClip.id);
-  return (
-    <iframe
-      key={currentClip.id}
-      src={embedUrl}
-      title={currentClip.title}
-      style={{ height: '100%', width: '100%' }}
-      frameBorder="0"
-      allow="autoplay"
-      allowFullScreen
-    />
-  );
 };
 
 function Player({ className }: PlayerProps) {

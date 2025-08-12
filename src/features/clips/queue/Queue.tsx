@@ -18,13 +18,14 @@ function Queue({ wrapper, card }: QueueProps) {
 
   return (
     <>
-      {clips.map((clip) => (
+      {clips.map((clip, idx) => (
         <Wrapper key={clip!.id}>
           <Clip
             platform={clip!.Platform || undefined}
             key={clip!.id}
             clipId={clip!.id}
             card={card}
+            queueIndex={idx + 1}
             onClick={() => dispatch(currentClipReplaced(clip!.id))}
             onCrossClick={() => dispatch(queueClipRemoved(clip!.id))}
           />

@@ -16,7 +16,7 @@ function FeaturesSection() {
       >
         <List.Item>
           <strong>
-            Supports Twitch Clips, Kick Clips, Afreeca Clips, Twitch VODs, YouTube and Streamable video links.
+            Supports Twitch Clips, Kick Clips, Afreeca Clips, Twitch VODs, YouTube, Streamable, <span className="etf_color">TikTok</span> and <span className="etf_color">Twitter</span> video links.
           </strong>
         </List.Item>
         <List.Item>
@@ -77,6 +77,10 @@ function FeaturesSection() {
           <Code>remove [url]</Code> - removes the clip with [url] from the queue
           <br />
           <Code>providers [providers]</Code> - sets enabled clip providers to [providers]
+          <br />
+          <Code className="etf_color">removeidx [index]</Code> - removes the clip at position [index]
+          <br />
+          <Code className="etf_color">ht [index]</Code> - bump the clip at position [index] to the top of the queue and highlight it
         </List.Item>
       </List>
     </Box>

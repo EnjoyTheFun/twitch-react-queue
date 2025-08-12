@@ -1,46 +1,8 @@
-# Getting Started with Create React App
+# Twitch React Queue
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a personalized version of the app [twitch-clip-queue](https://github.com/jakemiki/twitch-clip-queue). It extends the functionality of the original app with features like enhanced queue management, additional Twitch chat commands, support for more media platforms (TikTok and Twitter/X), and importing URLs (which can be fed from Discord channels or other APIs). The project aims to add new capabilities while keeping the core experience simple and as close to the original as possible.
 
-## Available Scripts
+*The name "Clip Queue" didn't make sense anymore since the app now includes more media types than just clips. Most creators who use the app use it for react content so "React Queue" felt more fitting. It also adds a way to differentiate between this custom build and the original app. If you are looking for a stable version of Clip Queue, visit the original creator's [repository](https://github.com/jakemiki/twitch-clip-queue).*
 
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+Intended for personal use, but *(for a limited time)* you can test it out yourself here:
+[Live Demo Link](https://etf-clip-q.vercel.app/)
