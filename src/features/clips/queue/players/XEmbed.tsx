@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
-import { InstagramEmbed } from 'react-social-media-embed';
-import { useAppDispatch } from '../../../app/hooks';
+import { XEmbed } from 'react-social-media-embed';
+import { useAppDispatch } from '../../../../app/hooks';
 import {
   autoplayTimeoutHandleChanged,
-} from '../clipQueueSlice';
+} from '../../clipQueueSlice';
 
-export default function InstagramEmbedWithTimeout({
+export default function XEmbedWithTimeout({
   url,
   autoplayEnabled,
   dispatch,
@@ -27,5 +27,5 @@ export default function InstagramEmbedWithTimeout({
     }
   }, [autoplayEnabled, dispatch, timeout]);
 
-  return <InstagramEmbed url={url} {...props} />;
+  return <XEmbed url={url} {...props} />;
 }

@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import {
   autoplayTimeoutHandleChanged,
-} from '../clipQueueSlice';
-import { useAppDispatch } from '../../../app/hooks';
+} from '../../clipQueueSlice';
+import { useAppDispatch } from '../../../../app/hooks';
 
 interface TikTokPlayerProps {
   src: string;

@@ -11,12 +11,16 @@ interface SettingsState {
   channel?: string;
   commandPrefix: string;
   volume: number;
+  blacklist: string[];
+  blurredProviders: string[];
 }
 
 const initialState: SettingsState = {
   colorScheme: null,
   commandPrefix: '!queue',
   volume: 1,
+  blacklist: [],
+  blurredProviders: [],
 };
 
 const settingsSlice = createSlice({
@@ -38,6 +42,12 @@ const settingsSlice = createSlice({
       }
       if (payload.commandPrefix) {
         state.commandPrefix = payload.commandPrefix;
+      }
+      if (payload.blacklist) {
+        state.blacklist = payload.blacklist.map((s) => s.toLowerCase());
+      }
+      if (payload.blurredProviders) {
+        state.blurredProviders = payload.blurredProviders;
       }
     },
     setVolume: (state, action) => {
@@ -61,6 +71,8 @@ const settingsSlice = createSlice({
 const selectSettings = (state: RootState): SettingsState => state.settings;
 export const selectChannel = (state: RootState) => state.settings.channel;
 export const selectCommandPrefix = (state: RootState) => state.settings.commandPrefix;
+export const selectBlacklist = (state: RootState) => state.settings.blacklist || [];
+export const selectBlurredProviders = (state: RootState) => state.settings.blurredProviders || [];
 
 export const selectColorScheme = createSelector(
   [selectSettings, (_, defaultColorScheme: ColorScheme) => defaultColorScheme],

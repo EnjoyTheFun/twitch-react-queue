@@ -1,8 +1,10 @@
 import { AppShell, Box } from '@mantine/core';
 import { PropsWithChildren } from 'react';
 import AppHeader from './AppHeader';
+import useQueueStatusTitle from './QueueStatus';
 
 function AppLayout({ children, noNav = false }: PropsWithChildren<{ noNav?: boolean }>) {
+  useQueueStatusTitle();
   return (
     <AppShell
       padding={0}

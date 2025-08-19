@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { setVolume } from '../../settings/settingsSlice';
+import { setVolume } from '../../../settings/settingsSlice';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../../app/store';
+import { RootState } from '../../../../app/store';
 import videojs from 'video.js';
 import VideoJSPlayer from 'video.js/dist/types/player';
 import 'video.js/dist/video-js.css';

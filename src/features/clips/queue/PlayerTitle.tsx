@@ -1,4 +1,4 @@
-import { Box, Text } from '@mantine/core';
+import { Box, Text, useMantineTheme } from '@mantine/core';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { useAppSelector } from '../../../app/hooks';
 import { selectCurrentClip } from '../clipQueueSlice';
@@ -12,6 +12,9 @@ const _nbsp = <>&nbsp;</>;
 
 function PlayerTitle({ className }: PlayerTitleProps) {
   const currentClip = useAppSelector(selectCurrentClip);
+  const theme = useMantineTheme();
+  const submitter = currentClip?.submitters?.[0];
+  const chatUser = useAppSelector((s) => (submitter ? s.chatUsers[submitter.toLowerCase()] : undefined));
 
   return (
     <Box className={className} sx={{ strong: { fontWeight: 600 }, maxWidth: '70%', minWidth: 0, overflow: 'hidden' }}>
@@ -42,7 +45,10 @@ function PlayerTitle({ className }: PlayerTitleProps) {
         )}
         {currentClip?.submitters[0] && (
           <>
-            , submitted by <strong>{currentClip?.submitters[0]}</strong>
+            , submitted by{' '}
+            <strong style={{ color: chatUser?.broadcaster ? theme.colors.red[6] : chatUser?.vip ? theme.colors.pink[6] : chatUser?.mod ? theme.colors.green[6] : undefined }}>
+              {currentClip?.submitters[0]}
+            </strong>
             {currentClip?.submitters.length > 1 && <> and {currentClip.submitters.length - 1} other(s)</>}
           </>
         )}

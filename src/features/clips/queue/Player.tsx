@@ -11,11 +11,11 @@ import {
 } from '../clipQueueSlice';
 import clipProvider from '../providers/providers';
 import AutoplayOverlay from './AutoplayOverlay';
-import VideoPlayer from './VideoPlayer';
-import TikTokPlayer from './TikTokPlayer';
-import TwitterImagePlayer from './TwitterImagePlayer';
-import InstagramEmbedWithTimeout from './InstagramEmbed';
-import XEmbedWithTimeout from './XEmbed';
+import VideoPlayer from './players/VideoPlayer';
+import TikTokPlayer from './players/TikTokPlayer';
+import TwitterImagePlayer from './players/TwitterImagePlayer';
+import InstagramEmbedWithTimeout from './players/InstagramEmbed';
+import XEmbedWithTimeout from './players/XEmbed';
 
 interface PlayerProps {
   className?: string;

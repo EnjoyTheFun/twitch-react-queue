@@ -50,6 +50,12 @@ const handleMessage =
       vip: chatUserstate.badges?.vip ? true : undefined,
     };
 
+    try {
+      storeApi.dispatch({ type: 'chatUsers/chatUserUpdated', payload: { username: userstate.username, flags: { mod: userstate.mod, vip: userstate.vip, broadcaster: userstate.broadcaster } } });
+    } catch (e) {
+      // ignore
+    }
+
     if (message.startsWith(commandPrefix)) {
       const [command, ...args] = message.substring(commandPrefix.length).split(' ');
       processCommand(storeApi.dispatch, { command, args, userstate });

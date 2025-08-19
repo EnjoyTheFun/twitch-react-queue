@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { useAppDispatch } from '../../../app/hooks';
+import { useAppDispatch } from '../../../../app/hooks';
 import {
   autoplayTimeoutHandleChanged,
-} from '../clipQueueSlice';
+} from '../../clipQueueSlice';
 
 function TwitterImagePlayer({ src, title, autoplayEnabled, dispatch }: {
   src: string;

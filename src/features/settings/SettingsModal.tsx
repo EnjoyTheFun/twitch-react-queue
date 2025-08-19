@@ -1,7 +1,8 @@
-import { Button, Chip, Chips, Group, Stack, TextInput, Text, NumberInput, Tabs, Select, Code } from '@mantine/core';
+import { Button, Group, Stack, TextInput, Text, NumberInput, Tabs, Select, Code, Textarea, Switch, Box, useMantineTheme } from '@mantine/core';
+import React from 'react';
 import { useForm } from '@mantine/hooks';
 import { useModals } from '@mantine/modals';
-import { History, Settings, Slideshow } from 'tabler-icons-react';
+import { History, Settings, Slideshow, Ban } from 'tabler-icons-react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import {
   memoryPurged,
@@ -21,14 +22,22 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
   const layout = useAppSelector(selectLayout);
   const historyIds = useAppSelector(selectHistoryIds);
 
+  const existingBlacklist = useAppSelector((s) => s.settings.blacklist) || [];
+  const existingBlurred = useAppSelector((s) => s.settings.blurredProviders) || [];
+  const theme = useMantineTheme();
   const form = useForm({
-    initialValues: { channel, commandPrefix, clipLimit, enabledProviders, layout },
+    initialValues: { channel, commandPrefix, clipLimit, enabledProviders, layout, blacklist: existingBlacklist.join(', '), blurredProviders: existingBlurred },
   });
 
   return (
     <form
       onSubmit={form.onSubmit((settings) => {
-        dispatch(settingsChanged(settings));
+        const blacklistArr = (settings.blacklist || '')
+          .split(',')
+          .map((s: string) => s.trim())
+          .filter((s: string) => s.length > 0);
+
+  dispatch(settingsChanged({ ...settings, blacklist: blacklistArr, blurredProviders: settings.blurredProviders || [] }));
         closeModal();
       })}
     >
@@ -71,17 +80,60 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
               />
               <Stack spacing="sm">
                 <Text size="sm">Clip providers</Text>
-                <Chips multiple {...form.getInputProps('enabledProviders')}>
-                  <Chip value="twitch-clip">Twitch Clips</Chip>
-                  <Chip value="twitch-vod">Twitch Videos / VODs</Chip>
-                  <Chip value="kick-clip">Kick Clips</Chip>
-                  <Chip value="youtube">YouTube</Chip>
-                  <Chip value="streamable">Streamable</Chip>
-                  <Chip value="afreeca-clip">Afreeca Clips</Chip>
-                  <Chip value="tiktok">TikToks</Chip>
-                  <Chip value="twitter">X / Twitter</Chip>
-                  <Chip value="instagram">Instagram (Experimental)</Chip>
-                </Chips>
+                {[
+                  { key: 'twitch-clip', label: 'Twitch Clips' },
+                  { key: 'twitch-vod', label: 'Twitch Videos / VODs' },
+                  { key: 'kick-clip', label: 'Kick Clips' },
+                  { key: 'youtube', label: 'YouTube' },
+                  { key: 'streamable', label: 'Streamable' },
+                  { key: 'afreeca-clip', label: 'Afreeca Clips' },
+                  { key: 'tiktok', label: 'TikToks' },
+                  { key: 'twitter', label: 'X / Twitter (Third-party API)' },
+                  { key: 'instagram', label: 'Instagram (Experimental)' },
+                ].map((p) => {
+                  const enabled = form.values.enabledProviders?.includes(p.key);
+                  const blurred = form.values.blurredProviders?.includes(p.key);
+                  return (
+                    <Box
+                      key={p.key}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '4px',
+                        borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[3]}`,
+                      }}
+                    >
+                      <Text size="xs" style={{ flex: 1 }}>{p.label}</Text>
+                      <Group spacing="sm" noWrap>
+                        <Text size="xs" color="dimmed">
+                          Blur
+                        </Text>
+                        <Switch
+                          checked={!!blurred}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            const next = new Set(form.values.blurredProviders || []);
+                            if (e.currentTarget.checked) next.add(p.key);
+                            else next.delete(p.key);
+                            form.setFieldValue('blurredProviders', Array.from(next));
+                          }}
+                        />
+                        <Text size="xs" color="dimmed">
+                          Enabled
+                        </Text>
+                        <Switch
+                          checked={!!enabled}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            const next = new Set(form.values.enabledProviders || []);
+                            if (e.currentTarget.checked) next.add(p.key);
+                            else next.delete(p.key);
+                            form.setFieldValue('enabledProviders', Array.from(next));
+                          }}
+                        />
+                      </Group>
+                    </Box>
+                  );
+                })}
               </Stack>
               <NumberInput
                 label="Clip limit"
@@ -114,6 +166,17 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
                   Purge memory
                 </Button>
               </Group>
+            </Stack>
+          </Tabs.Tab>
+          <Tabs.Tab label="Moderation" icon={<Ban size={16} />}>
+            <Stack>
+              <Text size="sm">User blacklist (comma-separated). Submissions from these usernames will be ignored.</Text>
+              <Textarea
+                autosize
+                minRows={2}
+                placeholder="nightbot, streamelements"
+                {...form.getInputProps('blacklist')}
+              />
             </Stack>
           </Tabs.Tab>
         </Tabs>

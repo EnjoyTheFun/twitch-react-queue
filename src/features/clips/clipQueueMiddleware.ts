@@ -33,6 +33,10 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
       } else if (urlReceived.match(action)) {
         const { url, userstate } = action.payload;
         const sender = userstate.username;
+        const blacklist = storeAPI.getState().settings.blacklist || [];
+        if (blacklist.map((b: string) => b.toLowerCase()).includes((sender || '').toLowerCase())) {
+          return next(action);
+        }
         if (storeAPI.getState().clipQueue.isOpen) {
           const id = clipProvider.getIdFromUrl(url);
           if (id) {

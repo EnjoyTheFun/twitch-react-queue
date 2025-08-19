@@ -1,4 +1,4 @@
-import { ActionIcon, AspectRatio, Image, Box, Group, Skeleton, Stack, Text } from '@mantine/core';
+import { ActionIcon, AspectRatio, Image, Box, Group, Skeleton, Stack, Text, useMantineTheme } from '@mantine/core';
 import { MouseEventHandler } from 'react';
 import { Trash } from 'tabler-icons-react';
 import { useAppSelector } from '../../app/hooks';
@@ -21,6 +21,35 @@ interface ClipProps {
 function Clip({ clipId, onClick, onCrossClick, className, card, platform, queueIndex }: ClipProps) {
   const { title, thumbnailUrl = '', author, submitters } = useAppSelector(selectClipById(clipId));
   const highlightedClipId = useAppSelector(selectHighlightedClipId);
+  const theme = useMantineTheme();
+  const chatUser = useAppSelector((s) => (submitters?.[0] ? s.chatUsers[submitters[0].toLowerCase()] : undefined));
+  const blurredProviders = useAppSelector((s) => s.settings.blurredProviders || []);
+
+  const platformToProviderKey = (platform: string | undefined) => {
+    switch (platform) {
+      case 'Twitch':
+        return ['twitch-clip', 'twitch-vod'];
+      case 'YouTube':
+        return ['youtube'];
+      case 'TikTok':
+        return ['tiktok'];
+      case 'Twitter':
+        return ['twitter'];
+      case 'Instagram':
+        return ['instagram'];
+      case 'Kick':
+        return ['kick-clip'];
+      case 'Streamable':
+        return ['streamable'];
+      case 'Afreeca':
+        return ['afreeca-clip'];
+      default:
+        return [];
+    }
+  };
+
+  const providerKeys = platformToProviderKey(platform);
+  const shouldBlur = providerKeys.some((k) => blurredProviders.includes(k));
 
   const isHighlighted = highlightedClipId === clipId;
 
@@ -107,7 +136,14 @@ function Clip({ clipId, onClick, onCrossClick, className, card, platform, queueI
           }}
         >
           <Skeleton visible={!thumbnailUrl}>
-            <Image src={thumbnailUrl} sx={{ backgroundColor: '#373A40', borderRadius: 4 }} />
+            <Image
+              src={thumbnailUrl}
+              sx={{
+                backgroundColor: '#373A40',
+                borderRadius: 4,
+                filter: shouldBlur ? 'blur(6px)' : undefined,
+              }}
+            />
           </Skeleton>
         </AspectRatio>
         <Stack spacing={0} align="flex-start" sx={{ width: '100%' }}>
@@ -131,7 +167,14 @@ function Clip({ clipId, onClick, onCrossClick, className, card, platform, queueI
           </Skeleton>
           {submitters?.[0] && (
             <Text size="xs" color="dimmed" lineClamp={1} title={submitters.join('\n')}>
-              Submitted by <strong>{submitters[0]}</strong>
+              Submitted by{' '}
+              <strong
+                style={{
+                  color: chatUser?.broadcaster ? theme.colors.red[6] : chatUser?.vip ? theme.colors.pink[6] : chatUser?.mod ? theme.colors.green[6] : undefined,
+                }}
+              >
+                {submitters[0]}
+              </strong>
               {submitters.length > 1 && ` +${submitters.length - 1}`}
             </Text>
           )}
