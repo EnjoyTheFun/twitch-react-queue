@@ -9,4 +9,4 @@ If you have any cool ideas or improvements for the app open an issue!
 *The name "Clip Queue" didn't make sense anymore since the app now includes more media types than just clips. Most creators who use the app use it for react content so "React Queue" felt more fitting. It also adds a way to differentiate between this custom build and the original app. If you are looking for a stable version of Clip Queue, visit the original creator's [repository](https://github.com/jakemiki/twitch-clip-queue).*
 
 Intended for personal use, but you can test it out yourself here:
-[Github Pages Demo](https://enjoythefun.github.io/twitch-react-queue/auth) or [Vercel Test Demo](https://etf-clip-q.vercel.app/)
+[Github Pages Demo](https://enjoythefun.github.io/twitch-react-queue) or [Vercel Test Demo](https://etf-clip-q.vercel.app/)
