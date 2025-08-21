@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/twitch-react-queue/static/css/main.aebc67d0.css",
-    "main.js": "/twitch-react-queue/static/js/main.9c1c0cc3.js",
+    "main.css": "/twitch-react-queue/static/css/main.eebb8360.css",
+    "main.js": "/twitch-react-queue/static/js/main.4e3c5d6a.js",
     "static/js/453.03bdb18e.chunk.js": "/twitch-react-queue/static/js/453.03bdb18e.chunk.js",
     "index.html": "/twitch-react-queue/index.html",
-    "main.aebc67d0.css.map": "/twitch-react-queue/static/css/main.aebc67d0.css.map",
-    "main.9c1c0cc3.js.map": "/twitch-react-queue/static/js/main.9c1c0cc3.js.map",
+    "main.eebb8360.css.map": "/twitch-react-queue/static/css/main.eebb8360.css.map",
+    "main.4e3c5d6a.js.map": "/twitch-react-queue/static/js/main.4e3c5d6a.js.map",
     "453.03bdb18e.chunk.js.map": "/twitch-react-queue/static/js/453.03bdb18e.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.aebc67d0.css",
-    "static/js/main.9c1c0cc3.js"
+    "static/css/main.eebb8360.css",
+    "static/js/main.4e3c5d6a.js"
   ]
 }
