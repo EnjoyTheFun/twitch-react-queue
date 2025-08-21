@@ -33,6 +33,8 @@ interface ClipQueueState {
   historyIds: string[];
   highlightedClipId: string | null;
   watchedClipCount: number;
+  watchedCounts: Record<string, number>;
+  coloredSubmitterNames?: boolean;
 
   isOpen: boolean;
 
@@ -52,6 +54,7 @@ const initialState: ClipQueueState = {
   queueIds: [],
   historyIds: [],
   watchedClipCount: 0,
+  watchedCounts: {},
   providers: ['twitch-clip', 'twitch-vod', 'youtube', 'tiktok', 'twitter'],
   layout: 'classic',
   isOpen: false,
@@ -59,6 +62,7 @@ const initialState: ClipQueueState = {
   autoplayDelay: 5000,
   watchedHistory: [],
   highlightedClipId: null,
+  coloredSubmitterNames: true,
 };
 
 const addClipToQueue = (state: ClipQueueState, clip: Clip) => {
@@ -176,6 +180,13 @@ const clipQueueSlice = createSlice({
       if (state.currentId) {
         state.watchedClipCount += 1;
         state.watchedHistory.push(state.currentId);
+
+        const clip = state.byId[state.currentId];
+        const submitter = clip?.submitters?.[0];
+        if (submitter) {
+          const key = submitter.toLowerCase();
+          state.watchedCounts[key] = (state.watchedCounts[key] || 0) + 1;
+        }
       }
       updateClip(state, state.currentId, { status: 'watched' });
       state.autoplayTimeoutHandle = undefined;
@@ -203,6 +214,12 @@ const clipQueueSlice = createSlice({
       state.autoplayTimeoutHandle = undefined;
       if (state.currentId) {
         state.watchedHistory.push(state.currentId);
+        const clip = state.byId[state.currentId];
+        const submitter = clip?.submitters?.[0];
+        if (submitter) {
+          const key = submitter.toLowerCase();
+          state.watchedCounts[key] = (state.watchedCounts[key] || 0) + 1;
+        }
       }
     },
     clipStubReceived: (state, { payload: clip }: PayloadAction<Clip>) => addClipToQueue(state, clip),
@@ -256,6 +273,13 @@ const clipQueueSlice = createSlice({
         state.watchedClipCount += 1;
         updateClip(state, state.currentId, { status: 'watched' });
         state.autoplayTimeoutHandle = undefined;
+
+        const clip = state.byId[state.currentId as string];
+        const submitter = clip?.submitters?.[0];
+        if (submitter) {
+          const key = submitter.toLowerCase();
+          state.watchedCounts[key] = (state.watchedCounts[key] || 0) + 1;
+        }
       }
     },
     currentClipForceReplaced: (state, { payload }: PayloadAction<Clip>) => {
@@ -272,6 +296,9 @@ const clipQueueSlice = createSlice({
           state.watchedHistory = [];
         }
       }
+    },
+    submitterColorsToggled: (state) => {
+      state.coloredSubmitterNames = !state.coloredSubmitterNames;
     },
     autoplayChanged: (state, { payload }: PayloadAction<boolean>) => {
       state.autoplay = payload;
@@ -299,6 +326,9 @@ const clipQueueSlice = createSlice({
           state.queueIds.unshift(clipId);    // Add to the top
         }
       }
+    },
+    resetWatchedCounts: (state) => {
+      state.watchedCounts = {};
     },
     highlightClip: (state, { payload }: PayloadAction<string>) => {
       state.highlightedClipId = payload;
@@ -336,6 +366,8 @@ const clipQueueSlice = createSlice({
       state.byId = payload.byIds;
       state.historyIds = payload.historyIds;
       state.queueIds = payload.queueIds;
+
+      state.watchedCounts = {};
 
       if (payload.providers) {
         state.providers = payload.providers;
@@ -386,6 +418,27 @@ export const selectHasPrevious = (state: RootState) => {
   return currentId && historyIds && watchedHistory.length > 1;
 };
 
+export const selectWatchedCounts = (state: RootState) => state.clipQueue.watchedCounts || {};
+
+export const selectColoredSubmitterNames = (state: RootState) => state.clipQueue.coloredSubmitterNames !== false;
+
+export const selectTopSubmitter = createSelector([selectWatchedCounts], (counts) => {
+  let top: { username: string | null; count: number } = { username: null, count: 0 };
+  for (const [user, cnt] of Object.entries(counts || {})) {
+    if (cnt > (top.count || 0)) {
+      top = { username: user, count: cnt };
+    }
+  }
+  return top;
+});
+
+export const selectTopNSubmitters = (n: number) =>
+  createSelector([selectWatchedCounts], (counts) => {
+    const arr = Object.entries(counts || {}).map(([username, count]) => ({ username, count }));
+    arr.sort((a, b) => b.count - a.count);
+    return arr.slice(0, n);
+  });
+
 export const highlightClipFrame = createAsyncThunk<void, void, { state: RootState }>(
   'clipQueue/highlightClipFrame',
   async (_, { dispatch, getState }) => {
@@ -419,13 +472,15 @@ export const {
   previousClipWatched,
   bumpClipToTop,
   highlightClip,
-  clearHighlight
+  clearHighlight,
+  resetWatchedCounts,
+  submitterColorsToggled
 } = clipQueueSlice.actions;
 
 const clipQueueReducer = persistReducer(
   {
     key: 'clipQueue',
-    storage: storage('twitch-clip-queue'),
+    storage: storage('twitch-react-queue'),
     version: 1,
     blacklist: ['isOpen'],
   },

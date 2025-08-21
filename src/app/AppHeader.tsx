@@ -1,6 +1,5 @@
 import { ActionIcon, ActionIconProps, Button, Group, Header, Space, Text, ThemeIcon } from '@mantine/core';
 import { PropsWithChildren } from 'react';
-import { DeviceTv } from 'tabler-icons-react';
 import ColorSchemeSwitch from '../common/components/ColorSchemeSwitch';
 import { NavLinkProps, useLocation } from 'react-router-dom';
 import NavLink from '../common/components/NavLink';
@@ -12,9 +11,11 @@ import AppMenu from './AppMenu';
 import ImportLinksButton from '../features/clips/queue/ImportLinksButton';
 
 export function TitleIcon() {
+  const favicon = `${process.env.PUBLIC_URL || ''}/favicon.svg`;
+
   return (
     <ThemeIcon size="xl" variant="gradient" gradient={{ from: 'violet', to: 'indigo' }}>
-      <DeviceTv size={24} />
+      <img src={favicon} alt="React Queue" style={{ width: 32, height: 32 }} />
     </ThemeIcon>
   );
 }

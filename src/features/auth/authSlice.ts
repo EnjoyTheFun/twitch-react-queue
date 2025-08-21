@@ -143,7 +143,7 @@ export const selectProfilePictureUrl = (state: RootState) => state.auth.profileP
 const authReducer = persistReducer(
   {
     key: 'auth',
-    storage: storage('twitch-clip-queue'),
+    storage: storage('twitch-react-queue'),
     version: 1,
     whitelist: ['token'],
   },

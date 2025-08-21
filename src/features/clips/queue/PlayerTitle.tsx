@@ -1,7 +1,9 @@
+import React from 'react';
 import { Box, Text, useMantineTheme } from '@mantine/core';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { useAppSelector } from '../../../app/hooks';
 import { selectCurrentClip } from '../clipQueueSlice';
+import { selectTopNSubmitters } from '../clipQueueSlice';
 import Platform from '../../../common/components/BrandPlatforms';
 
 interface PlayerTitleProps {
@@ -15,6 +17,25 @@ function PlayerTitle({ className }: PlayerTitleProps) {
   const theme = useMantineTheme();
   const submitter = currentClip?.submitters?.[0];
   const chatUser = useAppSelector((s) => (submitter ? s.chatUsers[submitter.toLowerCase()] : undefined));
+  const topN = useAppSelector(selectTopNSubmitters(3));
+  const topIndex = submitter ? topN.findIndex((t) => t.username === submitter.toLowerCase()) : -1;
+  const topClass = topIndex >= 0 ? `chip-anim-${topIndex}` : undefined;
+  const colored = useAppSelector((s) => s.clipQueue.coloredSubmitterNames !== false);
+
+  const submitterClass = colored && topClass ? topClass : undefined;
+  const submitterStyle = React.useMemo(() => {
+    if (!colored || topClass || !chatUser) return undefined;
+
+    const roleColor = chatUser.broadcaster
+      ? theme.colors.red[6]
+      : chatUser.vip
+      ? theme.colors.pink[6]
+      : chatUser.mod
+      ? theme.colors.green[6]
+      : undefined;
+
+    return roleColor ? { color: roleColor } : undefined;
+  }, [colored, topClass, chatUser, theme]);
 
   return (
     <Box className={className} sx={{ strong: { fontWeight: 600 }, maxWidth: '70%', minWidth: 0, overflow: 'hidden' }}>
@@ -46,7 +67,7 @@ function PlayerTitle({ className }: PlayerTitleProps) {
         {currentClip?.submitters[0] && (
           <>
             , submitted by{' '}
-            <strong style={{ color: chatUser?.broadcaster ? theme.colors.red[6] : chatUser?.vip ? theme.colors.pink[6] : chatUser?.mod ? theme.colors.green[6] : undefined }}>
+            <strong className={submitterClass} style={submitterStyle}>
               {currentClip?.submitters[0]}
             </strong>
             {currentClip?.submitters.length > 1 && <> and {currentClip.submitters.length - 1} other(s)</>}

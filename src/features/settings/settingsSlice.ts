@@ -13,6 +13,7 @@ interface SettingsState {
   volume: number;
   blacklist: string[];
   blurredProviders: string[];
+  showTopSubmitters?: boolean;
 }
 
 const initialState: SettingsState = {
@@ -21,6 +22,7 @@ const initialState: SettingsState = {
   volume: 1,
   blacklist: [],
   blurredProviders: [],
+  showTopSubmitters: false,
 };
 
 const settingsSlice = createSlice({
@@ -49,6 +51,15 @@ const settingsSlice = createSlice({
       if (payload.blurredProviders) {
         state.blurredProviders = payload.blurredProviders;
       }
+      if (payload.showTopSubmitters !== undefined) {
+        state.showTopSubmitters = payload.showTopSubmitters;
+      }
+    },
+    toggleShowTopSubmitters: (state) => {
+      state.showTopSubmitters = !state.showTopSubmitters;
+    },
+    setShowTopSubmitters: (state, { payload }: PayloadAction<boolean>) => {
+      state.showTopSubmitters = payload;
     },
     setVolume: (state, action) => {
       state.volume = action.payload;
@@ -79,13 +90,15 @@ export const selectColorScheme = createSelector(
   (state, defaultColorScheme) => state.colorScheme ?? defaultColorScheme
 );
 
-export const { colorSchemeToggled, channelChanged, settingsChanged } = settingsSlice.actions;
+export const selectShowTopSubmitters = (state: RootState) => state.settings.showTopSubmitters !== false;
+
+export const { colorSchemeToggled, channelChanged, settingsChanged, toggleShowTopSubmitters, setShowTopSubmitters } = settingsSlice.actions;
 
 const settingsReducer = persistReducer(
   {
     key: 'settings',
     version: 1,
-    storage: storage('twitch-clip-queue'),
+    storage: storage('twitch-react-queue'),
   },
   settingsSlice.reducer
 );

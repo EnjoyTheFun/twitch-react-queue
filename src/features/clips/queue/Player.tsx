@@ -46,13 +46,13 @@ const getPlayerComponent = (
     case 'Streamable':
       return autoplayEnabled ? (
         <VideoPlayer
-          key={`${id}-${videoSrc}`}
+          key={`${id}-${videoSrc}-${autoplayEnabled}`}
           src={videoSrc}
           onEnded={handleEnded}
         />
       ) : (
         <iframe
-          key={id}
+          key={`${id}-${autoplayEnabled}`}
           src={clipProvider.getEmbedUrl(id) || embedUrl}
           title={title}
           style={{ height: '100%', width: '100%' }}
@@ -61,13 +61,13 @@ const getPlayerComponent = (
           allowFullScreen
         />);
     case 'Kick':
-      return <VideoPlayer key={id} src={url} onEnded={handleEnded} />;
+      return <VideoPlayer key={`${currentClip.id}-${videoSrc}-${autoplayEnabled}`} src={url} onEnded={handleEnded} />;
     case 'Instagram':
       return (
         <InstagramEmbedWithTimeout
           key={id}
           url={embedUrl}
-          autoplayEnabled={autoplayEnabled}
+          autoplayEnabled={autoplayEnabled && !!nextClipId}
           dispatch={dispatch}
           height="100%"
           captioned
@@ -76,20 +76,20 @@ const getPlayerComponent = (
     case 'TikTok':
       return (
         <TikTokPlayer
-          key={id}
-          src={videoSrc ? videoSrc + (autoplayEnabled ? '?autoplay=1&rel=0' : '?autoplay=1&rel=0&') : clipProvider.getEmbedUrl(id) + (autoplayEnabled ? '?autoplay=1&rel=0' : '?autoplay=1&rel=0&')}
+          key={`${id}-${videoSrc}-${autoplayEnabled}`}
+          src={videoSrc ? videoSrc + '?autoplay=1&rel=0' : clipProvider.getEmbedUrl(id) + '?autoplay=1&rel=0'}
           title={title}
-          autoplayEnabled={autoplayEnabled}
+          autoplayEnabled={autoplayEnabled && !!nextClipId}
         />
       );
     case 'Twitter':
       if (videoSrc?.endsWith('.jpg') || videoSrc?.endsWith('.png')) {
         return (
           <TwitterImagePlayer
-            key={`${id}-${videoSrc}`}
+            key={`${id}-${videoSrc}-${autoplayEnabled}`}
             src={videoSrc}
             title={title}
-            autoplayEnabled={autoplayEnabled}
+            autoplayEnabled={autoplayEnabled && !!nextClipId}
             dispatch={dispatch}
           />
         );
@@ -97,20 +97,20 @@ const getPlayerComponent = (
       if (videoSrc?.endsWith('.mp4')) {
         return (
           <VideoPlayer
-            key={`${id}-${videoSrc}`}
+            key={`${id}-${videoSrc}-${autoplayEnabled}`}
             src={videoSrc}
             onEnded={handleEnded}
           />
         );
       }
       // Not sure if raw tweets with no media should be displayed. Temp solution:
-      return <XEmbedWithTimeout key={`${id}-${videoSrc}`} url={embedUrl} style={{
+      return <XEmbedWithTimeout key={`${id}-${videoSrc}-${autoplayEnabled}`} url={embedUrl} style={{
         maxWidth: '100%', maxHeight: '100%', width: 500, height: '100%'
-      }} autoplayEnabled={autoplayEnabled} dispatch={dispatch} />;
+      }} autoplayEnabled={autoplayEnabled && !!nextClipId} dispatch={dispatch} />;
     default:
       return (
         <iframe
-          key={id}
+          key={`${id}-${autoplayEnabled}`}
           src={embedUrl}
           title={title}
           style={{ height: '100%', width: '100%' }}

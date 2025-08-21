@@ -1,13 +1,29 @@
 # Twitch React Queue
 
-This is a personalized version of the app [twitch-clip-queue](https://github.com/jakemiki/twitch-clip-queue). It extends the functionality of the original app with features like enhanced queue management, additional Twitch chat commands, support for more media platforms (TikTok and Twitter/X), and importing URLs (which can be fed from Discord channels or other APIs). The project aims to add new capabilities while keeping the core experience simple and as close to the original as possible.
+Twitch React Queue is a custom build of [twitch-clip-queue](https://github.com/jakemiki/twitch-clip-queue). It extends the original app with enhanced queue management, extra chat commands, and support for more media platforms - making it a versatile tool for streamers who want to manage and react to viewer-submitted content in real time. The project aims to add new capabilities while keeping the core experience simple and as close to the original as possible.
 
-**You can test it out here:
-[Github Pages (PROD)](https://enjoythefun.github.io/twitch-react-queue) or [Vercel (EXPERIMENTAL)](https://etf-clip-q.vercel.app/)**
-<sup>(*I test new stuff on vercel first*)</sup>
+### Live Demo
+**[Github Pages (PROD)](https://enjoythefun.github.io/twitch-react-queue) or [Vercel (EXPERIMENTAL)](https://etf-clip-q.vercel.app/)**
+<sup>(*new features are tested on Vercel first*)</sup>
 
-**Nothing about Twitch auth has been changed from the original!**
+### Features
+(For a _somewhat_ up to date list of changes check out [Releases](https://github.com/EnjoyTheFun/twitch-react-queue/releases))
+- Multi-platform support
+  - Twitch clips & VODs
+  - YouTube videos & shorts
+  - Afreeca clips
+  - Kick clips
+  - Streamable clips
+  - TikTok videos & photo reels
+  - Twitter(X) media - videos, images, posts
+  - Instagram posts (EXPERIMENTAL)
+- Advanced queue management - additional Twitch chat commands, import from Discord/APIs, autoplay options
+- UI improvements
+- Authentication & Privacy - **unchanged from the original. Most logic still runs client-side**
+- [More](https://github.com/EnjoyTheFun/twitch-react-queue/releases)
 
-If you have any cool ideas or improvements for the app open an issue!
+### Contributing
+Contributions are welcome! If you have ideas or improvements, feel free to open an issue or PR.
 
-*The name "Clip Queue" didn't make sense anymore since the app now includes more media types than just clips. Most creators who use the app use it for react content so "React Queue" felt more fitting. It also adds a way to differentiate between this custom build and the original app. If you are looking for a stable version of Clip Queue, visit the original creator's [repository](https://github.com/jakemiki/twitch-clip-queue).*
+### Notes
+*The name "Clip Queue" didn’t make sense anymore since the app now supports many media types beyond clips. Because most creators use it for reaction content, "React Queue" felt more fitting - while also distinguishing this custom build from the original project. If you are looking for a stable version of Clip Queue, visit the original creator's [repository](https://github.com/jakemiki/twitch-clip-queue).*

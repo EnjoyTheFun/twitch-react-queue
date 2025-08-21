@@ -10,6 +10,8 @@ export interface AllSettings {
   enabledProviders?: string[];
   blurredProviders?: string[];
 
+  showTopSubmitters?: boolean;
+
   clipLimit?: number | null;
   layout?: string;
 }

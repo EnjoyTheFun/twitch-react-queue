@@ -12,11 +12,24 @@ class KickClipProvider implements ClipProvider {
       if (uri.hostname === 'kick.com' || uri.hostname === 'www.kick.com') {
         const id = uri.searchParams.get('clip');
         if (id) {
+          try {
+            this.clipCache.set(id, url);
+          } catch {
+            // ignore
+          }
           return id;
         }
         if (uri.pathname.includes('/clips/')) {
           const idStart = uri.pathname.lastIndexOf('/');
-          return uri.pathname.slice(idStart).split('?')[0]?.slice(1);
+          const extracted = uri.pathname.slice(idStart).split('?')[0]?.slice(1);
+          if (extracted) {
+            try {
+              this.clipCache.set(extracted, url);
+            } catch {
+              // ignore
+            }
+          }
+          return extracted;
         }
       }
       return undefined;
@@ -29,10 +42,16 @@ class KickClipProvider implements ClipProvider {
     if (!id) return undefined;
 
     const clipInfo = await kickApi.getClip(id);
-    const clipCache: Record<string, string> = {};
     if (!clipInfo || !clipInfo.video_url) return undefined;
 
-    clipCache[id] = clipInfo.video_url;
+
+    if (!this.clipCache.has(id) && clipInfo.video_url) {
+      try {
+        this.clipCache.set(id, clipInfo.video_url);
+      } catch {
+        // ignore cache failures
+      }
+    }
 
     return {
       id: clipInfo.id,

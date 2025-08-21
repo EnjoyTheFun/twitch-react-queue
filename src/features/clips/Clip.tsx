@@ -1,11 +1,10 @@
 import { ActionIcon, AspectRatio, Image, Box, Group, Skeleton, Stack, Text, useMantineTheme } from '@mantine/core';
-import { MouseEventHandler } from 'react';
+import React, { MouseEventHandler } from 'react';
 import { Trash } from 'tabler-icons-react';
 import { useAppSelector } from '../../app/hooks';
-import { selectClipById } from './clipQueueSlice';
+import { selectClipById, selectTopNSubmitters, selectHighlightedClipId } from './clipQueueSlice';
 import type { PlatformType } from '../../common/utils';
 import Platform from '../../common/components/BrandPlatforms';
-import { selectHighlightedClipId } from './clipQueueSlice';
 
 interface ClipProps {
   clipId: string;
@@ -18,35 +17,53 @@ interface ClipProps {
   queueIndex?: number;
 }
 
+const PLATFORM_PROVIDER_MAP: Record<string, string[]> = {
+  Twitch: ['twitch-clip', 'twitch-vod'],
+  YouTube: ['youtube'],
+  TikTok: ['tiktok'],
+  Twitter: ['twitter'],
+  Instagram: ['instagram'],
+  Kick: ['kick-clip'],
+  Streamable: ['streamable'],
+  Afreeca: ['afreeca-clip'],
+};
+
+const platformToProviderKey = (platform?: PlatformType): string[] => {
+  if (!platform) return [];
+  return PLATFORM_PROVIDER_MAP[platform] ?? [];
+};
+
 function Clip({ clipId, onClick, onCrossClick, className, card, platform, queueIndex }: ClipProps) {
   const { title, thumbnailUrl = '', author, submitters } = useAppSelector(selectClipById(clipId));
+  const displayAuthor = React.useMemo(() => {
+    if (!author) return '';
+    const max = 30;
+    if (author.length <= max) return author;
+    return `${author.slice(0, max - 1)}…`;
+  }, [author]);
   const highlightedClipId = useAppSelector(selectHighlightedClipId);
   const theme = useMantineTheme();
   const chatUser = useAppSelector((s) => (submitters?.[0] ? s.chatUsers[submitters[0].toLowerCase()] : undefined));
   const blurredProviders = useAppSelector((s) => s.settings.blurredProviders || []);
+  const topN = useAppSelector(selectTopNSubmitters(3));
+  const topIndex = submitters?.[0] ? topN.findIndex((t) => t.username === submitters[0].toLowerCase()) : -1;
+  const topClass = topIndex >= 0 ? `chip-anim-${topIndex}` : undefined;
+  const colored = useAppSelector((s) => s.clipQueue.coloredSubmitterNames !== false);
 
-  const platformToProviderKey = (platform: string | undefined) => {
-    switch (platform) {
-      case 'Twitch':
-        return ['twitch-clip', 'twitch-vod'];
-      case 'YouTube':
-        return ['youtube'];
-      case 'TikTok':
-        return ['tiktok'];
-      case 'Twitter':
-        return ['twitter'];
-      case 'Instagram':
-        return ['instagram'];
-      case 'Kick':
-        return ['kick-clip'];
-      case 'Streamable':
-        return ['streamable'];
-      case 'Afreeca':
-        return ['afreeca-clip'];
-      default:
-        return [];
-    }
-  };
+  const submitterClass = colored && topClass ? topClass : undefined;
+  const submitterStyle = React.useMemo(() => {
+    if (!colored || topClass || !chatUser) return undefined;
+
+    const roleColor = chatUser.broadcaster
+      ? theme.colors.red[6]
+      : chatUser.vip
+      ? theme.colors.pink[6]
+      : chatUser.mod
+      ? theme.colors.green[6]
+      : undefined;
+
+    return roleColor ? { color: roleColor } : undefined;
+  }, [colored, topClass, chatUser, theme]);
 
   const providerKeys = platformToProviderKey(platform);
   const shouldBlur = providerKeys.some((k) => blurredProviders.includes(k));
@@ -162,21 +179,17 @@ function Clip({ clipId, onClick, onCrossClick, className, card, platform, queueI
               title={author}
             >
               <Platform platform={platform} />
-              {author}&nbsp;
+              {displayAuthor}&nbsp;
             </Text>
           </Skeleton>
           {submitters?.[0] && (
             <Text size="xs" color="dimmed" lineClamp={1} title={submitters.join('\n')}>
-              Submitted by{' '}
-              <strong
-                style={{
-                  color: chatUser?.broadcaster ? theme.colors.red[6] : chatUser?.vip ? theme.colors.pink[6] : chatUser?.mod ? theme.colors.green[6] : undefined,
-                }}
-              >
-                {submitters[0]}
-              </strong>
-              {submitters.length > 1 && ` +${submitters.length - 1}`}
-            </Text>
+                Submitted by{' '}
+                <strong className={submitterClass} style={submitterStyle}>
+                  {submitters[0]}
+                </strong>
+                {submitters.length > 1 && ` +${submitters.length - 1}`}
+              </Text>
           )}
         </Stack>
       </Group>

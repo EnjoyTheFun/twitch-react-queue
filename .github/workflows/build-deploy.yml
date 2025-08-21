@@ -15,7 +15,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    environment: deployment
     env:
       REACT_APP_TWITCH_CLIENT_ID: ${{ secrets.REACT_APP_TWITCH_CLIENT_ID }}
       REACT_APP_UMAMI_SRC: ${{ secrets.REACT_APP_UMAMI_SRC }}
@@ -66,7 +65,6 @@ jobs:
     name: Deploy
     needs: build
     runs-on: ubuntu-latest
-    environment: deployment
     if: github.ref == 'refs/heads/main'
 
     steps:

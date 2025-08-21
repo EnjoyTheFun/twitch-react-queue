@@ -6,6 +6,8 @@
   <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png">
   <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
+  <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg"/>
+  <link rel="preload" as="image" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>React Queue</title>
 
@@ -36,7 +38,7 @@
 
   <% if (process.env.REACT_APP_UMAMI_SRC && process.env.REACT_APP_UMAMI_WEBSITE_ID) { %>
     <script async defer data-website-id="%REACT_APP_UMAMI_WEBSITE_ID%" src="%REACT_APP_UMAMI_SRC%"></script>
-  <% } %>
+    <% } %>
 </head>
 
 <body>

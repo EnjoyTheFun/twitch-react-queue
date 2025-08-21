@@ -1,4 +1,4 @@
-import { Group, Button, Switch } from '@mantine/core';
+import { Group, Button, Switch, Box } from '@mantine/core';
 import { PlayerSkipForward, PlayerTrackNext, PlayerTrackPrev } from 'tabler-icons-react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import {
@@ -18,13 +18,15 @@ function PlayerButtons({ className }: { className?: string }) {
   const autoplayEnabled = useAppSelector(selectAutoplayEnabled);
   const hasPrevious = useAppSelector(selectHasPrevious);
   return (
-    <Group align="flex-start" className={className} sx={{ flexShrink: 0 }}>
-      <Group>
-        <Switch
-          label="Autoplay"
-          checked={autoplayEnabled}
-          onChange={(event) => dispatch(autoplayChanged(event.currentTarget.checked))}
-        />
+    <Group align="center" className={className} sx={{ flexShrink: 0 }}>
+      <Group align="center">
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Switch
+            label="Autoplay"
+            checked={autoplayEnabled}
+            onChange={(event) => dispatch(autoplayChanged(event.currentTarget.checked))}
+          />
+        </Box>
         {clipLimit && (
           <Button
             variant="default"

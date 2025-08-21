@@ -12,7 +12,7 @@ function MyCredits() {
         </BrandButton>
         <div>&</div>
         <BrandButton href="https://github.com/EnjoyTheFun" icon={<BrandGithub size={16} />}>
-          <span style={{ color: '#89f5a0' }}>EnjoyTheFun</span>
+          <span className="etf_color">EnjoyTheFun</span>
         </BrandButton>
       </Group>
     </Text>

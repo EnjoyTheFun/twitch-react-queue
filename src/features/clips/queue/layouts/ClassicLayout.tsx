@@ -12,17 +12,17 @@ function ClassicLayout() {
         <Grid.Col xs={14} sm={15} md={15} lg={17} xl={19} span={19}>
           <Stack justify="flex-start" spacing="xs" sx={{ height: '100%' }}>
             <Player />
-            <Group position="apart" sx={{ alignItems: 'center', width: '100%' }}>
+            <Group position="apart" sx={{ alignItems: 'flex-start', width: '100%' }}>
               <PlayerTitle />
               <PlayerButtons />
             </Group>
           </Stack>
         </Grid.Col>
         <Grid.Col xs={10} sm={9} md={9} lg={7} xl={5} span={5} sx={{ height: '100%' }}>
-          <Stack justify="flex-start" sx={{ height: '100%', maxHeight: '100%' }}>
+          <Stack justify="flex-start" sx={{ height: '100%', maxHeight: '100%', gap: 3 }}>
             <QueueControlPanel />
             <ScrollArea sx={{ '.mantine-ScrollArea-viewport > div': { display: 'block !important' } }}>
-              <Group direction="column" spacing="xs" sx={{ height: '100%' }}>
+              <Group direction="column" sx={{ height: '100%', gap: 3 }}>
                 <Queue />
               </Group>
             </ScrollArea>
