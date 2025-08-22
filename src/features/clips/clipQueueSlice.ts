@@ -283,10 +283,22 @@ const clipQueueSlice = createSlice({
       }
     },
     currentClipForceReplaced: (state, { payload }: PayloadAction<Clip>) => {
+      const previousCurrent = state.currentId;
+
       state.byId[payload.id] = payload;
+
+      if (previousCurrent && previousCurrent !== payload.id) {
+        const existingIndex = state.queueIds.indexOf(previousCurrent);
+        if (existingIndex === -1) {
+          state.queueIds.unshift(previousCurrent);
+        } else {
+          state.queueIds.splice(existingIndex, 1);
+          state.queueIds.unshift(previousCurrent);
+        }
+      }
+
       state.currentId = payload.id;
       state.autoplayTimeoutHandle = undefined;
-      state.watchedHistory.push(payload.id);
     },
     isOpenChanged: (state, { payload }: PayloadAction<boolean>) => {
       state.isOpen = payload;

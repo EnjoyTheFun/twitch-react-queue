@@ -1,6 +1,5 @@
-import { Button, Center, RingProgress, LoadingOverlay, Stack, Text } from '@mantine/core';
-import { useInterval } from '@mantine/hooks';
-import { useEffect, useState } from 'react';
+import { Button, Center, RingProgress, Stack, Text, Box, useMantineTheme } from '@mantine/core';
+import { useEffect, useState, useRef } from 'react';
 import { useAppSelector } from '../../../app/hooks';
 import { selectAutoplayDelay, selectNextId, selectQueueIds, selectClipById } from '../clipQueueSlice';
 import Clip from '../Clip';
@@ -15,11 +14,13 @@ function AutoplayOverlay({ visible, onCancel }: AutoplayOverlayProps) {
   const nextClipId = useAppSelector(selectNextId);
   const overlayOn = visible && !!nextClipId;
 
-  const intervalTime = 100;
-  const step = 100 / (delay / intervalTime - 1);
-
   const [progress, setProgress] = useState(0);
-  const interval = useInterval(() => setProgress((p) => p + step), intervalTime);
+  const rafRef = useRef<number | null>(null);
+
+  const theme = useMantineTheme();
+
+  const fillColor = theme.colors.blue?.[4];
+  const overlayTextColor = theme.colorScheme === 'light' ? theme.white : undefined;
 
   const clipQueueIds = useAppSelector(selectQueueIds);
   const clips = useAppSelector((state) =>
@@ -28,49 +29,92 @@ function AutoplayOverlay({ visible, onCancel }: AutoplayOverlayProps) {
   const nextClip = clips.find((clip) => clip!.id === nextClipId);
 
   useEffect(() => {
-    if (overlayOn) {
-      interval.stop();
-      interval.start();
-    } else {
+    if (!overlayOn) {
       setProgress(0);
-      interval.stop();
-    }
-    return () => interval.stop();
-    // eslint-disable-next-line
-  }, [overlayOn]);
-
-  if (!overlayOn) {
-    return <></>;
-  }
-  return (
-    <LoadingOverlay
-      visible={true}
-      overlayOpacity={0.9}
-      loader={
-        <Stack spacing="xs">
-          <Center>
-            <RingProgress
-              size={96}
-              thickness={16}
-              sections={[{ value: progress, color: 'gray' }]}
-              label={
-                onCancel && (
-                  <Center>
-                    <Button compact size="md" variant="subtle" color="dark" onClick={onCancel}>
-                      Cancel
-                    </Button>
-                  </Center>
-                )
-              }
-            />
-          </Center>
-          <Text size="lg" weight={700}>
-            Next up
-          </Text>
-          <Clip platform={nextClip?.Platform || undefined} clipId={nextClipId} />
-        </Stack>
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
       }
-    />
+      return;
+    }
+
+    if (!delay || delay <= 0) {
+      setProgress(100);
+      return;
+    }
+
+    const startTs = performance.now();
+
+    const step = (now: number) => {
+      const elapsed = now - startTs;
+      const pct = Math.min(100, (elapsed / delay) * 100);
+      setProgress(pct);
+      if (pct < 100) {
+        rafRef.current = requestAnimationFrame(step);
+      } else {
+        rafRef.current = null;
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(step);
+
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+  }, [overlayOn, delay]);
+
+  if (!overlayOn) return null;
+
+  return (
+    <Box
+      sx={() => ({
+        position: 'absolute',
+        inset: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        zIndex: 2,
+        padding: 24,
+        pointerEvents: 'auto',
+      })}
+      aria-hidden={!overlayOn}
+    >
+      <Stack spacing="sm" align="center">
+        <Center>
+          <RingProgress
+            size={120}
+            thickness={14}
+            sections={[{ value: progress, color: fillColor }]}
+            label={
+              onCancel && (
+                <Center>
+                  <Button
+                    compact
+                    size="md"
+                    variant="subtle"
+                    color="dark"
+                    onClick={onCancel}
+                    sx={{ color: overlayTextColor }}
+                  >
+                    Cancel
+                  </Button>
+                </Center>
+              )
+            }
+          />
+        </Center>
+        <Text size="lg" weight={700} align="center" sx={{ color: overlayTextColor }}>
+          Next up
+        </Text>
+        <Box sx={{ maxWidth: 420, width: '100%', color: overlayTextColor }}>
+          <Clip platform={nextClip?.Platform || undefined} clipId={nextClipId} />
+        </Box>
+      </Stack>
+    </Box>
   );
 }
 

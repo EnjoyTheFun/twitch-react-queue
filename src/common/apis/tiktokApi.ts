@@ -1,6 +1,7 @@
 import axios from 'axios';
+import type { TikTokOEmbedResponse } from '../models/tiktok';
 
-const getClip = async (id: string): Promise<any | undefined> => {
+const getClip = async (id: string): Promise<TikTokOEmbedResponse | undefined> => {
   try {
     let url: string;
 
@@ -14,8 +15,8 @@ const getClip = async (id: string): Promise<any | undefined> => {
       url = `https://www.tiktok.com/oembed?url=https://www.tiktok.com/@_/video/${id}`;
     }
 
-    const { data } = await axios.get(url);
-    return data;
+  const { data } = await axios.get<TikTokOEmbedResponse>(url);
+  return data;
   } catch {
     return undefined;
   }

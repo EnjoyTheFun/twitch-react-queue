@@ -57,7 +57,9 @@ const handleMessage =
     }
 
     if (message.startsWith(commandPrefix)) {
-      const [command, ...args] = message.substring(commandPrefix.length).split(' ');
+      const remainder = message.substring(commandPrefix.length);
+      const normalized = remainder.startsWith(' ') ? remainder.trim() : remainder.replace(/^([a-zA-Z]+)(\s?)/, '$1 ');
+      const [command, ...args] = normalized.split(' ');
       processCommand(storeApi.dispatch, { command, args, userstate });
       return;
     }

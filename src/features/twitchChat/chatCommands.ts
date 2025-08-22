@@ -12,7 +12,7 @@ import {
 } from '../clips/clipQueueSlice';
 import { settingsChanged } from '../settings/settingsSlice';
 import { createLogger } from '../../common/logging';
-import { urlDeleted, Userstate } from './actions';
+import { urlDeleted, Userstate, urlEnqueue } from './actions';
 
 const logger = createLogger('Chat Command');
 
@@ -24,7 +24,7 @@ interface ChatCommandPayload {
   userstate: Userstate;
 }
 
-type CommmandFunction = (dispatch: Dispatch, args: string[]) => void;
+type CommmandFunction = (dispatch: Dispatch, args: string[], userstate?: Userstate) => void;
 
 const commands: Record<string, CommmandFunction> = {
   open: (dispatch) => dispatch(isOpenChanged(true)),
@@ -33,6 +33,11 @@ const commands: Record<string, CommmandFunction> = {
   skip: (dispatch) => dispatch(currentClipSkipped()),
   remove: (dispatch, [url]) => url && dispatch(urlDeleted(url)),
   removeidx: (dispatch, [idx]) => idx && dispatch(queueClipRemoveByIndex(idx)),
+  add: (dispatch, args, userstate) => {
+    const url = args && args[0];
+    if (!url) return;
+    dispatch(urlEnqueue({ url, userstate: userstate as Userstate }));
+  },
   ht: (dispatch, [idxStr]) => {
     if (idxStr) {
       dispatch(bumpClipToTop(idxStr));
@@ -75,6 +80,6 @@ export function processCommand(dispatch: Dispatch, { command, args, userstate }:
   const commandFunc = commands[command];
 
   if (commandFunc) {
-    commandFunc(dispatch, args);
+    commandFunc(dispatch, args, userstate);
   }
 }

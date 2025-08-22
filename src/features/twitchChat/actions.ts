@@ -11,3 +11,4 @@ export interface Userstate {
 export const urlReceived = createAction<{ url: string; userstate: Userstate }>('twitchChat/urlReceived');
 export const urlDeleted = createAction<string>('twitchChat/urlDeleted');
 export const userTimedOut = createAction<string>('twitchChat/userTimedOut');
+export const urlEnqueue = createAction<{ url: string; userstate: Userstate }>('twitchChat/urlEnqueue');

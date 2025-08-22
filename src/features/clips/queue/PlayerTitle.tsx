@@ -38,7 +38,7 @@ function PlayerTitle({ className }: PlayerTitleProps) {
   }, [colored, topClass, chatUser, theme]);
 
   return (
-    <Box className={className} sx={{ strong: { fontWeight: 600 }, maxWidth: '70%', minWidth: 0, overflow: 'hidden' }}>
+    <Box className={className} sx={{ strong: { fontWeight: 600 }, flex: 1, minWidth: 0, overflow: 'hidden' }}>
       <Text size="xl" weight={700} lineClamp={1}>
         {currentClip?.title ?? _nbsp}
       </Text>

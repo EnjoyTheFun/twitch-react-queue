@@ -1,6 +1,6 @@
 {
   "name": "twitch-react-queue",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "homepage": "/twitch-react-queue/",
   "scripts": {
     "start": "react-scripts start",

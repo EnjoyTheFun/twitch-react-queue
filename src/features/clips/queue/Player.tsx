@@ -168,7 +168,7 @@ function Player({ className }: PlayerProps) {
   return (
     <Stack
       align="center"
-      sx={{ background: 'black', height: '100%', aspectRatio: '16 / 9', position: 'relative' }}
+      sx={{ background: 'black', width: '100%', aspectRatio: '16 / 9', position: 'relative', flex: '0 0 auto' }}
       className={className}
     >
       {error ? <div style={{ color: 'red' }}>{error}</div> : videoSrc || !autoplayEnabled ? player : <div></div>}

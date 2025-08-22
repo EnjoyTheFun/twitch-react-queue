@@ -10,7 +10,7 @@ export function applyCustomizations(storeApi: AppMiddlewareAPI) {
   const now = new Date();
 
   switch (channel?.toLowerCase()) {
-    case 'wolfabelle': {
+    case 'etf_bot': {
       if (isFriday(now)) {
         storeApi.dispatch(
           currentClipForceReplaced({
@@ -21,6 +21,7 @@ export function applyCustomizations(storeApi: AppMiddlewareAPI) {
             submitters: ['TriPls'],
             timestamp: formatISO(now),
             status: 'watched',
+            Platform: 'YouTube'
           })
         );
       }

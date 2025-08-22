@@ -18,7 +18,7 @@ interface SettingsState {
 
 const initialState: SettingsState = {
   colorScheme: null,
-  commandPrefix: '!queue',
+  commandPrefix: '!q',
   volume: 1,
   blacklist: [],
   blurredProviders: [],

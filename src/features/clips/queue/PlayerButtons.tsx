@@ -8,6 +8,7 @@ import {
   selectClipLimit,
   selectNextId,
 } from '../clipQueueSlice';
+import { autoplayTimeoutHandleChanged } from '../clipQueueSlice';
 import { currentClipWatched, selectCurrentId, previousClipWatched, selectHasPrevious } from '../clipQueueSlice';
 
 function PlayerButtons({ className }: { className?: string }) {
@@ -18,39 +19,35 @@ function PlayerButtons({ className }: { className?: string }) {
   const autoplayEnabled = useAppSelector(selectAutoplayEnabled);
   const hasPrevious = useAppSelector(selectHasPrevious);
   return (
-    <Group align="center" className={className} sx={{ flexShrink: 0 }}>
-      <Group align="center">
+    <Group align="center" className={className} sx={{ flexShrink: 0, marginLeft: 'auto' }}>
+      <Group align="center" spacing="xs">
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Switch
-            label="Autoplay"
-            checked={autoplayEnabled}
-            onChange={(event) => dispatch(autoplayChanged(event.currentTarget.checked))}
-          />
+          <Switch size="sm" label="Autoplay" checked={autoplayEnabled} onChange={(event) => {
+            dispatch(autoplayTimeoutHandleChanged({ set: false }));
+            dispatch(autoplayChanged(event.currentTarget.checked));
+          }} />
         </Box>
         {clipLimit && (
-          <Button
-            variant="default"
-            rightIcon={<PlayerSkipForward />}
-            onClick={() => dispatch(currentClipSkipped())}
-            disabled={!currentClipId}
-          >
+          <Button size="xs" variant="default" rightIcon={<PlayerSkipForward />} onClick={() => {
+            dispatch(autoplayTimeoutHandleChanged({ set: false }));
+            dispatch(currentClipSkipped());
+          }} disabled={!currentClipId}>
             Skip
           </Button>
         )}
       </Group>
-      <Button
-        //prettier-ignore
-        leftIcon={<PlayerTrackPrev />}
-        onClick={() => dispatch(previousClipWatched())}
-        disabled={!hasPrevious}
+      <Button size="xs"
+        leftIcon={<PlayerTrackPrev />} onClick={() => {
+          dispatch(autoplayTimeoutHandleChanged({ set: false }));
+          dispatch(previousClipWatched());
+        }} disabled={!hasPrevious}
       >
         Previous
       </Button>
-      <Button
-        rightIcon={<PlayerTrackNext />}
-        onClick={() => dispatch(currentClipWatched())}
-        disabled={!currentClipId && !nextClipId}
-      >
+      <Button size="xs" rightIcon={<PlayerTrackNext />} onClick={() => {
+        dispatch(autoplayTimeoutHandleChanged({ set: false }));
+        dispatch(currentClipWatched());
+      }} disabled={!currentClipId && !nextClipId}>
         Next
       </Button>
     </Group>

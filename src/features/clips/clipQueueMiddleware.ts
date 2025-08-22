@@ -5,7 +5,7 @@ import { RootState, AppMiddlewareAPI } from '../../app/store';
 import { createLogger } from '../../common/logging';
 import { authenticateWithToken } from '../auth/authSlice';
 import { settingsChanged } from '../settings/settingsSlice';
-import { urlDeleted, urlReceived } from '../twitchChat/actions';
+import { urlDeleted, urlReceived, urlEnqueue } from '../twitchChat/actions';
 import {
   clipStubReceived,
   queueClipRemoved,
@@ -33,32 +33,61 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
       } else if (urlReceived.match(action)) {
         const { url, userstate } = action.payload;
         const sender = userstate.username;
+
+        if (!storeAPI.getState().clipQueue.isOpen) {
+          return next(action);
+        }
+
         const blacklist = storeAPI.getState().settings.blacklist || [];
         if (blacklist.map((b: string) => b.toLowerCase()).includes((sender || '').toLowerCase())) {
           return next(action);
         }
-        if (storeAPI.getState().clipQueue.isOpen) {
-          const id = clipProvider.getIdFromUrl(url);
-          if (id) {
-            const clip: Clip | undefined = storeAPI.getState().clipQueue.byId[id];
 
-            storeAPI.dispatch(clipStubReceived({ id, submitters: [sender], timestamp: formatISO(new Date()) }));
+        const id = clipProvider.getIdFromUrl(url);
+        if (id) {
+          const clip: Clip | undefined = storeAPI.getState().clipQueue.byId[id];
 
-            if (!clip) {
-              clipProvider
-                .getClipById(id)
-                .then((clip) => {
-                  if (clip) {
-                    storeAPI.dispatch(clipDetailsReceived(clip));
-                  } else {
-                    storeAPI.dispatch(clipDetailsFailed(id));
-                  }
-                })
-                .catch((e) => {
-                  logger.error(e);
+          storeAPI.dispatch(clipStubReceived({ id, submitters: [sender], timestamp: formatISO(new Date()) }));
+
+          if (!clip) {
+            clipProvider
+              .getClipById(id)
+              .then((clip) => {
+                if (clip) {
+                  storeAPI.dispatch(clipDetailsReceived(clip));
+                } else {
                   storeAPI.dispatch(clipDetailsFailed(id));
-                });
-            }
+                }
+              })
+              .catch((e) => {
+                logger.error(e);
+                storeAPI.dispatch(clipDetailsFailed(id));
+              });
+          }
+        }
+      } else if (urlEnqueue.match(action)) {
+        const { url, userstate } = action.payload;
+        const sender = userstate.username;
+        const id = clipProvider.getIdFromUrl(url);
+        if (id) {
+          const clip: Clip | undefined = storeAPI.getState().clipQueue.byId[id];
+
+          storeAPI.dispatch(clipStubReceived({ id, submitters: [sender], timestamp: formatISO(new Date()) }));
+
+          if (!clip) {
+            clipProvider
+              .getClipById(id)
+              .then((clip) => {
+                if (clip) {
+                  storeAPI.dispatch(clipDetailsReceived(clip));
+                } else {
+                  storeAPI.dispatch(clipDetailsFailed(id));
+                }
+              })
+              .catch((e) => {
+                logger.error(e);
+                storeAPI.dispatch(clipDetailsFailed(id));
+              });
           }
         }
       } else if (urlDeleted.match(action)) {
