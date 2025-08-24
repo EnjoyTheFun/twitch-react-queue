@@ -22,6 +22,8 @@ jobs:
       REACT_APP_TWITCH_REDIRECT_URI: https://enjoythefun.github.io/twitch-react-queue/auth
       REACT_APP_BASEPATH: /twitch-react-queue/
       REACT_APP_LOG_LEVEL: warn
+      REACT_APP_DC_LINKS_API_URL: ${{ secrets.REACT_APP_DC_LINKS_API_URL }}
+      REACT_APP_IMPORT_WHITELIST: ${{ secrets.REACT_APP_IMPORT_WHITELIST }}
 
     steps:
     - name: Checkout code
