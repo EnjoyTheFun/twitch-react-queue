@@ -1,0 +1,41 @@
+/*!
+	Copyright (c) 2018 Jed Watson.
+	Licensed under the MIT License (MIT), see
+	http://jedwatson.github.io/classnames
+*/
+
+/*!
+  * $script.js JS loader & dependency manager
+  * https://github.com/ded/script.js
+  * (c) Dustin Diaz 2014 | License MIT
+  */
+
+/*! @name @videojs/http-streaming @version 3.17.0 @license Apache-2.0 */
+
+/*! @name aes-decrypter @version 4.0.2 @license Apache-2.0 */
+
+/*! @name m3u8-parser @version 7.2.0 @license Apache-2.0 */
+
+/*! @name pkcs7 @version 1.0.4 @license Apache-2.0 */
+
+/*! @name videojs-contrib-quality-levels @version 4.1.0 @license Apache-2.0 */
+
+/**
+ * @license
+ * slighly modified parse-headers 2.0.2 <https://github.com/kesla/parse-headers/>
+ * Copyright (c) 2014 David Björklund
+ * Available under the MIT license
+ * <https://github.com/kesla/parse-headers/blob/master/LICENCE>
+ */
+
+/**
+ * @license @tabler/icons-react v3.31.0 - MIT
+ *
+ * This source code is licensed under the MIT license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+/**
+* @link https://github.com/gajus/sister for the canonical source repository
+* @license https://github.com/gajus/sister/blob/master/LICENSE BSD 3-Clause
+*/

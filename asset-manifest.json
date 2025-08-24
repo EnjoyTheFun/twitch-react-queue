@@ -1,15 +1,27 @@
 {
   "files": {
-    "main.css": "/twitch-react-queue/static/css/main.eebb8360.css",
-    "main.js": "/twitch-react-queue/static/js/main.e3068559.js",
+    "main.css": "/twitch-react-queue/static/css/main.bc172591.css",
+    "main.js": "/twitch-react-queue/static/js/main.a593f923.js",
+    "static/js/726.502ded1b.chunk.js": "/twitch-react-queue/static/js/726.502ded1b.chunk.js",
+    "static/js/569.b9fee8e6.chunk.js": "/twitch-react-queue/static/js/569.b9fee8e6.chunk.js",
+    "static/js/452.63bcc9aa.chunk.js": "/twitch-react-queue/static/js/452.63bcc9aa.chunk.js",
     "static/js/453.03bdb18e.chunk.js": "/twitch-react-queue/static/js/453.03bdb18e.chunk.js",
+    "static/js/662.4de7577e.chunk.js": "/twitch-react-queue/static/js/662.4de7577e.chunk.js",
+    "static/css/1.ebda8df5.chunk.css": "/twitch-react-queue/static/css/1.ebda8df5.chunk.css",
+    "static/js/1.22e4e2d5.chunk.js": "/twitch-react-queue/static/js/1.22e4e2d5.chunk.js",
     "index.html": "/twitch-react-queue/index.html",
-    "main.eebb8360.css.map": "/twitch-react-queue/static/css/main.eebb8360.css.map",
-    "main.e3068559.js.map": "/twitch-react-queue/static/js/main.e3068559.js.map",
-    "453.03bdb18e.chunk.js.map": "/twitch-react-queue/static/js/453.03bdb18e.chunk.js.map"
+    "main.bc172591.css.map": "/twitch-react-queue/static/css/main.bc172591.css.map",
+    "main.a593f923.js.map": "/twitch-react-queue/static/js/main.a593f923.js.map",
+    "726.502ded1b.chunk.js.map": "/twitch-react-queue/static/js/726.502ded1b.chunk.js.map",
+    "569.b9fee8e6.chunk.js.map": "/twitch-react-queue/static/js/569.b9fee8e6.chunk.js.map",
+    "452.63bcc9aa.chunk.js.map": "/twitch-react-queue/static/js/452.63bcc9aa.chunk.js.map",
+    "453.03bdb18e.chunk.js.map": "/twitch-react-queue/static/js/453.03bdb18e.chunk.js.map",
+    "662.4de7577e.chunk.js.map": "/twitch-react-queue/static/js/662.4de7577e.chunk.js.map",
+    "1.ebda8df5.chunk.css.map": "/twitch-react-queue/static/css/1.ebda8df5.chunk.css.map",
+    "1.22e4e2d5.chunk.js.map": "/twitch-react-queue/static/js/1.22e4e2d5.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.eebb8360.css",
-    "static/js/main.e3068559.js"
+    "static/css/main.bc172591.css",
+    "static/js/main.a593f923.js"
   ]
 }
