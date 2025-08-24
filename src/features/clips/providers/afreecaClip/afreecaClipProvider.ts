@@ -1,38 +1,54 @@
-import soopApi from '../../../../common/apis/afreecaApi';
+import afreecaApi from '../../../../common/apis/afreecaApi';
 import type { Clip } from '../../clipQueueSlice';
 import type { ClipProvider } from '../providers';
-
-// SOOP (formerly AfreecaTV)
 class AfreecaClipProvider implements ClipProvider {
   name = 'afreeca-clip';
 
   getIdFromUrl(url: string): string | undefined {
-    return soopApi.extractIdFromUrl(url) ?? undefined;
+    let uri: URL;
+    try {
+      uri = new URL(url);
+    } catch {
+      return undefined;
+    }
+
+    if (uri.hostname.endsWith('vod.afreecatv.com')) {
+      const idStart = uri.pathname.lastIndexOf('/') + 1;
+      const id = uri.pathname.slice(idStart).split('?')[0];
+
+      if (!id) {
+        return undefined;
+      }
+
+      return id;
+    }
+
+    return undefined;
   }
 
   async getClipById(id: string): Promise<Clip | undefined> {
-    const clipInfo = await soopApi.getClip(id);
+    const clipInfo = await afreecaApi.getClip(id);
 
     return {
       id,
       title: clipInfo?.title ?? id,
-      author: clipInfo?.author_name ?? 'SOOP',
+      author: clipInfo?.author_name ?? 'afreeca',
       thumbnailUrl: clipInfo?.thumbnail_url,
       submitters: [],
-      Platform: 'SOOP',
+      Platform: 'Afreeca',
     };
   }
 
   getUrl(id: string): string | undefined {
-    return `https://www.sooplive.com/video/${id}`;
+    return `https://vod.afreecatv.com/player/${id}`;
   }
 
   getEmbedUrl(id: string): string | undefined {
-    return `https://www.sooplive.com/player/embed/video/${id}`;
+    return `https://vod.afreecatv.com/player/${id}/embed?showChat=false&autoPlay=true&mutePlay=false`;
   }
 
   async getAutoplayUrl(id: string): Promise<string | undefined> {
-    return `https://www.sooplive.com/video/${id}`;
+    return this.getUrl(id);
   }
 }
 

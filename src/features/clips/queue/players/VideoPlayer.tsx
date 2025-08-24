@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { setVolume } from '../../../settings/settingsSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../../app/store';
@@ -19,40 +19,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
   const dispatch = useDispatch();
   const volume = useSelector((state: RootState) => state.settings.volume);
 
-  const handleVolumeChange = useCallback(() => {
-    if (playerRef.current && !playerRef.current.isDisposed()) {
-      const currentVolume = playerRef.current.volume();
-      dispatch(setVolume(currentVolume));
-    }
-  }, [dispatch]);
-
-  const handleError = useCallback((e: any) => {
-    console.error('Video player error:', e);
-  }, []);
-
-  const handleLoadedMetadata = useCallback(() => {
-    if (playerRef.current && !playerRef.current.isDisposed()) {
-      const player = playerRef.current;
-      if (!player.paused()) return;
-      player.play()?.catch((err) => {
-        console.warn('Play failed:', err);
-      });
-    }
-  }, []);
-
   useEffect(() => {
     if (!videoRef.current || !src) return;
 
-    const isYouTube = src.includes('youtube.com') || src.includes('youtu.be');
-
-    if (playerRef.current && !playerRef.current.isDisposed()) {
-      try {
-        playerRef.current.dispose();
-      } catch (e) {
-        console.warn('Error during Video.js dispose:', e);
-      }
-      playerRef.current = null;
-    }
+    const YouTube = src.includes('youtube.com') || src.includes('youtu.be');
 
     playerRef.current = videojs(videoRef.current, {
       controls: true,
@@ -62,10 +32,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
       aspectRatio: '16:9',
       bigPlayButton: false,
       preload: 'auto',
-      sources: isYouTube
+      sources: YouTube
         ? [{ src, type: 'video/youtube' }]
         : [{ src, type: src.includes('.m3u8') ? 'application/x-mpegURL' : 'video/mp4' }],
-      techOrder: isYouTube ? ['youtube', 'html5'] : ['html5'],
+      techOrder: YouTube ? ['youtube', 'html5'] : ['html5'],
     });
 
     const player = playerRef.current;
@@ -73,9 +43,21 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
       player.fill(true);
       player.volume(volume);
 
-      player.on('volumechange', handleVolumeChange);
-      player.on('error', handleError);
-      player.on('loadedmetadata', handleLoadedMetadata);
+      player.on('volumechange', () => {
+        const currentVolume = player.volume();
+        dispatch(setVolume(currentVolume));
+      });
+
+      player.on('error', (e: any) => {
+        console.error('Video player error:', e);
+      });
+
+      player.on('loadedmetadata', () => {
+        if (!player.paused()) return;
+        player.play()?.catch((err) => {
+          console.warn('Play failed:', err);
+        });
+      });
 
       if (onEnded) {
         player.on('ended', onEnded);
@@ -85,21 +67,15 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
     return () => {
       if (playerRef.current && !playerRef.current.isDisposed()) {
         try {
-          const player = playerRef.current;
-          player.off('volumechange', handleVolumeChange);
-          player.off('error', handleError);
-          player.off('loadedmetadata', handleLoadedMetadata);
-          if (onEnded) {
-            player.off('ended', onEnded);
-          }
-          player.dispose();
+          playerRef.current.dispose();
         } catch (e) {
           console.warn('Error during Video.js dispose:', e);
         }
         playerRef.current = null;
       }
     };
-  }, [src, volume, onEnded, handleVolumeChange, handleError, handleLoadedMetadata]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src]);
 
   if (!src) return null;
 

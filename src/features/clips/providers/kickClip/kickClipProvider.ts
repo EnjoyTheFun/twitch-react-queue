@@ -4,9 +4,38 @@ import type { ClipProvider } from '../providers';
 
 class KickClipProvider implements ClipProvider {
   name = 'kick-clip';
+  private clipCache: Map<string, string> = new Map();
 
   getIdFromUrl(url: string): string | undefined {
-    return kickApi.extractIdFromUrl(url) ?? undefined;
+    try {
+      const uri = new URL(url);
+      if (uri.hostname === 'kick.com' || uri.hostname === 'www.kick.com') {
+        const id = uri.searchParams.get('clip');
+        if (id) {
+          try {
+            this.clipCache.set(id, url);
+          } catch {
+            // ignore
+          }
+          return id;
+        }
+        if (uri.pathname.includes('/clips/')) {
+          const idStart = uri.pathname.lastIndexOf('/');
+          const extracted = uri.pathname.slice(idStart).split('?')[0]?.slice(1);
+          if (extracted) {
+            try {
+              this.clipCache.set(extracted, url);
+            } catch {
+              // ignore
+            }
+          }
+          return extracted;
+        }
+      }
+      return undefined;
+    } catch {
+      return undefined;
+    }
   }
 
   async getClipById(id: string): Promise<Clip | undefined> {
@@ -14,6 +43,15 @@ class KickClipProvider implements ClipProvider {
 
     const clipInfo = await kickApi.getClip(id);
     if (!clipInfo || !clipInfo.video_url) return undefined;
+
+
+    if (!this.clipCache.has(id) && clipInfo.video_url) {
+      try {
+        this.clipCache.set(id, clipInfo.video_url);
+      } catch {
+        // ignore cache failures
+      }
+    }
 
     return {
       id: clipInfo.id,
@@ -29,7 +67,7 @@ class KickClipProvider implements ClipProvider {
   }
 
   getUrl(id: string): string | undefined {
-    return id ? `https://kick.com/clips/${id}` : undefined;
+    return this.clipCache.get(id);
   }
 
   getEmbedUrl(id: string): string | undefined {

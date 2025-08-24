@@ -6,7 +6,25 @@ class StreamableProvider implements ClipProvider {
   name = 'streamable';
 
   getIdFromUrl(url: string): string | undefined {
-    return streamableApi.extractIdFromUrl(url) ?? undefined;
+    let uri: URL;
+    try {
+      uri = new URL(url);
+    } catch {
+      return undefined;
+    }
+
+    if (uri.hostname.endsWith('streamable.com')) {
+      const idStart = uri.pathname.lastIndexOf('/') + 1;
+      const id = uri.pathname.slice(idStart).split('?')[0];
+
+      if (!id) {
+        return undefined;
+      }
+
+      return id;
+    }
+
+    return undefined;
   }
 
   async getClipById(id: string): Promise<Clip | undefined> {

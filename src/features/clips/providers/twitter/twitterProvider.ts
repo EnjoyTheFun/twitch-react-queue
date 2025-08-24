@@ -1,12 +1,23 @@
 import type { Clip } from '../../clipQueueSlice';
 import type { ClipProvider } from '../providers';
-import twitterApi, { getClipFromTweet, getDirectMediaUrl } from '../../../../common/apis/twitterApi';
+import { getClipFromTweet, getDirectMediaUrl } from '../../../../common/apis/twitterApi';
+
+const TWITTER_HOSTS = ['twitter.com', 'x.com', 'www.twitter.com', 'www.x.com'];
 
 class TwitterProvider implements ClipProvider {
   name = 'twitter';
 
   getIdFromUrl(url: string): string | undefined {
-    return twitterApi.extractIdFromUrl(url) ?? undefined;
+    try {
+      const uri = new URL(url);
+      if (TWITTER_HOSTS.some(h => uri.hostname.endsWith(h))) {
+        const match = uri.pathname.match(/\/status\/(\d+)/);
+        return match ? match[1] : undefined;
+      }
+    } catch {
+      return undefined;
+    }
+    return undefined;
   }
 
   async getClipById(id: string): Promise<Clip | undefined> {
