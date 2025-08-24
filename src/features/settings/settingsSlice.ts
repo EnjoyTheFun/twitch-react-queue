@@ -14,6 +14,9 @@ interface SettingsState {
   blacklist: string[];
   blurredProviders: string[];
   showTopSubmitters?: boolean;
+  skipThreshold?: number;
+  clipMemoryRetentionDays?: number | null;
+  reorderOnDuplicate?: boolean;
 }
 
 const initialState: SettingsState = {
@@ -23,6 +26,9 @@ const initialState: SettingsState = {
   blacklist: [],
   blurredProviders: [],
   showTopSubmitters: false,
+  skipThreshold: 20,
+  clipMemoryRetentionDays: null,
+  reorderOnDuplicate: true,
 };
 
 const settingsSlice = createSlice({
@@ -53,6 +59,15 @@ const settingsSlice = createSlice({
       }
       if (payload.showTopSubmitters !== undefined) {
         state.showTopSubmitters = payload.showTopSubmitters;
+      }
+      if (payload.skipThreshold !== undefined) {
+        state.skipThreshold = payload.skipThreshold;
+      }
+      if (payload.clipMemoryRetentionDays !== undefined) {
+        state.clipMemoryRetentionDays = payload.clipMemoryRetentionDays;
+      }
+      if (payload.reorderOnDuplicate !== undefined) {
+        state.reorderOnDuplicate = payload.reorderOnDuplicate;
       }
     },
     toggleShowTopSubmitters: (state) => {
@@ -91,6 +106,10 @@ export const selectColorScheme = createSelector(
 );
 
 export const selectShowTopSubmitters = (state: RootState) => state.settings.showTopSubmitters !== false;
+export const selectSkipThreshold = (state: RootState) => state.settings.skipThreshold ?? 20;
+export const selectClipMemoryRetentionDays = (state: RootState) => state.settings.clipMemoryRetentionDays ?? null;
+
+export const selectReorderOnDuplicate = (state: RootState) => state.settings.reorderOnDuplicate !== false;
 
 export const { colorSchemeToggled, channelChanged, settingsChanged, toggleShowTopSubmitters, setShowTopSubmitters } = settingsSlice.actions;
 

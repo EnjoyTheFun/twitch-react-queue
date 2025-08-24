@@ -1,7 +1,8 @@
-import { ActionIcon, ActionIconProps, Button, Group, Header, Space, Text, ThemeIcon, useMantineTheme, Box } from '@mantine/core';
-import { PropsWithChildren, useState } from 'react';
-import ColorSchemeSwitch from '../common/components/ColorSchemeSwitch';
+import { useState } from 'react';
+import { ActionIcon, ActionIconProps, Button, Group, Header, Space, Text, ThemeIcon, Box } from '@mantine/core';
+import { PropsWithChildren } from 'react';
 import { NavLinkProps, useLocation } from 'react-router-dom';
+import ColorSchemeSwitch from '../common/components/ColorSchemeSwitch';
 import NavLink from '../common/components/NavLink';
 import MyCredits from '../common/components/MyCredits';
 import IfAuthenticated from '../features/auth/IfAuthenticated';
@@ -10,7 +11,7 @@ import { login } from '../features/auth/authSlice';
 import AppMenu from './AppMenu';
 import ImportLinksButton from '../features/clips/queue/ImportLinksButton';
 
-export function TitleIcon() {
+const TitleIcon = () => {
   const favicon = `${process.env.PUBLIC_URL || ''}/favicon.svg`;
 
   return (
@@ -18,58 +19,70 @@ export function TitleIcon() {
       <img src={favicon} alt="React Queue" style={{ width: 32, height: 32 }} />
     </ThemeIcon>
   );
-}
+};
 
-export function TitleText() {
-  return (
-    <Group direction="column" spacing={0}>
-      <Text size="xl" weight={800}>
-        React Queue
-      </Text>
-      <MyCredits />
-    </Group>
-  );
-}
+const TitleText = () => (
+  <Group direction="column" spacing={0}>
+    <Text size="xl" weight={800}>
+      React Queue
+    </Text>
+    <MyCredits />
+  </Group>
+);
 
-function NavBarIcon({ children, ...props }: PropsWithChildren<ActionIconProps<any>>) {
-  return (
-    <ActionIcon variant="hover" size="lg" {...props}>
-      {children}
-    </ActionIcon>
-  );
-}
+const NavBarIcon = ({ children, ...props }: PropsWithChildren<ActionIconProps<any>>) => (
+  <ActionIcon variant="hover" size="lg" {...props}>
+    {children}
+  </ActionIcon>
+);
 
-function NavBarButton({ children, type, className, style, ...props }: PropsWithChildren<NavLinkProps>) {
-  return (
-    <Button
-      component={NavLink}
-      variant="subtle"
-      {...props}
-      activeStyle={({ isActive }: { isActive: boolean }) => ({
-        borderBottom: isActive ? '1px solid' : undefined,
-      })}
-    >
-      {children}
-    </Button>
-  );
-}
+const NavBarButton = ({ children, type, className, style, ...props }: PropsWithChildren<NavLinkProps>) => (
+  <Button
+    component={NavLink}
+    variant="subtle"
+    {...props}
+    activeStyle={({ isActive }: { isActive: boolean }) => ({
+      borderBottom: isActive ? '1px solid' : undefined,
+    })}
+  >
+    {children}
+  </Button>
+);
 
-function AppHeader({ noNav = false }: { noNav?: boolean }) {
+const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
   const dispatch = useAppDispatch();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const theme = useMantineTheme();
+
+  const handleLogin = () => {
+    dispatch(login(location.pathname));
+  };
+
+  const toggleCollapsed = () => {
+    setCollapsed(prev => !prev);
+  };
 
   return (
     <Header height={collapsed ? 0 : 60} px="lg" sx={{ overflow: 'visible', transition: 'height 160ms' }}>
       {!collapsed ? (
-        <Group position="apart" align="center" sx={{ height: '100%' }}>
-          <Group align="center">
+        <Group position="apart" align="center" sx={{ height: '100%', flexWrap: 'nowrap' }}>
+          <Group align="center" sx={{ minWidth: 0, gap: '0.5rem', flexWrap: 'nowrap' }}>
             <TitleIcon />
             <TitleText />
             <Space />
             {!noNav && (
-              <Group spacing={0}>
+              <Group
+                spacing={0}
+                sx={{
+                  display: 'flex',
+                  gap: 0,
+                  flexWrap: 'nowrap',
+                  overflowX: 'auto',
+                  overflowY: 'hidden',
+                  WebkitOverflowScrolling: 'touch',
+                  alignItems: 'center',
+                }}
+              >
                 <NavBarButton to="/">Home</NavBarButton>
                 <IfAuthenticated>
                   <NavBarButton to="queue">Queue</NavBarButton>
@@ -80,28 +93,28 @@ function AppHeader({ noNav = false }: { noNav?: boolean }) {
           </Group>
           <IfAuthenticated
             otherwise={
-              <Group>
+              <Group sx={{ flexWrap: 'nowrap', gap: '0.5rem' }}>
                 <ColorSchemeSwitch component={NavBarIcon} />
-                <Button onClick={() => dispatch(login(location.pathname))}>Login with Twitch</Button>
+                <Button onClick={handleLogin}>Login with Twitch</Button>
               </Group>
             }
           >
-            <Group spacing="xs" align="center">
+            <Group spacing="xs" align="center" sx={{ flexWrap: 'nowrap', gap: '0.5rem', minWidth: 0 }}>
               <ImportLinksButton />
               <AppMenu />
             </Group>
           </IfAuthenticated>
         </Group>
       ) : (
-  <Group position="right" sx={{ height: '100%', alignItems: 'center' }}>
-  </Group>
+        <Group position="right" sx={{ height: '100%', alignItems: 'center' }}>
+        </Group>
       )}
 
-  <Box
-        onClick={() => setCollapsed((c) => !c)}
+      <Box
+        onClick={toggleCollapsed}
         role="button"
         aria-label={collapsed ? 'Expand header' : 'Collapse header'}
-        sx={() => ({
+        sx={(theme) => ({
           position: collapsed ? 'fixed' : 'absolute',
           left: '50%',
           transform: 'translateX(-50%)',
@@ -138,6 +151,8 @@ function AppHeader({ noNav = false }: { noNav?: boolean }) {
       </Box>
     </Header>
   );
-}
+};
+AppHeader.displayName = 'AppHeader';
 
+export { TitleIcon, TitleText };
 export default AppHeader;

@@ -4,7 +4,7 @@ import ClassicLayout from './layouts/ClassicLayout';
 import FullscreenWithPopupLayout from './layouts/FullscreenWithPopupLayout';
 import SpotlightLayout from './layouts/SpotlightLayout';
 
-function QueuePage() {
+const QueuePage = () => {
   const layout = useAppSelector(selectLayout);
 
   switch (layout) {
@@ -17,6 +17,8 @@ function QueuePage() {
     default:
       return <ClassicLayout />;
   }
-}
+};
+
+QueuePage.displayName = 'QueuePage';
 
 export default QueuePage;

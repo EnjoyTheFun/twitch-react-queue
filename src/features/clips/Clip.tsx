@@ -1,5 +1,5 @@
 import { ActionIcon, AspectRatio, Image, Box, Group, Skeleton, Stack, Text, useMantineTheme } from '@mantine/core';
-import React, { MouseEventHandler } from 'react';
+import { MouseEventHandler } from 'react';
 import { Trash } from 'tabler-icons-react';
 import { useAppSelector } from '../../app/hooks';
 import { selectClipById, selectTopNSubmitters, selectHighlightedClipId } from './clipQueueSlice';
@@ -25,7 +25,7 @@ const PLATFORM_PROVIDER_MAP: Record<string, string[]> = {
   Instagram: ['instagram'],
   Kick: ['kick-clip'],
   Streamable: ['streamable'],
-  Afreeca: ['afreeca-clip'],
+  SOOP: ['afreeca-clip'],
 };
 
 const platformToProviderKey = (platform?: PlatformType): string[] => {
@@ -33,25 +33,29 @@ const platformToProviderKey = (platform?: PlatformType): string[] => {
   return PLATFORM_PROVIDER_MAP[platform] ?? [];
 };
 
-function Clip({ clipId, onClick, onCrossClick, className, card, platform, queueIndex }: ClipProps) {
-  const { title, thumbnailUrl = '', author, submitters } = useAppSelector(selectClipById(clipId));
-  const displayAuthor = React.useMemo(() => {
-    if (!author) return '';
-    const max = 30;
-    if (author.length <= max) return author;
-    return `${author.slice(0, max - 1)}…`;
-  }, [author]);
+const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueIndex }: ClipProps) => {
+  const clip = useAppSelector(selectClipById(clipId));
+  const { title, thumbnailUrl = '', author, submitters } = clip || {};
+
   const highlightedClipId = useAppSelector(selectHighlightedClipId);
   const theme = useMantineTheme();
   const chatUser = useAppSelector((s) => (submitters?.[0] ? s.chatUsers[submitters[0].toLowerCase()] : undefined));
   const blurredProviders = useAppSelector((s) => s.settings.blurredProviders || []);
   const topN = useAppSelector(selectTopNSubmitters(3));
-  const topIndex = submitters?.[0] ? topN.findIndex((t) => t.username === submitters[0].toLowerCase()) : -1;
-  const topClass = topIndex >= 0 ? `chip-anim-${topIndex}` : undefined;
   const colored = useAppSelector((s) => s.clipQueue.coloredSubmitterNames !== false);
 
+  const displayAuthor = (() => {
+    if (!author) return '';
+    const max = 30;
+    if (author.length <= max) return author;
+    return `${author.slice(0, max - 1)}…`;
+  })();
+
+  const topIndex = submitters?.[0] ? topN.findIndex((t) => t.username === submitters[0].toLowerCase()) : -1;
+  const topClass = topIndex >= 0 ? `chip-anim-${topIndex}` : undefined;
   const submitterClass = colored && topClass ? topClass : undefined;
-  const submitterStyle = React.useMemo(() => {
+
+  const submitterStyle = (() => {
     if (!colored || topClass || !chatUser) return undefined;
 
     const roleColor = chatUser.broadcaster
@@ -63,68 +67,86 @@ function Clip({ clipId, onClick, onCrossClick, className, card, platform, queueI
       : undefined;
 
     return roleColor ? { color: roleColor } : undefined;
-  }, [colored, topClass, chatUser, theme]);
+  })();
 
   const providerKeys = platformToProviderKey(platform);
   const shouldBlur = providerKeys.some((k) => blurredProviders.includes(k));
 
   const isHighlighted = highlightedClipId === clipId;
 
-  return (
-    <Box
-      sx={(theme) => ({
-        position: 'relative',
-        border: '3px solid transparent',
+  const boxSx = (theme: any) => ({
+    position: 'relative' as const,
+    border: '3px solid transparent',
+    borderRadius: 8,
+    transition: 'border 0.3s, box-shadow 0.3s, transform 0.25s',
+    height: '100%',
+    width: '100%',
+    maxWidth: '100%',
+    overflow: 'hidden',
+    zIndex: 2,
+    '& .clip--action-icon': { display: 'none' },
+    '&:hover .clip--action-icon': { display: 'block' },
+    '&:hover .clip--title': { color: onClick ? theme.colors.indigo[5] : undefined },
+    ...(isHighlighted && {
+      '&::after': {
+        content: '""',
+        position: 'absolute' as const,
+        inset: 6,
         borderRadius: 8,
-        transition: 'border 0.3s, box-shadow 0.3s, transform 0.25s',
-        height: '100%',
-        width: '100%',
-        maxWidth: '100%',
-        overflow: 'hidden',
-        zIndex: 2,
-        '& .clip--action-icon': { display: 'none' },
-        '&:hover .clip--action-icon': { display: 'block' },
-        '&:hover .clip--title': { color: onClick ? theme.colors.indigo[5] : undefined },
-        ...(isHighlighted && {
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            inset: 6,
-            borderRadius: 8,
-            background: 'linear-gradient(270deg, #00f2fe, #4facfe, #00f2fe)',
-            backgroundSize: '400% 400%',
-            filter: 'blur(12px)',
-            opacity: 0.30,
-            pointerEvents: 'none',
-            zIndex: 0,
-            transition: 'opacity 0.20s',
-            animation: 'gradient-border 2s ease infinite',
-          },
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            inset: 0,
-            borderRadius: 8,
-            padding: '2px',
-            background: 'linear-gradient(270deg, #00f2fe, #4facfe, #00f2fe)',
-            backgroundSize: '400% 400%',
-            animation: 'gradient-border 2s ease infinite',
-            WebkitMask:
-              'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-            WebkitMaskComposite: 'xor',
-            filter: 'blur(6px)',
-            opacity: 0.95,
-            pointerEvents: 'none',
-            zIndex: 3,
-          },
-          '@keyframes gradient-border': {
-            '0%': { backgroundPosition: '0% 50%' },
-            '50%': { backgroundPosition: '100% 50%' },
-            '100%': { backgroundPosition: '0% 50%' },
-          },
-        }),
-      })}
-    >
+        background: 'linear-gradient(270deg, #00f2fe, #4facfe, #00f2fe)',
+        backgroundSize: '400% 400%',
+        filter: 'blur(12px)',
+        opacity: 0.30,
+        pointerEvents: 'none' as const,
+        zIndex: 0,
+        transition: 'opacity 0.20s',
+        animation: 'gradient-border 2s ease infinite',
+      },
+      '&::before': {
+        content: '""',
+        position: 'absolute' as const,
+        inset: 0,
+        borderRadius: 8,
+        padding: '2px',
+        background: 'linear-gradient(270deg, #00f2fe, #4facfe, #00f2fe)',
+        backgroundSize: '400% 400%',
+        animation: 'gradient-border 2s ease infinite',
+        WebkitMask:
+          'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+        WebkitMaskComposite: 'xor',
+        filter: 'blur(6px)',
+        opacity: 0.95,
+        pointerEvents: 'none' as const,
+        zIndex: 3,
+      },
+      '@keyframes gradient-border': {
+        '0%': { backgroundPosition: '0% 50%' },
+        '50%': { backgroundPosition: '100% 50%' },
+        '100%': { backgroundPosition: '0% 50%' },
+      },
+    }),
+  });
+
+  const aspectRatioSx = {
+    width: card ? '100%' : '9rem',
+    minWidth: card ? undefined : '9rem',
+    maxWidth: card ? undefined : '33%',
+  };
+
+  const groupSx = {
+    cursor: onClick ? 'pointer' : undefined,
+    '&:active': onClick
+      ? {
+        paddingTop: 1,
+        marginBottom: -1,
+      }
+      : {},
+  };
+
+  if (!clip) return null;
+
+  return (
+    <Box sx={boxSx}>
       {queueIndex && (
         <Box
           sx={{
@@ -150,25 +172,10 @@ function Clip({ clipId, onClick, onCrossClick, className, card, platform, queueI
         direction={card ? 'column' : 'row'}
         noWrap
         className={className}
-        sx={{
-          cursor: onClick ? 'pointer' : undefined,
-          '&:active': onClick
-            ? {
-              paddingTop: 1,
-              marginBottom: -1,
-            }
-            : {},
-        }}
+        sx={groupSx}
         onClick={onClick}
       >
-        <AspectRatio
-          ratio={16 / 9}
-          sx={{
-            width: card ? '100%' : '9rem',
-            minWidth: card ? undefined : '9rem',
-            maxWidth: card ? undefined : '33%',
-          }}
-        >
+        <AspectRatio ratio={16 / 9} sx={aspectRatioSx}>
           <Skeleton visible={!thumbnailUrl}>
             <Image
               src={thumbnailUrl}
@@ -223,6 +230,8 @@ function Clip({ clipId, onClick, onCrossClick, className, card, platform, queueI
       )}
     </Box>
   );
-}
+};
+
+Clip.displayName = 'Clip';
 
 export default Clip;

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Text, useMantineTheme } from '@mantine/core';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { useAppSelector } from '../../../app/hooks';
@@ -23,7 +22,7 @@ function PlayerTitle({ className }: PlayerTitleProps) {
   const colored = useAppSelector((s) => s.clipQueue.coloredSubmitterNames !== false);
 
   const submitterClass = colored && topClass ? topClass : undefined;
-  const submitterStyle = React.useMemo(() => {
+  const submitterStyle = (() => {
     if (!colored || topClass || !chatUser) return undefined;
 
     const roleColor = chatUser.broadcaster
@@ -35,7 +34,7 @@ function PlayerTitle({ className }: PlayerTitleProps) {
       : undefined;
 
     return roleColor ? { color: roleColor } : undefined;
-  }, [colored, topClass, chatUser, theme]);
+  })();
 
   return (
     <Box className={className} sx={{ strong: { fontWeight: 600 }, flex: 1, minWidth: 0, overflow: 'hidden' }}>

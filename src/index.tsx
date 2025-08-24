@@ -7,6 +7,7 @@ import { persistor, store } from './app/store';
 import { injectStore } from './common/apis/twitchApi';
 import reportWebVitals from './reportWebVitals';
 
+import './polyfills/resizeObserverShim';
 import './index.scss';
 
 injectStore(store);

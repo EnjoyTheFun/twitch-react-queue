@@ -1,5 +1,5 @@
 import { Stack } from '@mantine/core';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import type { Clip } from '../clipQueueSlice';
 import {
@@ -8,6 +8,8 @@ import {
   selectAutoplayTimeoutHandle,
   selectCurrentClip,
   selectNextId,
+  selectSkipVoteCount,
+  clearSkipVotes,
 } from '../clipQueueSlice';
 import clipProvider from '../providers/providers';
 import AutoplayOverlay from './AutoplayOverlay';
@@ -42,7 +44,7 @@ const getPlayerComponent = (
   switch (Platform) {
     case 'YouTube':
     case 'Twitch':
-    case 'Afreeca':
+    case 'SOOP':
     case 'Streamable':
       return autoplayEnabled ? (
         <VideoPlayer
@@ -130,15 +132,25 @@ function Player({ className }: PlayerProps) {
   const autoplayTimeoutHandle = useAppSelector(selectAutoplayTimeoutHandle);
   const [videoSrc, setVideoSrc] = useState<string | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const skipVoteCount = useAppSelector(selectSkipVoteCount);
+
+  const handleCancel = useCallback(() => {
+    dispatch(autoplayTimeoutHandleChanged({ set: false }));
+    dispatch(clearSkipVotes());
+  }, [dispatch]);
 
   useEffect(() => {
     if (!currentClip) {
       setVideoSrc(undefined);
       setError(null);
+      setIsLoading(false);
       return;
     }
 
     setVideoSrc(undefined);
+    setError(null);
+    setIsLoading(true);
     let Flag = true;
 
     const fetchVideoUrl = async () => {
@@ -147,11 +159,14 @@ function Player({ className }: PlayerProps) {
         if (Flag) {
           setVideoSrc(url);
           setError(null);
+          setIsLoading(false);
         }
       } catch (err) {
         if (Flag) {
+          console.error('Failed to fetch video URL for clip:', currentClip.id, err);
           setError('Failed to load video');
           setVideoSrc(undefined);
+          setIsLoading(false);
         }
       }
     };
@@ -171,10 +186,43 @@ function Player({ className }: PlayerProps) {
       sx={{ background: 'black', width: '100%', aspectRatio: '16 / 9', position: 'relative', flex: '0 0 auto' }}
       className={className}
     >
-      {error ? <div style={{ color: 'red' }}>{error}</div> : videoSrc || !autoplayEnabled ? player : <div></div>}
+      {error ? (
+        <div style={{ color: 'white', background: 'rgba(255,0,0,0.7)', padding: '8px 12px', borderRadius: 4, margin: 16 }}>
+          {error}
+        </div>
+      ) : isLoading ? (
+        <div style={{ color: 'white', padding: 16 }}>Loading...</div>
+      ) : videoSrc || !autoplayEnabled ? (
+        player
+      ) : (
+        <div style={{ color: 'white', padding: 16 }}>Preparing video...</div>
+      )}
+      {skipVoteCount > 0 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 3,
+            background: 'rgba(0,0,0,0.6)',
+            color: 'white',
+            padding: '6px 10px',
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+            borderBottomLeftRadius: 12,
+            borderBottomRightRadius: 12,
+            fontWeight: 600,
+            fontSize: 12,
+          }}
+          aria-live="polite"
+        >
+          Skip votes: {skipVoteCount}
+        </div>
+      )}
       <AutoplayOverlay
         visible={!!autoplayTimeoutHandle}
-        onCancel={() => dispatch(autoplayTimeoutHandleChanged({ set: false }))}
+        onCancel={handleCancel}
       />
     </Stack>
   );

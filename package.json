@@ -1,6 +1,6 @@
 {
   "name": "twitch-react-queue",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "homepage": "/twitch-react-queue/",
   "scripts": {
     "start": "react-scripts start",
@@ -31,6 +31,7 @@
     "date-fns": "^2.28.0",
     "gh-pages": "^6.3.0",
     "react": "^18.1.0",
+    "react-compiler-runtime": "^19.1.0-rc.2",
     "react-dom": "^18.1.0",
     "react-player": "^2.10.1",
     "react-redux": "^8.0.2",
@@ -64,5 +65,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "babel-plugin-react-compiler": "^19.1.0-rc.2"
   }
 }

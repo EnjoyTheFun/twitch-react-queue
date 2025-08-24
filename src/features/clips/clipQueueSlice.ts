@@ -14,6 +14,7 @@ export interface Clip {
 
   status?: 'watched' | 'removed';
   timestamp?: string;
+  rememberedAt?: string;
 
   title?: string;
   author?: string;
@@ -35,6 +36,8 @@ interface ClipQueueState {
   watchedClipCount: number;
   watchedCounts: Record<string, number>;
   coloredSubmitterNames?: boolean;
+  skipVotingEnabled?: boolean;
+  currentSkipVoters?: string[];
 
   isOpen: boolean;
 
@@ -47,6 +50,7 @@ interface ClipQueueState {
   autoplayTimeoutHandle?: number;
   autoplayUrl?: string;
   watchedHistory: string[];
+  reorderOnDuplicate?: boolean;
 }
 
 const initialState: ClipQueueState = {
@@ -63,6 +67,9 @@ const initialState: ClipQueueState = {
   watchedHistory: [],
   highlightedClipId: null,
   coloredSubmitterNames: true,
+  skipVotingEnabled: false,
+  currentSkipVoters: [],
+  reorderOnDuplicate: true,
 };
 
 const addClipToQueue = (state: ClipQueueState, clip: Clip) => {
@@ -78,17 +85,18 @@ const addClipToQueue = (state: ClipQueueState, clip: Clip) => {
           submitters: [...rememberedClip.submitters, submitter],
         };
         state.byId[id] = rememberedClip;
+        if (state.reorderOnDuplicate !== false) {
+          const index = state.queueIds.indexOf(id);
+          state.queueIds.splice(index, 1);
 
-        const index = state.queueIds.indexOf(id);
-        state.queueIds.splice(index, 1);
-
-        const newIndex = state.queueIds.findIndex(
-          (otherId) => state.byId[otherId].submitters.length < rememberedClip.submitters.length
-        );
-        if (newIndex > -1) {
-          state.queueIds.splice(newIndex, 0, id);
-        } else {
-          state.queueIds.push(id);
+          const newIndex = state.queueIds.findIndex(
+            (otherId) => state.byId[otherId].submitters.length < rememberedClip.submitters.length
+          );
+          if (newIndex > -1) {
+            state.queueIds.splice(newIndex, 0, id);
+          } else {
+            state.queueIds.push(id);
+          }
         }
       }
 
@@ -159,6 +167,7 @@ const clipQueueSlice = createSlice({
       });
       state.currentId = undefined;
       state.autoplayTimeoutHandle = undefined;
+      state.currentSkipVoters = [];
       state.queueIds = [];
       state.watchedClipCount = 0;
       state.watchedHistory = [];
@@ -188,8 +197,9 @@ const clipQueueSlice = createSlice({
           state.watchedCounts[key] = (state.watchedCounts[key] || 0) + 1;
         }
       }
-      updateClip(state, state.currentId, { status: 'watched' });
+      updateClip(state, state.currentId, { status: 'watched', rememberedAt: new Date().toISOString() });
       state.autoplayTimeoutHandle = undefined;
+      state.currentSkipVoters = [];
     },
     previousClipWatched: (state) => {
       const currentId = state.currentId;
@@ -210,8 +220,9 @@ const clipQueueSlice = createSlice({
 
     currentClipSkipped: (state) => {
       advanceQueue(state);
-      updateClip(state, state.currentId, { status: 'watched' });
+      updateClip(state, state.currentId, { status: 'watched', rememberedAt: new Date().toISOString() });
       state.autoplayTimeoutHandle = undefined;
+      state.currentSkipVoters = [];
       if (state.currentId) {
         state.watchedHistory.push(state.currentId);
         const clip = state.byId[state.currentId];
@@ -271,8 +282,9 @@ const clipQueueSlice = createSlice({
 
         state.currentId = payload;
         state.watchedClipCount += 1;
-        updateClip(state, state.currentId, { status: 'watched' });
+        updateClip(state, state.currentId, { status: 'watched', rememberedAt: new Date().toISOString() });
         state.autoplayTimeoutHandle = undefined;
+        state.currentSkipVoters = [];
 
         const clip = state.byId[state.currentId as string];
         const submitter = clip?.submitters?.[0];
@@ -287,18 +299,36 @@ const clipQueueSlice = createSlice({
 
       state.byId[payload.id] = payload;
 
+      const existingReplacementIndex = state.queueIds.indexOf(payload.id);
+      if (existingReplacementIndex > -1) state.queueIds.splice(existingReplacementIndex, 1);
+
+      if (state.historyIds[0] !== payload.id) {
+        addClipToHistory(state, payload.id);
+      }
+      if (state.watchedHistory[state.watchedHistory.length - 1] !== payload.id) {
+        state.watchedHistory.push(payload.id);
+      }
+      state.watchedClipCount += 1;
+      updateClip(state, payload.id, { status: 'watched', rememberedAt: new Date().toISOString() });
+
+      const replacedClip = state.byId[payload.id];
+      const submitter = replacedClip?.submitters?.[0];
+      if (submitter) {
+        const key = submitter.toLowerCase();
+        state.watchedCounts[key] = (state.watchedCounts[key] || 0) + 1;
+      }
+
       if (previousCurrent && previousCurrent !== payload.id) {
         const existingIndex = state.queueIds.indexOf(previousCurrent);
-        if (existingIndex === -1) {
-          state.queueIds.unshift(previousCurrent);
-        } else {
+        if (existingIndex > -1) {
           state.queueIds.splice(existingIndex, 1);
-          state.queueIds.unshift(previousCurrent);
         }
+        state.queueIds.unshift(previousCurrent);
       }
 
       state.currentId = payload.id;
       state.autoplayTimeoutHandle = undefined;
+      state.currentSkipVoters = [];
     },
     isOpenChanged: (state, { payload }: PayloadAction<boolean>) => {
       state.isOpen = payload;
@@ -311,6 +341,23 @@ const clipQueueSlice = createSlice({
     },
     submitterColorsToggled: (state) => {
       state.coloredSubmitterNames = !state.coloredSubmitterNames;
+    },
+    addSkipVote: (state, { payload }: PayloadAction<string>) => {
+      if (!state.currentId) return;
+      const username = payload.toLowerCase();
+      const voters = new Set(state.currentSkipVoters || []);
+      voters.add(username);
+      state.currentSkipVoters = Array.from(voters);
+    },
+    clearSkipVotes: (state) => {
+      state.currentSkipVoters = [];
+    },
+    skipVotingToggled: (state) => {
+      const willEnable = !state.skipVotingEnabled;
+      state.skipVotingEnabled = willEnable;
+      if (!willEnable) {
+        state.currentSkipVoters = [];
+      }
     },
     autoplayChanged: (state, { payload }: PayloadAction<boolean>) => {
       state.autoplay = payload;
@@ -328,14 +375,15 @@ const clipQueueSlice = createSlice({
       state.autoplay = false;
       state.autoplayUrl = undefined;
       state.autoplayTimeoutHandle = undefined;
+      state.currentSkipVoters = [];
     },
     bumpClipToTop: (state, { payload }: PayloadAction<string>) => {
       const idx = Number.parseInt(payload, 10);
       if (!isNaN(idx) && idx > 0 && idx <= state.queueIds.length) {
         const clipId = state.queueIds[idx - 1];
         if (clipId) {
-          state.queueIds.splice(idx - 1, 1); // Remove from current position
-          state.queueIds.unshift(clipId);    // Add to the top
+          state.queueIds.splice(idx - 1, 1);
+          state.queueIds.unshift(clipId);
         }
       }
     },
@@ -370,6 +418,9 @@ const clipQueueSlice = createSlice({
       }
       if (payload.layout) {
         state.layout = payload.layout;
+      }
+      if (payload.reorderOnDuplicate !== undefined) {
+        state.reorderOnDuplicate = payload.reorderOnDuplicate;
       }
     });
     builder.addCase(legacyDataMigrated, (state, { payload }) => {
@@ -434,6 +485,10 @@ export const selectWatchedCounts = (state: RootState) => state.clipQueue.watched
 
 export const selectColoredSubmitterNames = (state: RootState) => state.clipQueue.coloredSubmitterNames !== false;
 
+export const selectSkipVotingEnabled = (state: RootState) => state.clipQueue.skipVotingEnabled === true;
+
+export const selectSkipVoteCount = (state: RootState) => (state.clipQueue.currentSkipVoters || []).length;
+
 export const selectTopSubmitter = createSelector([selectWatchedCounts], (counts) => {
   let top: { username: string | null; count: number } = { username: null, count: 0 };
   for (const [user, cnt] of Object.entries(counts || {})) {
@@ -463,6 +518,46 @@ export const highlightClipFrame = createAsyncThunk<void, void, { state: RootStat
   }
 );
 
+export const checkSkipVotes = createAsyncThunk<void, void, { state: RootState }>(
+  'clipQueue/checkSkipVotes',
+  async (_, { dispatch, getState }) => {
+    const threshold = getState().settings.skipThreshold ?? 20;
+    const voters = getState().clipQueue.currentSkipVoters || [];
+    const currentOverlayHandle = getState().clipQueue.autoplayTimeoutHandle;
+    if (voters.length >= threshold) {
+      if (!currentOverlayHandle) {
+        dispatch(autoplayTimeoutHandleChanged({ set: true }));
+      }
+    }
+  }
+);
+
+export const pruneOldMemory = createAsyncThunk<void, void, { state: RootState }>(
+  'clipQueue/pruneOldMemory',
+  async (_, { dispatch, getState }) => {
+    const retentionDays = getState().settings.clipMemoryRetentionDays;
+    if (!retentionDays) return; // permanent
+
+    const cutoff = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+    const state = getState().clipQueue;
+    const byId = state.byId;
+    const queuedIds = new Set(state.queueIds || []);
+    const currentId = state.currentId;
+
+    for (const [id, clip] of Object.entries(byId)) {
+      if (queuedIds.has(id) || (currentId && currentId === id)) continue;
+
+      const rememberedAt = clip.rememberedAt ? Date.parse(clip.rememberedAt) : null;
+
+      if (!rememberedAt) continue;
+
+      if (rememberedAt < cutoff) {
+        dispatch(memoryClipRemoved(id));
+      }
+    }
+  }
+);
+
 export const {
   queueCleared,
   memoryPurged,
@@ -486,7 +581,10 @@ export const {
   highlightClip,
   clearHighlight,
   resetWatchedCounts,
-  submitterColorsToggled
+  submitterColorsToggled,
+  addSkipVote,
+  clearSkipVotes,
+  skipVotingToggled
 } = clipQueueSlice.actions;
 
 const clipQueueReducer = persistReducer(

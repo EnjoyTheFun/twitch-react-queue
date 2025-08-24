@@ -1,10 +1,11 @@
-import { Menu, Badge, NumberInput, Button, Stack } from '@mantine/core';
+import { Menu, Badge, NumberInput, Button, Stack, Switch } from '@mantine/core';
 import { useModals } from '@mantine/modals';
 import { FormEvent, useState } from 'react';
 import { TrashX, Tallymarks } from 'tabler-icons-react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { settingsChanged } from '../../settings/settingsSlice';
 import { queueCleared, selectClipLimit } from '../clipQueueSlice';
+import { selectReorderOnDuplicate } from '../../settings/settingsSlice';
 
 function ClipLimitModal({ onSubmit }: { onSubmit: () => void }) {
   const dispatch = useAppDispatch();
@@ -46,6 +47,7 @@ function QueueQuickMenu() {
   const modals = useModals();
   const dispatch = useAppDispatch();
   const clipLimit = useAppSelector(selectClipLimit);
+  const reorderOnDuplicate = useAppSelector(selectReorderOnDuplicate);
 
   const openClipLimitModal = () => {
     const id = modals.openModal({
@@ -63,6 +65,9 @@ function QueueQuickMenu() {
           onClick={() => openClipLimitModal()}
         >
           Set queue limit
+        </Menu.Item>
+        <Menu.Item icon={<Tallymarks size={14} />} rightSection={<Switch size="sm" checked={reorderOnDuplicate} onChange={(e) => dispatch(settingsChanged({ reorderOnDuplicate: e.currentTarget.checked }))} />}>
+          Reorder on duplicate
         </Menu.Item>
         <Menu.Item icon={<TrashX size={14} />} color="red" onClick={() => dispatch(queueCleared())}>
           Clear queue

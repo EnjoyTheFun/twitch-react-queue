@@ -1,6 +1,6 @@
 import { Button, Container, Grid, Group, Portal, Stack } from '@mantine/core';
 import { randomId } from '@mantine/hooks';
-import React, { PropsWithChildren, useEffect, useMemo, useState } from 'react';
+import React, { PropsWithChildren, useEffect, useState } from 'react';
 import AppLayout from '../../../../app/AppLayout';
 import Player from '../Player';
 import PlayerButtons from '../PlayerButtons';
@@ -32,7 +32,7 @@ function copyStyles(sourceDoc: Document, targetDoc: Document) {
 }
 
 function Popup({ children }: PropsWithChildren<{}>) {
-  const containerEl = useMemo(() => document.createElement('div'), []);
+  const containerEl = document.createElement('div');
 
   useEffect(() => {
     const popup = window.open('', '', `width=${window.outerWidth},height=${window.outerHeight},popup`);

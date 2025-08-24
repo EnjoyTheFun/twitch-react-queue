@@ -14,4 +14,7 @@ export interface AllSettings {
 
   clipLimit?: number | null;
   layout?: string;
+  skipThreshold?: number;
+  clipMemoryRetentionDays?: number | null;
+  reorderOnDuplicate?: boolean;
 }

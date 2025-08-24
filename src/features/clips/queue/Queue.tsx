@@ -16,6 +16,9 @@ function Queue({ wrapper, card }: QueueProps) {
     clipQueueIds.map((id) => selectClipById(id)(state)).filter((clip) => clip !== undefined)
   );
 
+  const handleClipClick = (clipId: string) => () => dispatch(currentClipReplaced(clipId));
+  const handleClipRemove = (clipId: string) => () => dispatch(queueClipRemoved(clipId));
+
   return (
     <>
       {clips.map((clip, idx) => (
@@ -26,8 +29,8 @@ function Queue({ wrapper, card }: QueueProps) {
             clipId={clip!.id}
             card={card}
             queueIndex={idx + 1}
-            onClick={() => dispatch(currentClipReplaced(clip!.id))}
-            onCrossClick={() => dispatch(queueClipRemoved(clip!.id))}
+            onClick={handleClipClick(clip!.id)}
+            onCrossClick={handleClipRemove(clip!.id)}
           />
         </Wrapper>
       ))}

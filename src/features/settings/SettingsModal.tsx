@@ -11,7 +11,8 @@ import {
   selectLayout,
   selectProviders,
 } from '../clips/clipQueueSlice';
-import { selectChannel, selectCommandPrefix, settingsChanged } from './settingsSlice';
+import { selectChannel, selectCommandPrefix, settingsChanged, selectClipMemoryRetentionDays } from './settingsSlice';
+import { selectSkipThreshold } from './settingsSlice';
 
 function SettingsModal({ closeModal }: { closeModal: () => void }) {
   const dispatch = useAppDispatch();
@@ -24,9 +25,11 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
 
   const existingBlacklist = useAppSelector((s) => s.settings.blacklist) || [];
   const existingBlurred = useAppSelector((s) => s.settings.blurredProviders) || [];
+  const existingSkipThreshold = useAppSelector(selectSkipThreshold);
+  const existingClipMemoryRetentionDays = useAppSelector(selectClipMemoryRetentionDays);
   const theme = useMantineTheme();
   const form = useForm({
-    initialValues: { channel, commandPrefix, clipLimit, enabledProviders, layout, blacklist: existingBlacklist.join(', '), blurredProviders: existingBlurred },
+    initialValues: { channel, commandPrefix, clipLimit, enabledProviders, layout, blacklist: existingBlacklist.join(', '), blurredProviders: existingBlurred, skipThreshold: existingSkipThreshold, clipMemoryRetentionDays: existingClipMemoryRetentionDays },
   });
 
   return (
@@ -37,7 +40,7 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
           .map((s: string) => s.trim())
           .filter((s: string) => s.length > 0);
 
-  dispatch(settingsChanged({ ...settings, blacklist: blacklistArr, blurredProviders: settings.blurredProviders || [] }));
+        dispatch(settingsChanged({ ...settings, blacklist: blacklistArr, blurredProviders: settings.blurredProviders || [] }));
         closeModal();
       })}
     >
@@ -73,8 +76,8 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
                 label="Queue layout"
                 data={[
                   { value: 'classic', label: 'Classic' },
-                  { value: 'spotlight', label: 'Spotlight' },
-                  { value: 'fullscreen', label: 'Fullscreen with popup (experimental)' },
+                  { value: 'spotlight', label: 'Spotlight (Updated)' },
+                  { value: 'fullscreen', label: 'Fullscreen with popup (Experimental)' },
                 ]}
                 {...form.getInputProps('layout')}
               />
@@ -86,7 +89,7 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
                   { key: 'kick-clip', label: 'Kick Clips' },
                   { key: 'youtube', label: 'YouTube' },
                   { key: 'streamable', label: 'Streamable' },
-                  { key: 'afreeca-clip', label: 'Afreeca Clips' },
+                  { key: 'afreeca-clip', label: 'SOOP (Experimental)' },
                   { key: 'tiktok', label: 'TikToks' },
                   { key: 'twitter', label: 'X / Twitter (Third-party API)' },
                   { key: 'instagram', label: 'Instagram (Experimental)' },
@@ -157,15 +160,24 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
           <Tabs.Tab label="Clip memory" icon={<History size={16} />}>
             <Stack>
               <Text size="sm">
-                Here, soon, you'll be able to setup for how long watched clips should be remembered before they can be
-                added to the queue again. As well as change other clip memory related settings.
+                Configure how long watched clips should be remembered before they can be added to the queue again.
+                Setting to <em>Permanent</em> will keep clips indefinitely (current default).
               </Text>
               <Group>
-                <Text size="sm">You have {historyIds.length} clips in permanent memory</Text>
+                <Text size="sm">You have {historyIds.length} clips in memory</Text>
                 <Button color="red" size="xs" onClick={() => dispatch(memoryPurged())}>
                   Purge memory
                 </Button>
               </Group>
+              <NumberInput
+                label="Clip memory retention (days)"
+                description="Number of days to remember watched clips before allowing them to be re-added. Leave empty for permanent memory."
+                min={1}
+                step={1}
+                placeholder="Permanent"
+                value={form.values.clipMemoryRetentionDays ?? undefined}
+                onChange={(v) => form.setFieldValue('clipMemoryRetentionDays', v ?? null)}
+              />
             </Stack>
           </Tabs.Tab>
           <Tabs.Tab label="Moderation" icon={<Ban size={16} />}>
@@ -176,6 +188,14 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
                 minRows={2}
                 placeholder="nightbot, streamelements"
                 {...form.getInputProps('blacklist')}
+              />
+              <NumberInput
+                label="Skip votes required"
+                description="Number of unique chatters required to trigger a skip"
+                min={1}
+                step={1}
+                value={form.values.skipThreshold}
+                onChange={(v) => form.setFieldValue('skipThreshold', v ?? 20)}
               />
             </Stack>
           </Tabs.Tab>

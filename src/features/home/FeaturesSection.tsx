@@ -1,4 +1,4 @@
-import { Title, List, ThemeIcon, Code, Box } from '@mantine/core';
+import { Title, List, ThemeIcon, Code, Box, Spoiler, Text } from '@mantine/core';
 import { CircleCheck } from 'tabler-icons-react';
 
 function FeaturesSection() {
@@ -15,74 +15,98 @@ function FeaturesSection() {
         }
       >
         <List.Item>
-          <strong>
-            Supports Twitch Clips, Kick Clips, Afreeca Clips, Twitch VODs, YouTube, Streamable, <span className="etf_color">TikTok</span> and <span className="etf_color">Twitter</span> video links.
-          </strong>
+          <strong>Multi-provider media support</strong>
+          <br />
+          Supports media from Twitch, Kick, SOOP, YouTube, Streamable, TikTok and X(Twitter).
         </List.Item>
+
         <List.Item>
-          <strong>Integrates with Twitch chat</strong>
+          <strong>Twitch chat integration</strong>
           <br />
-          gathers links from messages to build the queue, by default from your chat but can join arbitrary channels
+          Accepts media/clip links from chat and exposes moderator commands (default prefix <Code>!q</Code>) for queue control.
         </List.Item>
+
         <List.Item>
-          <strong>Deduplicates clips</strong>
+          <strong>Queue management</strong>
           <br />
-          prevents from adding the same clip to the queue multiple times, persists remembered clips between queues
+          Manage all media, add blur to thumbnails, highlight items and play them out of order.
         </List.Item>
+
         <List.Item>
-          <strong>Recognizes clip popularity</strong>
+          <strong>Persistent memory</strong>
           <br />
-          when the same clip is posted by multiple users it will be moved up in the queue
+          Deduplicates remembered media and lets you configure how long watched media are kept before they can be re-added.
         </List.Item>
+
         <List.Item>
-          <strong>Offers basic queue management</strong>
+          <strong>Import media</strong>
           <br />
-          allows playing clips out of order, removing clips from queue, clearing the queue and purging persistant clip
-          memory
+          Paste URLs to bulk-import media or use the import via API feature (whitelist only).
         </List.Item>
+
         <List.Item>
-          <strong>Handles deleted messages and timed out users</strong>
+          <strong>Skip voting</strong>
           <br />
-          when a message with clip link is deleted from chat it is removed from the queue as well
-          <br />
-          if a user that submitted clips is timed out their clips are removed from the queue (unless someone else
-          submitted the clip as well)
+          When enabled, viewers can cast unique votes (<Code>!q voteskip</Code>) to skip the current media.
         </List.Item>
+
         <List.Item>
-          <strong>Respects privacy</strong>
+          <strong>Submitter leaderboard</strong>
           <br />
-          does not store any personal data, does not communicate with any third party services
-          <br />
-          requires permission only to get your username and read chat
+          Toggleable leaderboard for top submitters and animated username color styling.
         </List.Item>
+
         <List.Item>
-          <strong>Allows channel moderators to control the queue using chat commands</strong>
+          <strong>Privacy-first</strong>
           <br />
-          prefixed with <Code>!queue</Code> by default (ex. <Code>!queuenext</Code>)
-          <br />
-          <Code>next</Code> - next clip
-          <br />
-          <Code>open</Code> - opens the queue to accept submissions
-          <br />
-          <Code>close</Code> - closes the queue for new submissions
-          <br />
-          <Code>clear</Code> - clears the queue
-          <br />
-          <Code>purgememory</Code> - purges the permanent clip memory
-          <br />
-          <Code>autoplay [on/off]</Code> - switches autoplay on/off
-          <br />
-          <Code>limit [number]</Code> - sets clip limit to [number]
-          <br />
-          <Code>remove [url]</Code> - removes the clip with [url] from the queue
-          <br />
-          <Code>providers [providers]</Code> - sets enabled clip providers to [providers]
-          <br />
-          <Code className="etf_color">removeidx [index]</Code> - removes the clip at position [index]
-          <br />
-          <Code className="etf_color">ht [index]</Code> - bump the clip at position [index] to the top of the queue and highlight it
+          Runs locally in your browser, no third-party data collection by default! You control persistence and settings.
         </List.Item>
       </List>
+
+      <Spoiler maxHeight={0} showLabel="Show chat commands" hideLabel="Hide chat commands" mt="md">
+        <Box mt="sm" pb="md">
+          <Text weight={600} mb="xs">Chat commands</Text>
+          <List spacing="xs">
+            <List.Item>
+              <Code>!q next</Code> - play next clip in queue
+            </List.Item>
+            <List.Item>
+              <Code>!q [open/close]</Code> - open or close queue for new submissions
+            </List.Item>
+            <List.Item>
+              <Code>!q clear</Code> - clear current queue
+            </List.Item>
+            <List.Item>
+              <Code>!q purgememory</Code> - purge clip memory
+            </List.Item>
+            <List.Item>
+              <Code>!q autoplay [on|off]</Code> - toggle autoplay behavior
+            </List.Item>
+            <List.Item>
+              <Code>!q limit &lt;number&gt;</Code> - set clip limit to <Code>number</Code>
+            </List.Item>
+            <List.Item>
+              <Code>!q remove &lt;url&gt;</Code> - remove a specific clip by <Code>URL</Code>
+            </List.Item>
+            <List.Item>
+              <Code>!q removeidx &lt;index&gt;</Code> - remove clip at queue position <Code>index</Code>
+            </List.Item>
+            <List.Item>
+              <Code>!q ht &lt;index&gt;</Code> - bump the clip at position <Code>index</Code> to the top and highlight it
+            </List.Item>
+            <List.Item>
+              <Code>!q providers &lt;list&gt;</Code> - set enabled clip providers to <Code>[providers]</Code>
+            </List.Item>
+            <List.Item>
+              <Code>!q skip</Code> - immediate skip of the current clip
+            </List.Item>
+            <List.Item>
+              <Code>!q voteskip</Code> - (public) vote to skip
+            </List.Item>
+          </List>
+          <Text size="sm" color="dimmed" mt="sm">Note: some commands are moderator-only; prefix may vary by configuration.</Text>
+        </Box>
+      </Spoiler>
     </Box>
   );
 }

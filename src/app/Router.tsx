@@ -1,11 +1,18 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, Outlet } from 'react-router-dom';
+import { LoadingOverlay } from '@mantine/core';
 import AuthPage from '../features/auth/AuthPage';
 import IfAuthenticated from '../features/auth/IfAuthenticated';
 import RequireAuth from '../features/auth/RequireAuth';
-import HistoryPage from '../features/clips/history/HistoryPage';
-import QueuePage from '../features/clips/queue/QueuePage';
-import HomePage from '../features/home/HomePage';
 import AppLayout from './AppLayout';
+
+const HomePage = lazy(() => import('../features/home/HomePage'));
+const QueuePage = lazy(() => import('../features/clips/queue/QueuePage'));
+const HistoryPage = lazy(() => import('../features/clips/history/HistoryPage'));
+
+const PageLoader = () => (
+  <LoadingOverlay visible loaderProps={{ size: 'xl' }} />
+);
 
 function Router() {
   return (
@@ -15,14 +22,16 @@ function Router() {
           path="auth"
           element={
             <IfAuthenticated otherwise={<AuthPage />}>
-              <Navigate to={'/queue'} replace />
+              <Navigate to="/queue" replace />
             </IfAuthenticated>
           }
         />
         <Route
           element={
             <AppLayout>
-              <Outlet />
+              <Suspense fallback={<PageLoader />}>
+                <Outlet />
+              </Suspense>
             </AppLayout>
           }
         >

@@ -15,13 +15,18 @@ import { selectUsername, selectProfilePictureUrl, logout } from '../features/aut
 import useSettingsModal from '../features/settings/SettingsModal';
 import { useAppDispatch, useAppSelector } from './hooks';
 
-function AppMenu() {
+const AppMenu = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const username = useAppSelector(selectUsername);
   const profilePictureUrl = useAppSelector(selectProfilePictureUrl);
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const { openSettingsModal } = useSettingsModal();
+
+  const handleLogout = () => {
+    navigate('/');
+    dispatch(logout());
+  };
 
   return (
     <Menu
@@ -38,9 +43,22 @@ function AppMenu() {
             },
           })}
         >
-          <Group>
+          <Group sx={{ minWidth: 0, gap: 8, alignItems: 'center', flexWrap: 'nowrap' }}>
             <Avatar size="md" radius="xl" src={profilePictureUrl} alt={username}></Avatar>
-            <Text>{username}</Text>
+            <Text
+              sx={{
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
+                maxWidth: 140,
+                display: 'block',
+                '@media (max-width: 560px)': {
+                  display: 'none',
+                },
+              }}
+            >
+              {username}
+            </Text>
             <ChevronIcon />
           </Group>
         </UnstyledButton>
@@ -61,15 +79,13 @@ function AppMenu() {
 
       <Menu.Item
         icon={<Logout size={14} />}
-        onClick={() => {
-          navigate('/');
-          dispatch(logout());
-        }}
+        onClick={handleLogout}
       >
         Log Out
       </Menu.Item>
     </Menu>
   );
-}
+};
+AppMenu.displayName = 'AppMenu';
 
 export default AppMenu;

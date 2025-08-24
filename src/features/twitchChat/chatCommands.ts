@@ -9,7 +9,15 @@ import {
   queueClipRemoveByIndex,
   bumpClipToTop,
   highlightClipFrame,
+  addSkipVote,
+  checkSkipVotes,
+  selectSkipVotingEnabled,
+  clipStubReceived,
+  clipDetailsFailed,
+  currentClipForceReplaced,
 } from '../clips/clipQueueSlice';
+import clipProvider from '../clips/providers/providers';
+import type { Clip } from '../clips/clipQueueSlice';
 import { settingsChanged } from '../settings/settingsSlice';
 import { createLogger } from '../../common/logging';
 import { urlDeleted, Userstate, urlEnqueue } from './actions';
@@ -26,11 +34,21 @@ interface ChatCommandPayload {
 
 type CommmandFunction = (dispatch: Dispatch, args: string[], userstate?: Userstate) => void;
 
+export const voteskipCommand = (username?: string) => (dispatch: Dispatch, getState: AppMiddlewareAPI['getState']) => {
+  if (!username) return;
+  const enabled = selectSkipVotingEnabled(getState() as any);
+  if (!enabled) return;
+  dispatch(addSkipVote(username));
+  dispatch(checkSkipVotes());
+};
+
+
 const commands: Record<string, CommmandFunction> = {
   open: (dispatch) => dispatch(isOpenChanged(true)),
   close: (dispatch) => dispatch(isOpenChanged(false)),
   next: (dispatch) => dispatch(currentClipWatched()),
   skip: (dispatch) => dispatch(currentClipSkipped()),
+  voteskip: (dispatch, args, userstate) => dispatch(voteskipCommand(userstate?.username)),
   remove: (dispatch, [url]) => url && dispatch(urlDeleted(url)),
   removeidx: (dispatch, [idx]) => idx && dispatch(queueClipRemoveByIndex(idx)),
   add: (dispatch, args, userstate) => {
@@ -68,12 +86,42 @@ const commands: Record<string, CommmandFunction> = {
       dispatch(settingsChanged({ clipLimit: parsedLimit }));
     }
   },
+  replace: (dispatch, args, userstate) => {
+    const url = args && args[0];
+    if (!url) return;
+
+    const sender = userstate?.username;
+    const id = clipProvider.getIdFromUrl(url);
+    if (!id) return;
+
+    dispatch(clipStubReceived({ id, submitters: [sender || 'chat'], timestamp: new Date().toISOString() } as any));
+
+    (async () => {
+      const TIMEOUT_MS = 5000;
+      const fetchPromise = clipProvider.getClipById(id) as Promise<Clip | undefined>;
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const timeoutPromise = new Promise<undefined>((resolve) => {
+        timer = setTimeout(() => resolve(undefined), TIMEOUT_MS);
+      });
+
+      try {
+        const clip = (await Promise.race([fetchPromise, timeoutPromise])) as Clip | undefined;
+        if (timer) clearTimeout(timer);
+        if (clip) {
+          dispatch(currentClipForceReplaced(clip as any));
+        } else {
+          dispatch(clipDetailsFailed(id));
+        }
+      } catch (err) {
+        if (timer) clearTimeout(timer);
+        dispatch(clipDetailsFailed(id));
+      }
+    })();
+  },
 };
 
 export function processCommand(dispatch: Dispatch, { command, args, userstate }: ChatCommandPayload) {
-  if (!userstate.mod && !userstate.broadcaster) {
-    return;
-  }
+  if (command !== 'voteskip' && !userstate.mod && !userstate.broadcaster) return;
 
   logger.info(`Received '${command}' command`, args);
 

@@ -1,17 +1,24 @@
 import { useMantineColorScheme, Button } from '@mantine/core';
 import { PropsWithChildren } from 'react';
 
-function BrandButton({ children, icon, href }: PropsWithChildren<{ icon: JSX.Element; href: string }>) {
+interface BrandButtonProps {
+  icon: JSX.Element;
+  href: string;
+}
+
+const BrandButton = ({ children, icon, href }: PropsWithChildren<BrandButtonProps>) => {
   const { colorScheme } = useMantineColorScheme();
-  const isDark = colorScheme === 'dark';
+
+  const buttonColor = colorScheme === 'dark' ? 'gray' : 'dark';
 
   return (
     <Button
       component="a"
       href={href}
       target="_blank"
+      rel="noopener noreferrer"
       variant="subtle"
-      color={isDark ? 'gray' : 'dark'}
+      color={buttonColor}
       compact
       size="xs"
       leftIcon={icon}
@@ -28,6 +35,8 @@ function BrandButton({ children, icon, href }: PropsWithChildren<{ icon: JSX.Ele
       {children}
     </Button>
   );
-}
+};
+
+BrandButton.displayName = 'BrandButton';
 
 export default BrandButton;

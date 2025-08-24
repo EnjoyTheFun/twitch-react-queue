@@ -3,8 +3,9 @@ import { PropsWithChildren } from 'react';
 import AppHeader from './AppHeader';
 import useQueueStatusTitle from './QueueStatus';
 
-function AppLayout({ children, noNav = false }: PropsWithChildren<{ noNav?: boolean }>) {
+const AppLayout = ({ children, noNav = false }: PropsWithChildren<{ noNav?: boolean }>) => {
   useQueueStatusTitle();
+
   return (
     <AppShell
       padding={0}
@@ -28,6 +29,7 @@ function AppLayout({ children, noNav = false }: PropsWithChildren<{ noNav?: bool
       </Box>
     </AppShell>
   );
-}
+};
+AppLayout.displayName = 'AppLayout';
 
 export default AppLayout;

@@ -1,9 +1,14 @@
-import React from 'react';
+import { forwardRef } from 'react';
 import { NavLink as NavLinkBase, NavLinkProps } from 'react-router-dom';
 
-const NavLink = React.forwardRef<
-  HTMLAnchorElement,
-  Omit<NavLinkProps, 'className' | 'type' | 'style'> & { activeStyle?: NavLinkProps['style'] }
->(({ activeStyle, ...props }, ref) => <NavLinkBase ref={ref} {...props} style={activeStyle} />);
+interface CustomNavLinkProps extends Omit<NavLinkProps, 'className' | 'type' | 'style'> {
+  activeStyle?: NavLinkProps['style'];
+}
+
+const NavLink = forwardRef<HTMLAnchorElement, CustomNavLinkProps>(({ activeStyle, ...props }, ref) => (
+  <NavLinkBase ref={ref} {...props} style={activeStyle} />
+));
+
+NavLink.displayName = 'NavLink';
 
 export default NavLink;

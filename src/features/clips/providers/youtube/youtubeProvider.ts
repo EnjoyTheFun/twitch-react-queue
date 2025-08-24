@@ -13,17 +13,8 @@ class YoutubeProvider implements ClipProvider {
       return undefined;
     }
 
-    let id: string | undefined = undefined;
-    if (uri.hostname === 'youtu.be' || uri.pathname.includes('shorts')) {
-      const idStart = uri.pathname.lastIndexOf('/') + 1;
-      id = uri.pathname.slice(idStart).split('?')[0];
-    } else if (uri.hostname.endsWith('youtube.com')) {
-      id = uri.searchParams.get('v') ?? undefined;
-    }
-
-    if (!id) {
-      return undefined;
-    }
+    const basicId = youtubeApi.extractIdFromUrl(url);
+    if (!basicId) return undefined;
 
     const startTime = uri.searchParams.get('t') ?? undefined;
 
@@ -34,7 +25,7 @@ class YoutubeProvider implements ClipProvider {
       const seenUnits = chunks.filter((chunk) => UNITS.includes(chunk));
 
       if (chunks.length === 1) {
-        return `${id};${chunks[0]}`;
+        return `${basicId};${chunks[0]}`;
       } else {
         const normalizedStartTime = magnitudes.reduce((accum, magnitude, index) => {
           let conversionFactor = 0;
@@ -50,10 +41,10 @@ class YoutubeProvider implements ClipProvider {
           return accum + magnitude * conversionFactor;
         }, 0);
 
-        return `${id};${normalizedStartTime}`;
+        return `${basicId};${normalizedStartTime}`;
       }
     } else {
-      return id;
+      return basicId;
     }
   }
 

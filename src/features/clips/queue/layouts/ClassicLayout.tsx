@@ -1,4 +1,4 @@
-import React from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Container, Grid, Group, Stack, ScrollArea, Box } from '@mantine/core';
 import Player from '../Player';
 import PlayerButtons from '../PlayerButtons';
@@ -7,15 +7,15 @@ import Queue from '../Queue';
 import QueueControlPanel from '../QueueControlPanel';
 
 function ClassicLayout() {
-  const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const draggingRef = React.useRef(false);
-  const rectRef = React.useRef({ left: 0, width: 0 });
-  const [playerPercent, setPlayerPercent] = React.useState(79);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const draggingRef = useRef(false);
+  const rectRef = useRef({ left: 0, width: 0 });
+  const [playerPercent, setPlayerPercent] = useState(79);
 
   const MIN_PLAYER = 50;
   const MAX_PLAYER = 85;
 
-  React.useEffect(() => {
+  useEffect(() => {
     const pendingRef = { pct: playerPercent } as { pct: number };
     const rafId = { id: 0 } as { id: number };
     const flush = () => {

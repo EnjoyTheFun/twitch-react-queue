@@ -8,24 +8,57 @@ import {
   selectTotalQueueLength,
   submitterColorsToggled,
   selectColoredSubmitterNames,
+  selectSkipVotingEnabled,
+  skipVotingToggled,
 } from '../clipQueueSlice';
 import { selectShowTopSubmitters, toggleShowTopSubmitters } from '../../settings/settingsSlice';
 import QueueQuickMenu from './QueueQuickMenu';
 import TopSubmittersMarquee from './TopSubmittersMarquee';
-import { Palette, Crown } from 'tabler-icons-react';
+import { useModals } from '@mantine/modals';
+import ImportLinksModal from './ImportLinksModal';
+import { FileImport } from 'tabler-icons-react';
+import { Palette, PaletteOff, Crown, CrownOff, ThumbDown, ThumbDownOff } from 'tabler-icons-react';
 
 interface QueueControlPanelProps {
   className?: string;
 }
 
-function QueueControlPanel({ className }: QueueControlPanelProps) {
+const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
   const dispatch = useAppDispatch();
   const isOpen = useAppSelector(selectIsOpen);
   const showMarquee = useAppSelector(selectShowTopSubmitters);
   const colored = useAppSelector(selectColoredSubmitterNames);
+  const skipVotingEnabled = useAppSelector(selectSkipVotingEnabled);
   const clipLimit = useAppSelector(selectClipLimit);
   const totalClips = useAppSelector(selectTotalQueueLength);
   const clipsLeft = useAppSelector(selectQueueIds).length;
+  const modals = useModals();
+
+  const handleQueueToggle = (state: string) => {
+    dispatch(isOpenChanged(state === 'open'));
+  };
+
+  const handleImportModal = () => {
+    modals.openModal({
+      title: 'Import links',
+      children: <ImportLinksModal />,
+      size: 'lg'
+    });
+  };
+
+  const handleSkipVotingToggle = () => {
+    dispatch(skipVotingToggled());
+  };
+
+  const handleColorsToggle = () => {
+    dispatch(submitterColorsToggled());
+  };
+
+  const handleTopSubmittersToggle = () => {
+    dispatch(toggleShowTopSubmitters());
+  };
+
+  const queueText = `${clipsLeft} of ${totalClips}${clipLimit ? `/${clipLimit}` : ''} clips left`;
 
   return (
     <Stack spacing={0} className={className}>
@@ -41,32 +74,51 @@ function QueueControlPanel({ className }: QueueControlPanelProps) {
             { label: 'Closed', value: 'closed' },
             { label: 'Open', value: 'open' },
           ]}
-          onChange={(state) => dispatch(isOpenChanged(state === 'open'))}
+          onChange={handleQueueToggle}
         />
         <QueueQuickMenu />
       </Group>
       <Group position="apart" align="center" sx={{ width: '100%' }} mt={0}>
         <Text size="md" weight={700} sx={{ flex: 1, margin: 0, padding: 0 }}>
-          {clipsLeft} of {totalClips}
-          {clipLimit && `/${clipLimit}`} clips left
+          {queueText}
         </Text>
         <Group spacing={6} align="center" sx={{ alignItems: 'center', margin: 4 }}>
           <ActionIcon
             size="sm"
             variant="light"
-            onClick={() => dispatch(submitterColorsToggled())}
+            onClick={handleImportModal}
+            title="Import links"
+            aria-label="Import links"
+          >
+            <FileImport size={18} />
+          </ActionIcon>
+
+          <ActionIcon
+            size="sm"
+            variant="light"
+            onClick={handleSkipVotingToggle}
+            title={skipVotingEnabled ? 'Disable skip voting' : 'Enable skip voting'}
+            aria-label="Toggle skip voting"
+          >
+            {skipVotingEnabled ? <ThumbDown size={18} /> : <ThumbDownOff size={18} />}
+          </ActionIcon>
+
+          <ActionIcon
+            size="sm"
+            variant="light"
+            onClick={handleColorsToggle}
             title={colored ? 'Disable submitter colors' : 'Enable submitter colors'}
             aria-label="Toggle submitter colors"
           >
-            <Palette size={18} />
+            {colored ? <Palette size={18} /> : <PaletteOff size={18} />}
           </ActionIcon>
           <ActionIcon
             size="sm"
             variant="light"
-            onClick={() => dispatch(toggleShowTopSubmitters())}
+            onClick={handleTopSubmittersToggle}
             title={showMarquee ? 'Hide top submitters' : 'Show top submitters'}
           >
-            <Crown size={18} />
+            {showMarquee ? <Crown size={18} /> : <CrownOff size={18} />}
           </ActionIcon>
         </Group>
       </Group>
@@ -74,6 +126,6 @@ function QueueControlPanel({ className }: QueueControlPanelProps) {
       {showMarquee && <TopSubmittersMarquee count={3} />}
     </Stack>
   );
-}
+};
 
 export default QueueControlPanel;

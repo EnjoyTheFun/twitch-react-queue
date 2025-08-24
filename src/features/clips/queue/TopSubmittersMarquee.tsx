@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Box, ActionIcon, useMantineTheme } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '../../../app/hooks';
 import { selectTopNSubmitters, resetWatchedCounts } from '../clipQueueSlice';
@@ -8,12 +8,17 @@ interface TopSubmittersMarqueeProps {
   count?: number;
 }
 
-export default function TopSubmittersMarquee({ count = 3 }: TopSubmittersMarqueeProps) {
+const TopSubmittersMarquee = ({ count = 3 }: TopSubmittersMarqueeProps) => {
   const dispatch = useAppDispatch();
   const theme = useMantineTheme();
   const top = useAppSelector(selectTopNSubmitters(count));
   const colored = useAppSelector((s) => s.clipQueue.coloredSubmitterNames !== false);
-  const interleaved = useMemo(() => {
+
+  const handleReset = () => {
+    dispatch(resetWatchedCounts());
+  };
+
+  const interleaved = (() => {
     if (!top || top.length === 0) return null;
     const items: React.ReactNode[] = [];
     top.forEach((t, i) => {
@@ -32,7 +37,7 @@ export default function TopSubmittersMarquee({ count = 3 }: TopSubmittersMarquee
       );
     });
     return items;
-  }, [top, colored]);
+  })();
 
   if (!interleaved || interleaved.length === 0) return null;
 
@@ -55,10 +60,18 @@ export default function TopSubmittersMarquee({ count = 3 }: TopSubmittersMarquee
           </span>
         </Box>
 
-        <ActionIcon className="top-submitters-refresh" size="sm" variant="light" onClick={() => dispatch(resetWatchedCounts())} title="Reset top clippers">
+        <ActionIcon
+          className="top-submitters-refresh"
+          size="sm"
+          variant="light"
+          onClick={handleReset}
+          title="Reset top clippers"
+        >
           <Refresh size={14} />
         </ActionIcon>
       </Box>
     </Box>
   );
-}
+};
+
+export default TopSubmittersMarquee;

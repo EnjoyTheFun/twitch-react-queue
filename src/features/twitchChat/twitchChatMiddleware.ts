@@ -8,6 +8,7 @@ import { getUrlFromMessage } from '../../common/utils';
 import { showNotification } from '@mantine/notifications';
 import { Userstate, urlReceived, urlDeleted, userTimedOut } from './actions';
 import { processCommand } from './chatCommands';
+import { pruneOldMemory } from '../clips/clipQueueSlice';
 
 const logger = createLogger('Twitch Chat');
 
@@ -98,6 +99,7 @@ const createTwitchChatMiddleware = (): Middleware<{}, RootState> => {
           const { username } = action.payload;
           client = createClient(action.payload);
 
+          let pruneInterval: any | undefined;
           client.on('connected', () => {
             showNotification({
               id: 'twitch-chat',
@@ -108,6 +110,9 @@ const createTwitchChatMiddleware = (): Middleware<{}, RootState> => {
             });
             const channel = storeApi.getState().settings.channel ?? username;
             client?.join(channel.toLowerCase());
+            // run prune on startup and schedule daily (for people that leave their tabs open all the time)
+            storeApi.dispatch(pruneOldMemory());
+            pruneInterval = setInterval(() => storeApi.dispatch(pruneOldMemory()), 24 * 60 * 60 * 1000);
           });
           client.on('disconnected', () => {
             logger.warn('Disconnected.');
@@ -117,6 +122,10 @@ const createTwitchChatMiddleware = (): Middleware<{}, RootState> => {
               message: 'Disconnected from chat.',
               color: 'red',
             });
+            if (pruneInterval) {
+              clearInterval(pruneInterval);
+              pruneInterval = undefined;
+            }
           });
           client.on('message', handleMessage(storeApi));
           client.on('redeem', (channel, username, type, tags) => {
@@ -151,6 +160,9 @@ const createTwitchChatMiddleware = (): Middleware<{}, RootState> => {
           if (action.payload.channel && !client.getChannels().includes(action.payload.channel)) {
             client.getChannels().forEach((channel) => client?.part(channel));
             client.join(action.payload.channel);
+          }
+          if (action.payload.clipMemoryRetentionDays !== undefined) {
+            storeApi.dispatch(pruneOldMemory());
           }
         }
       }
