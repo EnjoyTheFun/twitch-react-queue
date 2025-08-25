@@ -28,26 +28,37 @@ function PlayerButtons({ className }: { className?: string }) {
           }} />
         </Box>
         {clipLimit && (
-          <Button size="xs" variant="default" rightIcon={<PlayerSkipForward />} onClick={() => {
-            dispatch(autoplayTimeoutHandleChanged({ set: false }));
-            dispatch(currentClipSkipped());
-          }} disabled={!currentClipId}>
+          <Button
+            size="xs"
+            variant="default"
+            rightIcon={<PlayerSkipForward />}
+            onClick={() => {
+              dispatch(autoplayTimeoutHandleChanged({ set: false }));
+              dispatch(currentClipSkipped());
+            }}
+            disabled={!currentClipId}>
             Skip
           </Button>
         )}
       </Group>
-      <Button size="xs"
-        leftIcon={<PlayerTrackPrev />} onClick={() => {
+      <Button
+        size="xs"
+        leftIcon={<PlayerTrackPrev />}
+        onClick={() => {
           dispatch(autoplayTimeoutHandleChanged({ set: false }));
           dispatch(previousClipWatched());
-        }} disabled={!hasPrevious}
+        }}
+        disabled={!hasPrevious}
       >
-        Previous
+        Prev
       </Button>
-      <Button size="xs" rightIcon={<PlayerTrackNext />} onClick={() => {
-        dispatch(autoplayTimeoutHandleChanged({ set: false }));
-        dispatch(currentClipWatched());
-      }} disabled={!currentClipId && !nextClipId}>
+      <Button size="xs"
+        rightIcon={<PlayerTrackNext />}
+        onClick={() => {
+          dispatch(autoplayTimeoutHandleChanged({ set: false }));
+          dispatch(currentClipWatched());
+        }}
+        disabled={!currentClipId && !nextClipId}>
         Next
       </Button>
     </Group>

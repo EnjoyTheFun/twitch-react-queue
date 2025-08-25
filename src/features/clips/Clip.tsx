@@ -25,7 +25,6 @@ const PLATFORM_PROVIDER_MAP: Record<string, string[]> = {
   Instagram: ['instagram'],
   Kick: ['kick-clip'],
   Streamable: ['streamable'],
-  SOOP: ['afreeca-clip'],
 };
 
 const platformToProviderKey = (platform?: PlatformType): string[] => {

@@ -17,7 +17,7 @@ function FeaturesSection() {
         <List.Item>
           <strong>Multi-provider media support</strong>
           <br />
-          Supports media from Twitch, Kick, SOOP, YouTube, Streamable, TikTok and X(Twitter).
+          Supports media from Twitch, Kick, YouTube, Streamable, TikTok and X(Twitter).
         </List.Item>
 
         <List.Item>

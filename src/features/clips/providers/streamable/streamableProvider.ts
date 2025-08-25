@@ -30,13 +30,18 @@ class StreamableProvider implements ClipProvider {
   async getClipById(id: string): Promise<Clip | undefined> {
     const clipInfo = await streamableApi.getClip(id);
 
+    if (!clipInfo) {
+      return undefined;
+    }
+
     return {
       id,
-      title: clipInfo?.title ?? id,
-      author: clipInfo?.author_name ?? 'Streamable',
-      thumbnailUrl: clipInfo?.thumbnail_url,
+      title: clipInfo.title,
+      author: clipInfo.author,
+      thumbnailUrl: clipInfo.thumbnailUrl,
       submitters: [],
       Platform: 'Streamable',
+      url: clipInfo.videoUrl,
     };
   }
 
@@ -49,7 +54,8 @@ class StreamableProvider implements ClipProvider {
   }
 
   async getAutoplayUrl(id: string): Promise<string | undefined> {
-    return this.getUrl(id);
+    const clip = await this.getClipById(id);
+    return clip?.url;
   }
 }
 

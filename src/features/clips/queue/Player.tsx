@@ -18,6 +18,7 @@ import TikTokPlayer from './players/TikTokPlayer';
 import TwitterImagePlayer from './players/TwitterImagePlayer';
 import InstagramEmbedWithTimeout from './players/InstagramEmbed';
 import XEmbedWithTimeout from './players/XEmbed';
+import StreamablePlayer from './players/StreamablePlayer';
 
 interface PlayerProps {
   className?: string;
@@ -43,25 +44,40 @@ const getPlayerComponent = (
 
   switch (Platform) {
     case 'YouTube':
-    case 'Twitch':
-    case 'Afreeca':
+    case 'Twitch': return autoplayEnabled ? (
+      <VideoPlayer
+        key={`${id}-${videoSrc}-${autoplayEnabled}`}
+        src={videoSrc}
+        onEnded={handleEnded}
+      />
+    ) : (
+      <iframe
+        key={`${id}-${autoplayEnabled}`}
+        src={clipProvider.getEmbedUrl(id) || embedUrl}
+        title={title}
+        style={{ height: '100%', width: '100%' }}
+        frameBorder="0"
+        allow="autoplay"
+        allowFullScreen
+      />)
     case 'Streamable':
       return autoplayEnabled ? (
-        <VideoPlayer
-          key={`${id}-${videoSrc}-${autoplayEnabled}`}
-          src={videoSrc}
+        <StreamablePlayer
+          key={`${id}-${autoplayEnabled}`}
+          src={embedUrl}
+          title={title || 'Streamable Video'}
+          autoplayEnabled={autoplayEnabled && !!nextClipId}
           onEnded={handleEnded}
         />
-      ) : (
-        <iframe
-          key={`${id}-${autoplayEnabled}`}
-          src={clipProvider.getEmbedUrl(id) || embedUrl}
-          title={title}
-          style={{ height: '100%', width: '100%' }}
-          frameBorder="0"
-          allow="autoplay"
-          allowFullScreen
-        />);
+      ) : (<iframe
+        key={`${id}-${autoplayEnabled}`}
+        src={clipProvider.getEmbedUrl(id) + "?autoplay=1&loop=0" || embedUrl + "?autoplay=1&loop=0"}
+        title={title}
+        style={{ height: '100%', width: '100%' }}
+        frameBorder="0"
+        allow="autoplay"
+        allowFullScreen
+      />);
     case 'Kick':
       return <VideoPlayer key={`${currentClip.id}-${videoSrc}-${autoplayEnabled}`} src={url} onEnded={handleEnded} />;
     case 'Instagram':

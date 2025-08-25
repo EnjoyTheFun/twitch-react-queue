@@ -21,7 +21,11 @@ class TwitterProvider implements ClipProvider {
   }
 
   async getClipById(id: string): Promise<Clip | undefined> {
-    return await getClipFromTweet(id);
+    try {
+      return await getClipFromTweet(id);
+    } catch (error) {
+      return undefined;
+    }
   }
 
   getUrl(id: string): string | undefined {
@@ -33,10 +37,15 @@ class TwitterProvider implements ClipProvider {
   }
 
   async getAutoplayUrl(id: string): Promise<string | undefined> {
-    const directUrl = await getDirectMediaUrl(id);
-    return directUrl ?? (await this.getClipById(id))?.url;
+    try {
+      const directUrl = await getDirectMediaUrl(id);
+      return directUrl ?? (await this.getClipById(id))?.url;
+    } catch (error) {
+      return undefined;
+    }
   }
 }
 
 const twitterProvider = new TwitterProvider();
+
 export default twitterProvider;

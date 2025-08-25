@@ -89,7 +89,6 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
                   { key: 'kick-clip', label: 'Kick Clips' },
                   { key: 'youtube', label: 'YouTube' },
                   { key: 'streamable', label: 'Streamable' },
-                  { key: 'afreeca-clip', label: 'SOOP (Experimental)' },
                   { key: 'tiktok', label: 'TikToks' },
                   { key: 'twitter', label: 'X / Twitter (Third-party API)' },
                   { key: 'instagram', label: 'Instagram (Experimental)' },

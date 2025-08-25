@@ -1,6 +1,5 @@
 import { createLogger } from '../../../common/logging';
 import { Clip } from '../clipQueueSlice';
-import afreecaClipProvider from './afreecaClip/afreecaClipProvider';
 import streamableProvider from './streamable/streamableProvider';
 import twitchClipProvider from './twitchClip/twitchClipProvider';
 import twitchVodProvider from './twitchVod/twitchVodProvider';
@@ -27,7 +26,6 @@ class CombinedClipProvider implements ClipProvider {
     [twitchVodProvider.name]: twitchVodProvider,
     [youtubeProvider.name]: youtubeProvider,
     [streamableProvider.name]: streamableProvider,
-    [afreecaClipProvider.name]: afreecaClipProvider,
     [kickClipProvider.name]: kickClipProvider,
     [tiktokProvider.name]: tiktokProvider,
     [twitterProvider.name]: twitterProvider,

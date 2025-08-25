@@ -11,7 +11,6 @@ Twitch React Queue is a custom build of [twitch-clip-queue](https://github.com/j
 - Multi-platform support
   - Twitch clips & VODs
   - YouTube videos & shorts
-  - Afreeca clips
   - Kick clips
   - Streamable clips
   - TikTok videos & photo reels
