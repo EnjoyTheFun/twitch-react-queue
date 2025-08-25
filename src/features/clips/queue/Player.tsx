@@ -33,7 +33,7 @@ const getPlayerComponent = (
 ) => {
   if (!currentClip) return null;
 
-  const { Platform, id, title, url } = currentClip;
+  const { Platform, id, title } = currentClip;
   if (!id) return null;
   const embedUrl = videoSrc || clipProvider.getEmbedUrl(id) || "";
 
@@ -79,7 +79,7 @@ const getPlayerComponent = (
         allowFullScreen
       />);
     case 'Kick':
-      return <VideoPlayer key={`${currentClip.id}-${videoSrc}-${autoplayEnabled}`} src={url} onEnded={handleEnded} />;
+      return <VideoPlayer key={`${currentClip.id}-${videoSrc}-${autoplayEnabled}`} src={embedUrl} onEnded={handleEnded} />;
     case 'Instagram':
       return (
         <InstagramEmbedWithTimeout

@@ -16,7 +16,6 @@ interface VideoPlayerProps {
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const playerRef = useRef<VideoJSPlayer | null>(null);
-  const disposeTimeoutRef = useRef<number | null>(null);
   const dispatch = useDispatch();
   const volume = useSelector((state: RootState) => state.settings.volume);
 
@@ -66,37 +65,13 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
     }
 
     return () => {
-      if (disposeTimeoutRef.current) {
-        clearTimeout(disposeTimeoutRef.current);
-        disposeTimeoutRef.current = null;
-      }
-
       if (playerRef.current && !playerRef.current.isDisposed()) {
         try {
-          try {
-            playerRef.current.pause();
-          } catch (err) {
-            // ignore
-          }
-
-          disposeTimeoutRef.current = window.setTimeout(() => {
-            try {
-              playerRef.current && !playerRef.current.isDisposed() && playerRef.current.dispose();
-            } catch (e) {
-              console.warn('Error during Video.js dispose:', e);
-            }
-            playerRef.current = null;
-            disposeTimeoutRef.current = null;
-          }, 50) as unknown as number;
+          playerRef.current.dispose();
         } catch (e) {
-          console.warn('Error during Video.js dispose scheduling:', e);
-          try {
-            playerRef.current.dispose();
-          } catch (err) {
-            // ignore
-          }
-          playerRef.current = null;
+          console.warn('Error during Video.js dispose:', e);
         }
+        playerRef.current = null;
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -4,7 +4,6 @@ import type { ClipProvider } from '../providers';
 
 class KickClipProvider implements ClipProvider {
   name = 'kick-clip';
-  private clipCache: Map<string, string> = new Map();
 
   getIdFromUrl(url: string): string | undefined {
     try {
@@ -12,24 +11,17 @@ class KickClipProvider implements ClipProvider {
       if (uri.hostname === 'kick.com' || uri.hostname === 'www.kick.com') {
         const id = uri.searchParams.get('clip');
         if (id) {
-          try {
-            this.clipCache.set(id, url);
-          } catch {
-            // ignore
-          }
           return id;
         }
         if (uri.pathname.includes('/clips/')) {
-          const idStart = uri.pathname.lastIndexOf('/');
-          const extracted = uri.pathname.slice(idStart).split('?')[0]?.slice(1);
-          if (extracted) {
-            try {
-              this.clipCache.set(extracted, url);
-            } catch {
-              // ignore
+          const pathParts = uri.pathname.split('/').filter(Boolean);
+          if (pathParts.length >= 3 && pathParts[1] === 'clips') {
+            const channelName = pathParts[0];
+            const clipId = pathParts[2].split('?')[0];
+            if (channelName && clipId) {
+              return `${channelName}|${clipId}`;
             }
           }
-          return extracted;
         }
       }
       return undefined;
@@ -41,20 +33,12 @@ class KickClipProvider implements ClipProvider {
   async getClipById(id: string): Promise<Clip | undefined> {
     if (!id) return undefined;
 
-    const clipInfo = await kickApi.getClip(id);
+    const actualClipId = id.includes('|') ? id.split('|')[1] : id;
+    const clipInfo = await kickApi.getClip(actualClipId);
     if (!clipInfo || !clipInfo.video_url) return undefined;
 
-
-    if (!this.clipCache.has(id) && clipInfo.video_url) {
-      try {
-        this.clipCache.set(id, clipInfo.video_url);
-      } catch {
-        // ignore cache failures
-      }
-    }
-
     return {
-      id: clipInfo.id,
+      id,
       title: clipInfo.title,
       author: clipInfo.channel.username,
       category: clipInfo.category.name,
@@ -67,14 +51,22 @@ class KickClipProvider implements ClipProvider {
   }
 
   getUrl(id: string): string | undefined {
-    return this.clipCache.get(id);
+    if (id.includes('|')) {
+      const [channelName, clipId] = id.split('|');
+      if (channelName && clipId) {
+        return `https://kick.com/${channelName}/clips/${clipId}`;
+      }
+    }
+    return undefined;
   }
 
   getEmbedUrl(id: string): string | undefined {
     return this.getUrl(id);
   }
+
   async getAutoplayUrl(id: string): Promise<string | undefined> {
-    return await kickApi.getDirectUrl(id);
+    const actualClipId = id.includes('|') ? id.split('|')[1] : id;
+    return await kickApi.getDirectUrl(actualClipId);
   }
 }
 
