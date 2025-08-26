@@ -35,4 +35,4 @@ Some browser tracker/privacy extensions (for example, Privacy Badger) may block 
 
 Make sure you've enabled these providers in the app settings first!
 
-Tested and works correctly on Firefox, Chrome and Brave with default tracking protection (no tracking extensions)!
+Tested and works correctly on Firefox, Chrome and Brave with default tracking protection (no advanced tracking extensions)!

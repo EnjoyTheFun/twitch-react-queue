@@ -501,7 +501,9 @@ export const selectTopSubmitter = createSelector([selectWatchedCounts], (counts)
 
 export const selectTopNSubmitters = (n: number) =>
   createSelector([selectWatchedCounts], (counts) => {
-    const arr = Object.entries(counts || {}).map(([username, count]) => ({ username, count }));
+    const arr = Object.entries(counts || {})
+      .filter(([username]) => username !== 'import*')
+      .map(([username, count]) => ({ username, count }));
     arr.sort((a, b) => b.count - a.count);
     return arr.slice(0, n);
   });
