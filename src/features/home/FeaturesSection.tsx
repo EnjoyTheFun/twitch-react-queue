@@ -95,7 +95,7 @@ function FeaturesSection() {
               <Code>!q ht &lt;index&gt;</Code> - bump the clip at position <Code>index</Code> to the top and highlight it
             </List.Item>
             <List.Item>
-              <Code>!q providers &lt;list&gt;</Code> - set enabled clip providers to <Code>[providers]</Code>
+              <Code>!q providers [&lt;list&gt;|all|none]</Code> - set enabled clip providers to <Code>[providers]</Code> or all/none
             </List.Item>
             <List.Item>
               <Code>!q skip</Code> - immediate skip of the current clip

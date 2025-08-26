@@ -118,6 +118,43 @@ const commands: Record<string, CommmandFunction> = {
       }
     })();
   },
+  providers: (dispatch, args) => {
+    if (!args || args.length === 0) return;
+
+    const validProviders = [
+      'twitch-clip',
+      'twitch-vod',
+      'kick-clip',
+      'youtube',
+      'streamable',
+      'tiktok',
+      'twitter',
+      'instagram'
+    ];
+
+    const providersInput = args.join(' ').toLowerCase();
+
+    if (providersInput.includes('all')) {
+      dispatch(settingsChanged({ enabledProviders: validProviders }));
+      return;
+    }
+
+    if (providersInput.includes('none')) {
+      dispatch(settingsChanged({ enabledProviders: [] }));
+      return;
+    }
+
+    const requestedProviders = providersInput
+      .split(/[,\s]+/)
+      .map(p => p.trim())
+      .filter(p => p.length > 0);
+
+    const enabledProviders = requestedProviders.filter(p => validProviders.includes(p));
+
+    if (enabledProviders.length > 0) {
+      dispatch(settingsChanged({ enabledProviders }));
+    }
+  },
 };
 
 export function processCommand(dispatch: Dispatch, { command, args, userstate }: ChatCommandPayload) {
