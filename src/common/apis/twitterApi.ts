@@ -15,7 +15,7 @@ async function fetchTweetData(id: string): Promise<TweetApiResponse | undefined>
 export async function getClipFromTweet(id: string): Promise<TweetClip | undefined> {
   const tweetUrl = `https://twitter.com/i/web/status/${id}`;
   const data = await fetchTweetData(id);
-  if (!data) return undefined;
+  if (!data || !data.user_name) return undefined;
 
   const thumbnailUrl =
     data.combinedMediaUrl || data.media_extended?.[0]?.thumbnail_url || data.qrt?.combinedMediaUrl || data.qrt?.media_extended?.[0]?.thumbnail_url || data.user_profile_image_url || '';
@@ -38,7 +38,7 @@ export async function getClipFromTweet(id: string): Promise<TweetClip | undefine
 
 export async function getDirectMediaUrl(id: string): Promise<string | undefined> {
   const data = await fetchTweetData(id);
-  if (!data) return undefined;
+  if (!data || !data.user_name) return undefined;
 
   const hasMultipleVideos = (mediaURLs: string[] | undefined) => (mediaURLs ?? []).filter((url) => url.endsWith('.mp4')).length > 1;
 

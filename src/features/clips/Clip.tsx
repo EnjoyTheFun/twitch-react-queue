@@ -1,5 +1,5 @@
 import { ActionIcon, AspectRatio, Image, Box, Group, Skeleton, Stack, Text, useMantineTheme } from '@mantine/core';
-import { MouseEventHandler } from 'react';
+import { MouseEventHandler, useEffect, useRef } from 'react';
 import { Trash } from 'tabler-icons-react';
 import { useAppSelector } from '../../app/hooks';
 import { selectClipById, selectTopNSubmitters, selectHighlightedClipId } from './clipQueueSlice';
@@ -38,10 +38,27 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
 
   const highlightedClipId = useAppSelector(selectHighlightedClipId);
   const theme = useMantineTheme();
+  const clipRef = useRef<HTMLDivElement>(null);
   const chatUser = useAppSelector((s) => (submitters?.[0] ? s.chatUsers[submitters[0].toLowerCase()] : undefined));
   const blurredProviders = useAppSelector((s) => s.settings.blurredProviders || []);
   const topN = useAppSelector(selectTopNSubmitters(3));
   const colored = useAppSelector((s) => s.clipQueue.coloredSubmitterNames !== false);
+
+  const isHighlighted = highlightedClipId === clipId;
+
+  useEffect(() => {
+    if (isHighlighted && clipRef.current) {
+      const timeoutId = setTimeout(() => {
+        clipRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest'
+        });
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isHighlighted]);
 
   const displayAuthor = (() => {
     if (!author) return '';
@@ -70,8 +87,6 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
 
   const providerKeys = platformToProviderKey(platform);
   const shouldBlur = providerKeys.some((k) => blurredProviders.includes(k));
-
-  const isHighlighted = highlightedClipId === clipId;
 
   const boxSx = (theme: any) => ({
     position: 'relative' as const,
@@ -145,7 +160,7 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
   if (!clip) return null;
 
   return (
-    <Box sx={boxSx}>
+    <Box ref={clipRef} sx={boxSx}>
       {queueIndex && (
         <Box
           sx={{

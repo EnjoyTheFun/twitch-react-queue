@@ -86,19 +86,28 @@ function FeaturesSection() {
               <Code>!q limit &lt;number&gt;</Code> - set clip limit to <Code>number</Code>
             </List.Item>
             <List.Item>
-              <Code>!q remove &lt;url&gt;</Code> - remove a specific clip by <Code>URL</Code>
+              <Code>!q remove &lt;URL&gt;</Code> - remove a specific clip by <Code>URL</Code>
             </List.Item>
             <List.Item>
               <Code>!q removeidx &lt;index&gt;</Code> - remove clip at queue position <Code>index</Code>
             </List.Item>
             <List.Item>
-              <Code>!q ht &lt;index&gt;</Code> - bump the clip at position <Code>index</Code> to the top and highlight it
+              <Code>!q bump &lt;index&gt;</Code> - bump the clip at position <Code>index</Code> to the top and highlight it
+            </List.Item>
+            <List.Item>
+              <Code>!q ht &lt;index&gt;</Code> - highlight the clip at position <Code>index</Code>
             </List.Item>
             <List.Item>
               <Code>!q providers [&lt;list&gt;|all|none]</Code> - set enabled clip providers to <Code>[providers]</Code> or all/none
             </List.Item>
             <List.Item>
               <Code>!q skip</Code> - immediate skip of the current clip
+            </List.Item>
+            <List.Item>
+              <Code>!q replace &lt;URL&gt;</Code> - replace the current clip with a new clip with <Code>URL</Code>
+            </List.Item>
+            <List.Item>
+              <Code>!q add &lt;URL&gt;</Code> - add a new clip to the queue with <Code>URL</Code> (mod only even if queue is closed)
             </List.Item>
             <List.Item>
               <Code>!q voteskip</Code> - (public) vote to skip

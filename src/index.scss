@@ -75,7 +75,7 @@ html {
 .chip-anim-0, .top-submitter {
   background: linear-gradient(90deg, #ff8a00, #e52e71, #7b61ff);
   background-size: 200% 100%;
-  animation: gradientShift 3s linear infinite;
+  // animation: gradientShift 3s linear infinite;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -83,7 +83,7 @@ html {
 .chip-anim-1 {
   background: linear-gradient(90deg, #7b61ff, #00c6ff, #e84bee);
   background-size: 200% 100%;
-  animation: gradientShift 3s linear infinite;
+  // animation: gradientShift 3s linear infinite;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -91,7 +91,7 @@ html {
 .chip-anim-2 {
   background: linear-gradient(90deg, #00b894, #2ecc71, #fdd41d);
   background-size: 200% 100%;
-  animation: gradientShift 3s linear infinite;
+  // animation: gradientShift 3s linear infinite;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

@@ -7,14 +7,15 @@ import {
   memoryPurged,
   queueCleared,
   queueClipRemoveByIndex,
-  bumpClipToTop,
-  highlightClipFrame,
+  highlightClipByIndex,
+  bumpClipByIndex,
   addSkipVote,
   checkSkipVotes,
   selectSkipVotingEnabled,
   clipStubReceived,
   clipDetailsFailed,
   currentClipForceReplaced,
+  setProviders,
 } from '../clips/clipQueueSlice';
 import clipProvider from '../clips/providers/providers';
 import type { Clip } from '../clips/clipQueueSlice';
@@ -42,7 +43,6 @@ export const voteskipCommand = (username?: string) => (dispatch: Dispatch, getSt
   dispatch(checkSkipVotes());
 };
 
-
 const commands: Record<string, CommmandFunction> = {
   open: (dispatch) => dispatch(isOpenChanged(true)),
   close: (dispatch) => dispatch(isOpenChanged(false)),
@@ -56,10 +56,14 @@ const commands: Record<string, CommmandFunction> = {
     if (!url) return;
     dispatch(urlEnqueue({ url, userstate: userstate as Userstate }));
   },
+  bump: (dispatch, [idxStr]) => {
+    if (idxStr) {
+      dispatch(bumpClipByIndex(idxStr));
+    }
+  },
   ht: (dispatch, [idxStr]) => {
     if (idxStr) {
-      dispatch(bumpClipToTop(idxStr));
-      dispatch(highlightClipFrame());
+      dispatch(highlightClipByIndex(idxStr));
     }
   },
   clear: (dispatch) => dispatch(queueCleared()),
@@ -90,11 +94,12 @@ const commands: Record<string, CommmandFunction> = {
     const url = args && args[0];
     if (!url) return;
 
-    const sender = userstate?.username;
+    const sender = userstate?.username || 'mods';
+
     const id = clipProvider.getIdFromUrl(url);
     if (!id) return;
 
-    dispatch(clipStubReceived({ id, submitters: [sender || 'chat'], timestamp: new Date().toISOString() } as any));
+    dispatch(clipStubReceived({ id, submitters: [sender], timestamp: new Date().toISOString() } as any));
 
     (async () => {
       const TIMEOUT_MS = 5000;
@@ -108,6 +113,7 @@ const commands: Record<string, CommmandFunction> = {
         const clip = (await Promise.race([fetchPromise, timeoutPromise])) as Clip | undefined;
         if (timer) clearTimeout(timer);
         if (clip) {
+          clip.submitters = [sender];
           dispatch(currentClipForceReplaced(clip as any));
         } else {
           dispatch(clipDetailsFailed(id));
@@ -120,40 +126,7 @@ const commands: Record<string, CommmandFunction> = {
   },
   providers: (dispatch, args) => {
     if (!args || args.length === 0) return;
-
-    const validProviders = [
-      'twitch-clip',
-      'twitch-vod',
-      'kick-clip',
-      'youtube',
-      'streamable',
-      'tiktok',
-      'twitter',
-      'instagram'
-    ];
-
-    const providersInput = args.join(' ').toLowerCase();
-
-    if (providersInput.includes('all')) {
-      dispatch(settingsChanged({ enabledProviders: validProviders }));
-      return;
-    }
-
-    if (providersInput.includes('none')) {
-      dispatch(settingsChanged({ enabledProviders: [] }));
-      return;
-    }
-
-    const requestedProviders = providersInput
-      .split(/[,\s]+/)
-      .map(p => p.trim())
-      .filter(p => p.length > 0);
-
-    const enabledProviders = requestedProviders.filter(p => validProviders.includes(p));
-
-    if (enabledProviders.length > 0) {
-      dispatch(settingsChanged({ enabledProviders }));
-    }
+    dispatch(setProviders(args));
   },
 };
 

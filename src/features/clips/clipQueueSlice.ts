@@ -396,6 +396,44 @@ const clipQueueSlice = createSlice({
     clearHighlight: (state) => {
       state.highlightedClipId = null;
     },
+    providersChanged: (state, { payload }: PayloadAction<string[]>) => {
+      state.providers = payload;
+    },
+    providersSet: (state, { payload }: PayloadAction<string[]>) => {
+      const validProviders = [
+        'twitch-clip',
+        'twitch-vod',
+        'kick-clip',
+        'youtube',
+        'streamable',
+        'tiktok',
+        'twitter',
+        'instagram'
+      ];
+
+      const providersInput = payload.join(' ').toLowerCase();
+
+      if (providersInput.includes('all')) {
+        state.providers = validProviders;
+        return;
+      }
+
+      if (providersInput.includes('none')) {
+        state.providers = [];
+        return;
+      }
+
+      const requestedProviders = providersInput
+        .split(/[,\s]+/)
+        .map(p => p.trim())
+        .filter(p => p.length > 0);
+
+      const enabledProviders = requestedProviders.filter(p => validProviders.includes(p));
+
+      if (enabledProviders.length > 0) {
+        state.providers = enabledProviders;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(userTimedOut, (state, { payload }) => {
@@ -520,6 +558,36 @@ export const highlightClipFrame = createAsyncThunk<void, void, { state: RootStat
   }
 );
 
+export const highlightClipByIndex = createAsyncThunk<void, string, { state: RootState }>(
+  'clipQueue/highlightClipByIndex',
+  async (idxStr, { dispatch, getState }) => {
+    const idx = Number.parseInt(idxStr, 10);
+    if (!isNaN(idx) && idx > 0) {
+      const queueIds = selectQueueIds(getState());
+      const clipId = queueIds[idx - 1];
+      if (clipId) {
+        dispatch(highlightClip(clipId));
+        setTimeout(() => dispatch(clearHighlight()), 3000);
+      }
+    }
+  }
+);
+
+export const bumpClipByIndex = createAsyncThunk<void, string, { state: RootState }>(
+  'clipQueue/bumpClipByIndex',
+  async (idxStr, { dispatch }) => {
+    dispatch(bumpClipToTop(idxStr));
+    dispatch(highlightClipFrame());
+  }
+);
+
+export const setProviders = createAsyncThunk<void, string[], { state: RootState }>(
+  'clipQueue/setProviders',
+  async (args, { dispatch }) => {
+    dispatch(providersSet(args));
+  }
+);
+
 export const checkSkipVotes = createAsyncThunk<void, void, { state: RootState }>(
   'clipQueue/checkSkipVotes',
   async (_, { dispatch, getState }) => {
@@ -586,7 +654,9 @@ export const {
   submitterColorsToggled,
   addSkipVote,
   clearSkipVotes,
-  skipVotingToggled
+  skipVotingToggled,
+  providersChanged,
+  providersSet,
 } = clipQueueSlice.actions;
 
 const clipQueueReducer = persistReducer(
