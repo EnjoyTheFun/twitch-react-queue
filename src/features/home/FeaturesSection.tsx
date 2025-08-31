@@ -1,5 +1,5 @@
 import { Title, List, ThemeIcon, Code, Box, Spoiler, Text } from '@mantine/core';
-import { CircleCheck } from 'tabler-icons-react';
+import { IconCircleCheck } from '@tabler/icons-react';
 
 function FeaturesSection() {
   return (
@@ -10,7 +10,7 @@ function FeaturesSection() {
         spacing="sm"
         icon={
           <ThemeIcon size={26} radius="xl">
-            <CircleCheck size={18} />
+            <IconCircleCheck size={18} />
           </ThemeIcon>
         }
       >

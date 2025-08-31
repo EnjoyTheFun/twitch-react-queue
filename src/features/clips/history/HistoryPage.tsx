@@ -1,15 +1,19 @@
 import { Anchor, Center, Container, Grid, Pagination, Text } from '@mantine/core';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { memoryClipRemoved, selectClipHistoryIdsPage, selectClipById } from '../clipQueueSlice';
+import { memoryClipRemoved, selectHistoryIds, makeSelectHistoryPageClips } from '../clipQueueSlice';
 import Clip from '../Clip';
 import clipProvider from '../providers/providers';
 
 function MemoryPage() {
   const dispatch = useAppDispatch();
   const [activePage, setPage] = useState(1);
-  const { clips, totalPages } = useAppSelector((state) => selectClipHistoryIdsPage(state, activePage, 24));
-  const clipObjects = useAppSelector((state) => clips.map((id) => selectClipById(id)(state)).filter(Boolean));
+  const selectHistoryPageClips = useMemo(() => makeSelectHistoryPageClips(), []);
+  
+  const clipObjects = useAppSelector((state) => selectHistoryPageClips(state, activePage, 24));
+  
+  const totalClips = useAppSelector(selectHistoryIds).length;
+  const totalPages = Math.ceil(totalClips / 24);
   return (
     <Container size="xl" py="md">
       {totalPages > 0 ? (

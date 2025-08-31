@@ -3,12 +3,15 @@
 
 <head>
   <meta charset="utf-8" />
-  <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png">
-  <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
-  <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg"/>
-  <link rel="preload" as="image" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Enqueue and play media from Twitch Chat with multi-platform support" />
+  <meta name="keywords" content="twitch, clips, queue, react, streaming" />
+  <meta name="author" content="EnjoyTheFun" />
+  <meta property="og:title" content="React Queue - Twitch Media Manager" />
+  <meta property="og:description" content="Enqueue and play media from Twitch Chat" />
+  <meta property="og:type" content="website" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="alternate icon" href="/favicon.ico" />
   <title>React Queue</title>
 
   <!-- Start Single Page Apps for GitHub Pages -->
@@ -36,14 +39,24 @@
   </script>
   <!-- End Single Page Apps for GitHub Pages -->
 
-  <% if (process.env.REACT_APP_UMAMI_SRC && process.env.REACT_APP_UMAMI_WEBSITE_ID) { %>
-    <script async defer data-website-id="%REACT_APP_UMAMI_WEBSITE_ID%" src="%REACT_APP_UMAMI_SRC%"></script>
-    <% } %>
+  <!-- Umami Analytics -->
+  <script>
+    if ('%VITE_UMAMI_SRC%' && '%VITE_UMAMI_WEBSITE_ID%') {
+      var script = document.createElement('script');
+      script.async = true;
+      script.defer = true;
+      script.setAttribute('data-website-id', '%VITE_UMAMI_WEBSITE_ID%');
+      script.src = '%VITE_UMAMI_SRC%';
+      document.head.appendChild(script);
+    }
+  </script>
+
 </head>
 
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
+  <script type="module" src="/src/index.tsx"></script>
 </body>
 
 </html>

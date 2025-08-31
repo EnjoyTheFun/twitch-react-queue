@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ActionIcon, useMantineTheme } from '@mantine/core';
 import { IconInfoCircle } from '@tabler/icons-react';
 import PlayerTitle from './PlayerTitle';
@@ -31,7 +31,7 @@ export default function TitleHover() {
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, right: 0 }} onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
       <div style={buttonStyle}>
-        <ActionIcon variant="filled" size="md" title="Show info" style={{ opacity: 0.3, transition: 'opacity 120ms' }} onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')} onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.3')}>
+        <ActionIcon variant="filled" size="md" title="Show info" style={{ opacity: 0.3, transition: 'opacity 120ms' }} onMouseEnter={(e: React.MouseEvent) => ((e.currentTarget as HTMLElement).style.opacity = '1')} onMouseLeave={(e: React.MouseEvent) => ((e.currentTarget as HTMLElement).style.opacity = '0.3')}>
           <IconInfoCircle />
         </ActionIcon>
       </div>

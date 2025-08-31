@@ -1,5 +1,5 @@
 import { Group, Button, Switch, Box } from '@mantine/core';
-import { PlayerSkipForward, PlayerTrackNext, PlayerTrackPrev } from 'tabler-icons-react';
+import { IconPlayerSkipForward, IconPlayerTrackNext, IconPlayerTrackPrev } from '@tabler/icons-react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import {
   autoplayChanged,
@@ -31,7 +31,7 @@ function PlayerButtons({ className }: { className?: string }) {
           <Button
             size="xs"
             variant="default"
-            rightIcon={<PlayerSkipForward />}
+            rightIcon={<IconPlayerSkipForward />}
             onClick={() => {
               dispatch(autoplayTimeoutHandleChanged({ set: false }));
               dispatch(currentClipSkipped());
@@ -43,7 +43,7 @@ function PlayerButtons({ className }: { className?: string }) {
       </Group>
       <Button
         size="xs"
-        leftIcon={<PlayerTrackPrev />}
+        leftIcon={<IconPlayerTrackPrev />}
         onClick={() => {
           dispatch(autoplayTimeoutHandleChanged({ set: false }));
           dispatch(previousClipWatched());
@@ -53,7 +53,7 @@ function PlayerButtons({ className }: { className?: string }) {
         Prev
       </Button>
       <Button size="xs"
-        rightIcon={<PlayerTrackNext />}
+        rightIcon={<IconPlayerTrackNext />}
         onClick={() => {
           dispatch(autoplayTimeoutHandleChanged({ set: false }));
           dispatch(currentClipWatched());

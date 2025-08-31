@@ -12,17 +12,15 @@ import AppMenu from './AppMenu';
 import ImportLinksButton from '../features/clips/queue/ImportLinksButton';
 
 const TitleIcon = () => {
-  const favicon = `${process.env.PUBLIC_URL || ''}/favicon.svg`;
+  const favicon = `${import.meta.env.BASE_URL || ''}favicon.svg`;
 
   return (
-    <ThemeIcon size="xl" variant="gradient" gradient={{ from: 'violet', to: 'indigo' }}>
-      <img src={favicon} alt="React Queue" style={{ width: 32, height: 32 }} />
-    </ThemeIcon>
+    <img src={favicon} alt="React Queue" style={{ width: 32, height: 32 }} />
   );
 };
 
 const TitleText = () => (
-  <Group direction="column" spacing={0}>
+  <Group direction="column" spacing={0} className="app-title-section">
     <Text size="xl" weight={800}>
       React Queue
     </Text>
@@ -66,7 +64,7 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
     <Header height={collapsed ? 0 : 60} px="lg" sx={{ overflow: 'visible', transition: 'height 160ms' }}>
       {!collapsed ? (
         <Group position="apart" align="center" sx={{ height: '100%', flexWrap: 'nowrap' }}>
-          <Group align="center" sx={{ minWidth: 0, gap: '0.5rem', flexWrap: 'nowrap' }}>
+          <Group align="center" sx={{ minWidth: 0, gap: '1rem', flexWrap: 'nowrap' }}>
             <TitleIcon />
             <TitleText />
             <Space />
@@ -77,9 +75,7 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
                   display: 'flex',
                   gap: 0,
                   flexWrap: 'nowrap',
-                  overflowX: 'auto',
-                  overflowY: 'hidden',
-                  WebkitOverflowScrolling: 'touch',
+                  overflow: 'visible',
                   alignItems: 'center',
                 }}
               >
@@ -101,7 +97,9 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
           >
             <Group spacing="xs" align="center" sx={{ flexWrap: 'nowrap', gap: '0.5rem', minWidth: 0 }}>
               <ImportLinksButton />
-              <AppMenu />
+              <div className="app-menu-container">
+                <AppMenu />
+              </div>
             </Group>
           </IfAuthenticated>
         </Group>

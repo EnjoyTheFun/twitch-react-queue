@@ -1,8 +1,8 @@
 import { useMantineColorScheme, Button } from '@mantine/core';
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, ReactElement } from 'react';
 
 interface BrandButtonProps {
-  icon: JSX.Element;
+  icon: ReactElement;
   href: string;
 }
 

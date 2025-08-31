@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ActionIcon } from '@mantine/core';
 
 type Props = {

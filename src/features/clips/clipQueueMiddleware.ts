@@ -27,7 +27,7 @@ const logger = createLogger('ClipQueueMiddleware');
 
 const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
   return (storeAPI: AppMiddlewareAPI) => {
-    return (next) => (action) => {
+    return (next) => (action: any) => {
       if (action.type === REHYDRATE && action.key === 'clipQueue' && action.payload) {
         clipProvider.setProviders(action.payload.providers);
       } else if (urlReceived.match(action)) {
@@ -103,6 +103,11 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
       } else if (autoplayTimeoutHandleChanged.match(action)) {
         if (!action.payload.handle) {
           if (action.payload.set) {
+            const existingHandle = storeAPI.getState().clipQueue.autoplayTimeoutHandle;
+            if (existingHandle) {
+              clearTimeout(existingHandle);
+            }
+            
             const delay = storeAPI.getState().clipQueue.autoplayDelay;
             const handle = setTimeout(() => {
               storeAPI.dispatch(currentClipWatched());

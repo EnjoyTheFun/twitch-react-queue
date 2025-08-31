@@ -1,9 +1,9 @@
 import { ActionIcon, PolymorphicComponentProps, useMantineColorScheme } from '@mantine/core';
 import { PropsWithChildren } from 'react';
-import { Sun, MoonStars } from 'tabler-icons-react';
+import { IconSun, IconMoonStars } from '@tabler/icons-react';
 
-const LightModeIcon = Sun;
-const DarkModeIcon = MoonStars;
+const LightModeIcon = IconSun;
+const DarkModeIcon = IconMoonStars;
 
 const ColorSchemeSwitch = ({
   component = ActionIcon,

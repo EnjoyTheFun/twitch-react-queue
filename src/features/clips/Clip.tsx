@@ -1,6 +1,6 @@
 import { ActionIcon, AspectRatio, Image, Box, Group, Skeleton, Stack, Text, useMantineTheme } from '@mantine/core';
 import { MouseEventHandler, useEffect, useRef } from 'react';
-import { Trash } from 'tabler-icons-react';
+import { IconTrash } from '@tabler/icons-react';
 import { useAppSelector } from '../../app/hooks';
 import { selectClipById, selectTopNSubmitters, selectHighlightedClipId } from './clipQueueSlice';
 import type { PlatformType } from '../../common/utils';
@@ -239,7 +239,7 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
           sx={{ position: 'absolute', left: 0, top: 0, opacity: 0.8, zIndex: 100 }}
           onClick={onCrossClick}
         >
-          <Trash size={12} />
+          <IconTrash size={12} />
         </ActionIcon>
       )}
     </Box>

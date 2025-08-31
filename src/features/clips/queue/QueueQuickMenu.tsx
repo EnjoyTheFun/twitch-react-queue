@@ -1,7 +1,7 @@
 import { Menu, Badge, NumberInput, Button, Stack, Switch } from '@mantine/core';
 import { useModals } from '@mantine/modals';
 import { FormEvent, useState } from 'react';
-import { TrashX, Tallymarks } from 'tabler-icons-react';
+import { IconTrashX, IconTallymarks } from '@tabler/icons-react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { settingsChanged } from '../../settings/settingsSlice';
 import { queueCleared, selectClipLimit } from '../clipQueueSlice';
@@ -57,23 +57,28 @@ function QueueQuickMenu() {
   };
 
   return (
-    <>
-      <Menu>
+    <div className="queue-quick-menu-container">
+      <Menu
+        withinPortal={false}
+        position="bottom"
+        placement="end"
+        closeOnItemClick={true}
+      >
         <Menu.Item
-          icon={<Tallymarks size={14} />}
+          icon={<IconTallymarks size={14} />}
           rightSection={<Badge color="indigo">{clipLimit ?? 'off'}</Badge>}
           onClick={() => openClipLimitModal()}
         >
           Set queue limit
         </Menu.Item>
-        <Menu.Item icon={<Tallymarks size={14} />} rightSection={<Switch size="sm" checked={reorderOnDuplicate} onChange={(e) => dispatch(settingsChanged({ reorderOnDuplicate: e.currentTarget.checked }))} />}>
+        <Menu.Item icon={<IconTallymarks size={14} />} rightSection={<Switch size="sm" checked={reorderOnDuplicate} onChange={(e) => dispatch(settingsChanged({ reorderOnDuplicate: e.currentTarget.checked }))} />}>
           Reorder on duplicate
         </Menu.Item>
-        <Menu.Item icon={<TrashX size={14} />} color="red" onClick={() => dispatch(queueCleared())}>
+        <Menu.Item icon={<IconTrashX size={14} />} color="red" onClick={() => dispatch(queueCleared())}>
           Clear queue
         </Menu.Item>
       </Menu>
-    </>
+    </div>
   );
 }
 

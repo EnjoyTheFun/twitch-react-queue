@@ -1,72 +1,53 @@
 {
   "name": "twitch-react-queue",
-  "version": "1.0.7",
-  "homepage": "/twitch-react-queue/",
+  "version": "1.1.0",
+  "homepage": "https://enjoythefun.github.io/twitch-react-queue/",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "dev": "vite",
+    "start": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@mantine/core": "^4.2.9",
     "@mantine/hooks": "^4.2.9",
     "@mantine/modals": "^4.2.9",
     "@mantine/notifications": "^4.2.9",
-    "@reduxjs/toolkit": "^1.8.2",
+    "@reduxjs/toolkit": "^2.8.2",
     "@tabler/icons-react": "^3.31.0",
-    "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.3.0",
-    "@testing-library/user-event": "^14.2.0",
-    "@types/jest": "^28.1.1",
     "@types/node": "^17.0.42",
-    "@types/react": "^18.0.12",
-    "@types/react-dom": "^18.0.5",
-    "@types/react-router-dom": "^5.3.3",
+    "@types/react": "^19.1.1",
+    "@types/react-dom": "^19.1.1",
     "@types/tmi.js": "^1.8.1",
     "@videojs/http-streaming": "^3.17.0",
-    "axios": "^0.27.2",
+    "axios": "^1.11.0",
     "date-fns": "^2.28.0",
     "gh-pages": "^6.3.0",
-    "react": "^18.1.0",
-    "react-compiler-runtime": "^19.1.0-rc.2",
-    "react-dom": "^18.1.0",
-    "react-player": "^2.10.1",
-    "react-redux": "^8.0.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-redux": "^9.2.0",
     "react-router-dom": "^6.3.0",
-    "react-scripts": "^5.0.1",
     "react-social-media-embed": "^2.5.18",
     "redux-persist": "^6.0.0",
     "redux-persist-indexeddb-storage": "^1.0.4",
     "sass": "^1.52.3",
-    "tabler-icons-react": "^1.56.0",
     "tmi.js": "^1.8.5",
     "typescript": "^4.9.5",
-    "video.js": "^8.22.0",
-    "videojs-youtube": "^3.0.1",
-    "web-vitals": "^2.1.4"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "video.js": "^8.23.4",
+    "videojs-youtube": "^3.0.1"
   },
   "devDependencies": {
-    "babel-plugin-react-compiler": "^19.1.0-rc.2"
+    "@types/node": "^20.19.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/ui": "^3.2.4",
+    "babel-plugin-react-compiler": "^19.1.0-rc.3",
+    "jsdom": "^26.1.0",
+    "rollup-plugin-visualizer": "^6.0.3",
+    "vite": "^7.1.3",
+    "vitest": "^3.2.4"
   }
 }

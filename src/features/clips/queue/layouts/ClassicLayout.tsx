@@ -1,10 +1,10 @@
 import { useRef, useEffect, useState } from 'react';
 import { Container, Grid, Group, Stack, ScrollArea, Box } from '@mantine/core';
-import Player from '../Player';
 import PlayerButtons from '../PlayerButtons';
 import PlayerTitle from '../PlayerTitle';
 import Queue from '../Queue';
 import QueueControlPanel from '../QueueControlPanel';
+import Player from '../Player';
 
 function ClassicLayout() {
   const containerRef = useRef<HTMLDivElement | null>(null);

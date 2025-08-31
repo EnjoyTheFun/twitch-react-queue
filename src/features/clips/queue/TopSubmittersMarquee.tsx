@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, ActionIcon, useMantineTheme } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '../../../app/hooks';
 import { selectTopNSubmitters, resetWatchedCounts } from '../clipQueueSlice';
-import { Refresh } from 'tabler-icons-react';
+import { IconRefresh } from '@tabler/icons-react';
 
 interface TopSubmittersMarqueeProps {
   count?: number;
@@ -67,7 +67,7 @@ const TopSubmittersMarquee = ({ count = 3 }: TopSubmittersMarqueeProps) => {
           onClick={handleReset}
           title="Reset top clippers"
         >
-          <Refresh size={14} />
+          <IconRefresh size={14} />
         </ActionIcon>
       </Box>
     </Box>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { setVolume } from '../../../settings/settingsSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../../app/store';

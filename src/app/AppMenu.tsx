@@ -1,5 +1,4 @@
 import {
-  useMantineColorScheme,
   UnstyledButton,
   Avatar,
   Divider,
@@ -7,10 +6,10 @@ import {
   Switch,
   Text,
   Group,
-  ChevronIcon,
+  useMantineColorScheme,
 } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
-import { MoonStars, Settings, Logout } from 'tabler-icons-react';
+import { IconMoonStars, IconSettings, IconLogout, IconChevronDown } from '@tabler/icons-react';
 import { selectUsername, selectProfilePictureUrl, logout } from '../features/auth/authSlice';
 import useSettingsModal from '../features/settings/SettingsModal';
 import { useAppDispatch, useAppSelector } from './hooks';
@@ -30,6 +29,10 @@ const AppMenu = () => {
 
   return (
     <Menu
+      withinPortal={false}
+      position="bottom"
+      placement="end"
+      closeOnItemClick={true}
       control={
         <UnstyledButton
           sx={(theme) => ({
@@ -59,26 +62,26 @@ const AppMenu = () => {
             >
               {username}
             </Text>
-            <ChevronIcon />
+            <IconChevronDown size={14} />
           </Group>
         </UnstyledButton>
       }
     >
       <Menu.Item
-        icon={<MoonStars size={14} />}
+        icon={<IconMoonStars size={14} />}
         onClick={() => toggleColorScheme()}
         rightSection={<Switch size="xs" checked={colorScheme === 'dark'} readOnly />}
       >
         Dark mode
       </Menu.Item>
-      <Menu.Item icon={<Settings size={14} />} onClick={() => openSettingsModal()}>
+      <Menu.Item icon={<IconSettings size={14} />} onClick={() => openSettingsModal()}>
         Settings
       </Menu.Item>
 
       <Divider />
 
       <Menu.Item
-        icon={<Logout size={14} />}
+        icon={<IconLogout size={14} />}
         onClick={handleLogout}
       >
         Log Out

@@ -1,20 +1,17 @@
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, ReactElement } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { selectQueueIds, currentClipReplaced, queueClipRemoved, selectClipById } from '../clipQueueSlice';
+import { selectQueueClips, currentClipReplaced, queueClipRemoved } from '../clipQueueSlice';
 import Clip from '../Clip';
 
 interface QueueProps {
   card?: boolean;
-  wrapper?: (props: PropsWithChildren<{}>) => JSX.Element;
+  wrapper?: (props: PropsWithChildren<{}>) => ReactElement;
 }
 
 function Queue({ wrapper, card }: QueueProps) {
   const dispatch = useAppDispatch();
-  const clipQueueIds = useAppSelector(selectQueueIds);
+  const clips = useAppSelector(selectQueueClips);
   const Wrapper = wrapper ?? (({ children }) => <>{children}</>);
-  const clips = useAppSelector((state) =>
-    clipQueueIds.map((id) => selectClipById(id)(state)).filter((clip) => clip !== undefined)
-  );
 
   const handleClipClick = (clipId: string) => () => dispatch(currentClipReplaced(clipId));
   const handleClipRemove = (clipId: string) => () => dispatch(queueClipRemoved(clipId));
@@ -22,15 +19,15 @@ function Queue({ wrapper, card }: QueueProps) {
   return (
     <>
       {clips.map((clip, idx) => (
-        <Wrapper key={clip!.id}>
+        <Wrapper key={clip.id}>
           <Clip
-            platform={clip!.Platform || undefined}
-            key={clip!.id}
-            clipId={clip!.id}
+            platform={clip.Platform || undefined}
+            key={clip.id}
+            clipId={clip.id}
             card={card}
             queueIndex={idx + 1}
-            onClick={handleClipClick(clip!.id)}
-            onCrossClick={handleClipRemove(clip!.id)}
+            onClick={handleClipClick(clip.id)}
+            onCrossClick={handleClipRemove(clip.id)}
           />
         </Wrapper>
       ))}

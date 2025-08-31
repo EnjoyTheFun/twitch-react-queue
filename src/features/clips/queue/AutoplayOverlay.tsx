@@ -1,7 +1,7 @@
 import { Button, Center, RingProgress, Stack, Text, Box, useMantineTheme } from '@mantine/core';
 import { useEffect, useState, useRef } from 'react';
 import { useAppSelector } from '../../../app/hooks';
-import { selectAutoplayDelay, selectNextId, selectQueueIds, selectClipById } from '../clipQueueSlice';
+import { selectAutoplayDelay, selectNextId, selectQueueClipsForAutoplay } from '../clipQueueSlice';
 import Clip from '../Clip';
 
 interface AutoplayOverlayProps {
@@ -22,10 +22,7 @@ function AutoplayOverlay({ visible, onCancel }: AutoplayOverlayProps) {
   const fillColor = theme.colors.blue?.[4];
   const overlayTextColor = theme.colorScheme === 'light' ? theme.white : undefined;
 
-  const clipQueueIds = useAppSelector(selectQueueIds);
-  const clips = useAppSelector((state) =>
-    clipQueueIds.map((id) => selectClipById(id)(state)).filter((clip) => clip !== undefined)
-  );
+  const clips = useAppSelector(selectQueueClipsForAutoplay);
   const nextClip = clips.find((clip) => clip!.id === nextClipId);
 
   useEffect(() => {

@@ -1,5 +1,0 @@
-{
-  "compilationMode": "annotation",
-  "sources": ["src/**"],
-  "exclude": ["src/**/*.test.*", "src/**/*.spec.*"]
-}

@@ -10,7 +10,7 @@ export function applyCustomizations(storeApi: AppMiddlewareAPI) {
   const now = new Date();
 
   switch (channel?.toLowerCase()) {
-    case 'etf_bot': {
+    case 'etf_bot_friday': {
       if (isFriday(now)) {
         storeApi.dispatch(
           currentClipForceReplaced({

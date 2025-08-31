@@ -29,6 +29,7 @@ const getPlayerComponent = (
   videoSrc: string | undefined,
   autoplayEnabled: boolean,
   nextClipId: string | undefined,
+  autoplayTimeoutHandle: number | undefined,
   dispatch: ReturnType<typeof useAppDispatch>
 ) => {
   if (!currentClip) return null;
@@ -38,7 +39,11 @@ const getPlayerComponent = (
   const embedUrl = videoSrc || clipProvider.getEmbedUrl(id) || "";
 
   const handleEnded = autoplayEnabled && nextClipId
-    ? () => dispatch(autoplayTimeoutHandleChanged({ set: true }))
+    ? () => {
+        if (!autoplayTimeoutHandle) {
+          dispatch(autoplayTimeoutHandleChanged({ set: true }));
+        }
+      }
     : undefined;
 
 
@@ -187,7 +192,7 @@ function Player({ className }: PlayerProps) {
     };
   }, [currentClip]);
 
-  const player = getPlayerComponent(currentClip, videoSrc, autoplayEnabled, nextClipId, dispatch);
+  const player = getPlayerComponent(currentClip, videoSrc, autoplayEnabled, nextClipId, autoplayTimeoutHandle, dispatch);
 
   return (
     <Stack

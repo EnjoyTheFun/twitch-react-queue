@@ -7,7 +7,7 @@ export const injectStore = (_store: AppMiddlewareAPI) => {
   store = _store;
 };
 
-const TWITCH_CLIENT_ID = process.env.REACT_APP_TWITCH_CLIENT_ID ?? '';
+const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID ?? '';
 
 const twitchApiClient = axios.create({
   baseURL: 'https://api.twitch.tv/helix/',
@@ -55,7 +55,7 @@ const getDirectUrl = async (id: string): Promise<string | undefined> => {
 twitchApiClient.interceptors.request.use((request) => {
   const { token } = store?.getState().auth;
   if (token) {
-    request.headers = { Authorization: `Bearer ${token}`, ...request.headers };
+    request.headers.set('Authorization', `Bearer ${token}`);
   }
 
   return request;

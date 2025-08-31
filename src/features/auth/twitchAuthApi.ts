@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { TokenInfo, UserInfo } from '../../common/models/twitch';
 
-const TWITCH_CLIENT_ID = process.env.REACT_APP_TWITCH_CLIENT_ID;
-const TWITCH_REDIRECT_URI = process.env.REACT_APP_TWITCH_REDIRECT_URI;
+const TWITCH_CLIENT_ID = import.meta.env.VITE_TWITCH_CLIENT_ID;
+const TWITCH_REDIRECT_URI = import.meta.env.VITE_TWITCH_REDIRECT_URI;
 
 const defaultScopes = ['openid', 'chat:read'];
 

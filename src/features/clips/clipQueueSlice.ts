@@ -132,6 +132,10 @@ const addClipToHistory = (state: ClipQueueState, id?: string) => {
   const clip = state.byId[id];
 
   if (clip) {
+    const existingIndex = state.historyIds.indexOf(id);
+    if (existingIndex !== -1) {
+      state.historyIds.splice(existingIndex, 1);
+    }
     state.historyIds.unshift(id);
   }
 };
@@ -216,6 +220,7 @@ const clipQueueSlice = createSlice({
         }
         state.watchedHistory = state.watchedHistory.filter((id) => state.historyIds.includes(id));
       }
+      state.currentSkipVoters = [];
     },
 
     currentClipSkipped: (state) => {
@@ -361,6 +366,7 @@ const clipQueueSlice = createSlice({
     },
     autoplayChanged: (state, { payload }: PayloadAction<boolean>) => {
       state.autoplay = payload;
+      state.currentSkipVoters = [];
     },
     autoplayTimeoutHandleChanged: (
       state,
@@ -507,6 +513,19 @@ const calculateTotalQueueLength = (watchedCount: number, queueIds: string[]) => 
 };
 export const selectTotalQueueLength = createSelector([selectWatchedCount, selectQueueIds], calculateTotalQueueLength);
 
+export const makeSelectClipHistoryIdsPage = () =>
+  createSelector(
+    [
+      selectHistoryIds,
+      (_, page: number) => page,
+      (_, page: number, perPage: number) => perPage
+    ],
+    (historyIds, page, perPage) => ({
+      clips: historyIds.slice((page - 1) * perPage, page * perPage),
+      totalPages: Math.ceil(historyIds.length / perPage),
+    })
+  );
+
 export const selectClipHistoryIdsPage = createSelector(
   [selectHistoryIds, (_, page: number, perPage: number) => ({ page, perPage })],
   (historyIds, { page, perPage }) => ({
@@ -545,6 +564,32 @@ export const selectTopNSubmitters = (n: number) =>
     arr.sort((a, b) => b.count - a.count);
     return arr.slice(0, n);
   });
+
+export const selectQueueClips = createSelector(
+  [selectByIds, selectQueueIds],
+  (byIds, queueIds) => queueIds.map((id) => byIds[id]).filter((clip) => clip !== undefined)
+);
+
+export const selectQueueClipsForAutoplay = createSelector(
+  [selectByIds, selectQueueIds],
+  (byIds, queueIds) => queueIds.map((id) => byIds[id]).filter((clip) => clip !== undefined)
+);
+
+export const makeSelectHistoryPageClips = () =>
+  createSelector(
+    [
+      selectByIds,
+      selectHistoryIds,
+      (_, page: number) => page,
+      (_, page: number, perPage: number) => perPage
+    ],
+    (byIds, historyIds, page, perPage) => {
+      const startIndex = (page - 1) * perPage;
+      const endIndex = page * perPage;
+      const pageClipIds = historyIds.slice(startIndex, endIndex);
+      return pageClipIds.map((id) => byIds[id]).filter((clip) => clip !== undefined);
+    }
+  );
 
 export const highlightClipFrame = createAsyncThunk<void, void, { state: RootState }>(
   'clipQueue/highlightClipFrame',

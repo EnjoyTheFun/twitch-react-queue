@@ -2,7 +2,7 @@ import { Button, Group, Stack, TextInput, Text, NumberInput, Tabs, Select, Code,
 import React from 'react';
 import { useForm } from '@mantine/hooks';
 import { useModals } from '@mantine/modals';
-import { History, Settings, Slideshow, Ban } from 'tabler-icons-react';
+import { IconHistory, IconSettings, IconSlideshow, IconBan } from '@tabler/icons-react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import {
   memoryPurged,
@@ -46,7 +46,7 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
     >
       <Stack spacing="md">
         <Tabs>
-          <Tabs.Tab label="General" icon={<Settings size={16} />}>
+          <Tabs.Tab label="General" icon={<IconSettings size={16} />} {...({} as any)}>
             <Stack>
               <TextInput
                 label="Twitch channel"
@@ -69,7 +69,7 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
             </Stack>
           </Tabs.Tab>
 
-          <Tabs.Tab label="Clip queue" icon={<Slideshow size={16} />}>
+          <Tabs.Tab label="Clip queue" icon={<IconSlideshow size={16} />} {...({} as any)}>
             <Stack>
               <Select
                 required
@@ -156,7 +156,7 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
             </Stack>
           </Tabs.Tab>
 
-          <Tabs.Tab label="Clip memory" icon={<History size={16} />}>
+          <Tabs.Tab label="Clip memory" icon={<IconHistory size={16} />} {...({} as any)}>
             <Stack>
               <Text size="sm">
                 Configure how long watched clips should be remembered before they can be added to the queue again.
@@ -179,7 +179,7 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
               />
             </Stack>
           </Tabs.Tab>
-          <Tabs.Tab label="Moderation" icon={<Ban size={16} />}>
+          <Tabs.Tab label="Moderation" icon={<IconBan size={16} />} {...({} as any)}>
             <Stack>
               <Text size="sm">User blacklist (comma-separated). Submissions from these usernames will be ignored.</Text>
               <Textarea

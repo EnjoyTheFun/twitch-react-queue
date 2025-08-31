@@ -9,7 +9,7 @@ import axios from 'axios';
 
 async function fetchLinks(): Promise<{ url: string; username: string }[]> {
   try {
-    const apiUrl = process.env.REACT_APP_DC_LINKS_API_URL;
+    const apiUrl = import.meta.env.VITE_DC_LINKS_API_URL;
     if (!apiUrl) {
       console.warn('Discord links API URL not configured');
       return [];
@@ -33,13 +33,13 @@ async function fetchLinks(): Promise<{ url: string; username: string }[]> {
 
 function ImportLinksButton() {
   const dispatch = useAppDispatch();
-  const apiUrl = process.env.REACT_APP_DC_LINKS_API_URL;
+  const apiUrl = import.meta.env.VITE_DC_LINKS_API_URL;
   const username = useAppSelector(selectUsername);
 
   const [disabled, setDisabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const whitelist = (process.env.REACT_APP_IMPORT_WHITELIST || "")
+  const whitelist = (import.meta.env.VITE_IMPORT_WHITELIST || "")
     .split(",")
     .map(u => u.trim())
     .filter(Boolean);

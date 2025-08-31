@@ -1,6 +1,6 @@
 import { Middleware, isAnyOf } from '@reduxjs/toolkit';
 import type { AppMiddlewareAPI, RootState } from '../../app/store';
-import { ChatUserstate, Client, DeleteUserstate } from 'tmi.js';
+import { Client, ChatUserstate, DeleteUserstate } from 'tmi.js';
 import { logout, authenticateWithToken, validateToken } from '../auth/authSlice';
 import { channelChanged, settingsChanged } from '../settings/settingsSlice';
 import { createLogger } from '../../common/logging';
@@ -15,17 +15,16 @@ const logger = createLogger('Twitch Chat');
 const createClient = ({ token, username }: { token: string; username: string }) => {
   const client = new Client({
     options: {
-      debug: process.env.REACT_APP_LOG_LEVEL === 'debug',
+      debug: import.meta.env.VITE_LOG_LEVEL === 'debug',
       messagesLogLevel: 'debug',
       skipUpdatingEmotesets: true,
       skipMembership: true,
     },
     logger: {
-      debug: logger.debug.bind(logger),
-      error: logger.error.bind(logger),
       info: logger.info.bind(logger),
       warn: logger.warn.bind(logger),
-    } as any,
+      error: logger.error.bind(logger),
+    },
     identity: {
       username: username,
       password: `oauth:${token}`,
@@ -88,7 +87,7 @@ const createTwitchChatMiddleware = (): Middleware<{}, RootState> => {
     let client: Client | undefined;
 
     const connect = () =>
-      client?.connect().catch((error) => {
+      client?.connect().catch((error: Error) => {
         logger.error(error);
         setTimeout(() => connect(), 5000);
       });
@@ -99,7 +98,7 @@ const createTwitchChatMiddleware = (): Middleware<{}, RootState> => {
           const { username } = action.payload;
           client = createClient(action.payload);
 
-          let pruneInterval: any | undefined;
+          let pruneInterval: NodeJS.Timeout | undefined;
           client.on('connected', () => {
             showNotification({
               id: 'twitch-chat',
@@ -128,8 +127,8 @@ const createTwitchChatMiddleware = (): Middleware<{}, RootState> => {
             }
           });
           client.on('message', handleMessage(storeApi));
-          client.on('redeem', (channel, username, type, tags) => {
-            logger.info('redeem', channel, username, type, tags);
+          client.on('redeem', (channel: string, username: string, rewardType: string, tags: ChatUserstate) => {
+            logger.info('redeem', channel, username, rewardType, tags);
           });
           client.on('messagedeleted', handleMessageDeleted(storeApi));
 
@@ -154,11 +153,11 @@ const createTwitchChatMiddleware = (): Middleware<{}, RootState> => {
           client = undefined;
           tempClient?.disconnect();
         } else if (channelChanged.match(action)) {
-          client.getChannels().forEach((channel) => client?.part(channel));
+          client.getChannels().forEach((channel: string) => client?.part(channel));
           client.join(action.payload.toLowerCase());
         } else if (settingsChanged.match(action)) {
           if (action.payload.channel && !client.getChannels().includes(action.payload.channel)) {
-            client.getChannels().forEach((channel) => client?.part(channel));
+            client.getChannels().forEach((channel: string) => client?.part(channel));
             client.join(action.payload.channel);
           }
           if (action.payload.clipMemoryRetentionDays !== undefined) {

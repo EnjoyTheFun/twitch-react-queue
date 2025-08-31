@@ -9,11 +9,11 @@ import {
   previousClipWatched,
   currentClipWatched
 } from '../../clipQueueSlice';
-import Player from '../Player';
 import Queue from '../Queue';
 import QueueControlPanel from '../QueueControlPanel';
 import CircularButton from '../CircularButton';
 import TitleHover from '../TitleHover';
+import Player from '../Player';
 
 function SpotlightLayout() {
   const dispatch = useAppDispatch();

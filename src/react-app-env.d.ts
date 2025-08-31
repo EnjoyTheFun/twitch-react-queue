@@ -1,15 +1,18 @@
-/// <reference types="react-scripts" />
+/// <reference types="vite/client" />
 
-namespace NodeJS {
-  interface ProcessEnv {
-    REACT_APP_TWITCH_CLIENT_ID: string;
-    REACT_APP_TWITCH_REDIRECT_URI: string;
-    REACT_APP_BASEPATH: string;
-    REACT_APP_LOG_LEVEL: string;
-    REACT_APP_UMAMI_WEBSITE_ID: string;
-    REACT_APP_UMAMI_SRC: string;
-    REACT_APP_CLIP_PROVIDERS: string;
-  }
+interface ImportMetaEnv {
+  readonly VITE_TWITCH_CLIENT_ID: string;
+  readonly VITE_TWITCH_REDIRECT_URI: string;
+  readonly VITE_BASEPATH: string;
+  readonly VITE_LOG_LEVEL: string;
+  readonly VITE_UMAMI_WEBSITE_ID: string;
+  readonly VITE_UMAMI_SRC: string;
+  readonly VITE_DC_LINKS_API_URL: string;
+  readonly VITE_IMPORT_WHITELIST: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
 }
 
 declare module 'redux-persist-indexeddb-storage' {

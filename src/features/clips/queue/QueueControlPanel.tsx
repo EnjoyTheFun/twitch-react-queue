@@ -16,8 +16,8 @@ import QueueQuickMenu from './QueueQuickMenu';
 import TopSubmittersMarquee from './TopSubmittersMarquee';
 import { useModals } from '@mantine/modals';
 import ImportLinksModal from './ImportLinksModal';
-import { FileImport } from 'tabler-icons-react';
-import { Palette, PaletteOff, Crown, CrownOff, ThumbDown, ThumbDownOff } from 'tabler-icons-react';
+import { IconFileImport } from '@tabler/icons-react';
+import { IconPalette, IconPaletteOff, IconCrown, IconCrownOff, IconThumbDown, IconThumbDownOff } from '@tabler/icons-react';
 
 interface QueueControlPanelProps {
   className?: string;
@@ -90,7 +90,7 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
             title="Import links"
             aria-label="Import links"
           >
-            <FileImport size={18} />
+            <IconFileImport size={18} />
           </ActionIcon>
 
           <ActionIcon
@@ -100,7 +100,7 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
             title={skipVotingEnabled ? 'Disable skip voting' : 'Enable skip voting'}
             aria-label="Toggle skip voting"
           >
-            {skipVotingEnabled ? <ThumbDown size={18} /> : <ThumbDownOff size={18} />}
+            {skipVotingEnabled ? <IconThumbDown size={18} /> : <IconThumbDownOff size={18} />}
           </ActionIcon>
 
           <ActionIcon
@@ -110,7 +110,7 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
             title={colored ? 'Disable submitter colors' : 'Enable submitter colors'}
             aria-label="Toggle submitter colors"
           >
-            {colored ? <Palette size={18} /> : <PaletteOff size={18} />}
+            {colored ? <IconPalette size={18} /> : <IconPaletteOff size={18} />}
           </ActionIcon>
           <ActionIcon
             size="sm"
@@ -118,7 +118,7 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
             onClick={handleTopSubmittersToggle}
             title={showMarquee ? 'Hide top submitters' : 'Show top submitters'}
           >
-            {showMarquee ? <Crown size={18} /> : <CrownOff size={18} />}
+            {showMarquee ? <IconCrown size={18} /> : <IconCrownOff size={18} />}
           </ActionIcon>
         </Group>
       </Group>

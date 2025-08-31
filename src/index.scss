@@ -194,3 +194,56 @@ html {
   from { opacity: 0; transform: translateX(-50%) translateY(10px); }
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
+
+.app-title-section {
+  @media (max-width: 768px) {
+    display: none !important;
+  }
+}
+
+.app-credits {
+  .credits-extended {
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 560px) {
+    display: none;
+  }
+}
+
+.app-menu-container,
+.queue-quick-menu-container {
+  position: relative;
+
+  .mantine-Menu-dropdown {
+    position: absolute !important;
+    transform: translateZ(0);
+    will-change: transform;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+}
+
+/* Fix for menu dropdown stacking in some browsers */
+.app-menu-container .mantine-Menu-dropdown {
+  z-index: 9999 !important;
+}
+.queue-quick-menu-container .mantine-Menu-dropdown {
+  z-index: 1000 !important;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(134, 142, 150, 0.8) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}

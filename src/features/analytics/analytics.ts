@@ -9,7 +9,7 @@ export function trace(value: string, type = 'custom') {
   try {
     if (umami) {
       if (type === 'view') {
-        umami.trackView(`${process.env.REACT_APP_BASEPATH}${value}`);
+        umami.trackView(`${import.meta.env.VITE_BASEPATH}${value}`);
       } else {
         umami.trackEvent(value, type);
       }

@@ -63,7 +63,7 @@ class ConsoleLogger implements Logger {
   }
 }
 
-setLogLevel((process.env.REACT_APP_LOG_LEVEL) as LogLevels);
+setLogLevel((import.meta.env.VITE_LOG_LEVEL) as LogLevels);
 (window as any).__setLogLevel = setLogLevel;
 
 export function createLogger(name: string): Logger {

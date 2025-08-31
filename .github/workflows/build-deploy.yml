@@ -16,52 +16,39 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     env:
-      REACT_APP_TWITCH_CLIENT_ID: ${{ secrets.REACT_APP_TWITCH_CLIENT_ID }}
-      REACT_APP_UMAMI_SRC: ${{ secrets.REACT_APP_UMAMI_SRC }}
-      REACT_APP_UMAMI_WEBSITE_ID: ${{ secrets.REACT_APP_UMAMI_WEBSITE_ID }}
-      REACT_APP_TWITCH_REDIRECT_URI: https://enjoythefun.github.io/twitch-react-queue/auth
-      REACT_APP_BASEPATH: /twitch-react-queue/
-      REACT_APP_LOG_LEVEL: warn
-      REACT_APP_DC_LINKS_API_URL: ${{ secrets.REACT_APP_DC_LINKS_API_URL }}
-      REACT_APP_IMPORT_WHITELIST: ${{ secrets.REACT_APP_IMPORT_WHITELIST }}
+      VITE_TWITCH_CLIENT_ID: ${{ secrets.VITE_TWITCH_CLIENT_ID }}
+      VITE_UMAMI_SRC: ${{ secrets.VITE_UMAMI_SRC }}
+      VITE_UMAMI_WEBSITE_ID: ${{ secrets.VITE_UMAMI_WEBSITE_ID }}
+      VITE_TWITCH_REDIRECT_URI: https://enjoythefun.github.io/twitch-react-queue/auth
+      VITE_BASEPATH: /twitch-react-queue/
+      VITE_LOG_LEVEL: warn
+      VITE_DC_LINKS_API_URL: ${{ secrets.VITE_DC_LINKS_API_URL }}
+      VITE_IMPORT_WHITELIST: ${{ secrets.VITE_IMPORT_WHITELIST }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install Node.js
+    - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 16.x
+        node-version: '20.x'
+        cache: 'npm'
 
-    - name: Get npm cache directory
-      id: npm-cache-dir
-      run: |
-        echo "::set-output name=dir::$(npm config get cache)"
-
-    - name: Setup npm cache
-      uses: actions/cache@v4
-      id: npm-cache
-      with:
-        path: ${{ steps.npm-cache-dir.outputs.dir }}
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
-
-    - name: Install NPM packages
+    - name: Install dependencies
       run: npm ci
+
+    - name: Run tests
+      run: npm test
 
     - name: Build project
       run: npm run build
-
-    - name: Run tests
-      run: npm run test
 
     - name: Upload production-ready build files
       uses: actions/upload-artifact@v4
       with:
         name: production-files
-        path: ./build
+        path: ./dist
 
   deploy:
     name: Deploy
@@ -74,10 +61,13 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: production-files
-        path: ./build
+        path: ./dist
 
     - name: Deploy to gh-pages
       uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./build
+        publish_dir: ./dist
+        force_orphan: true
+        user_name: 'github-actions[bot]'
+        user_email: 'github-actions[bot]@users.noreply.github.com'

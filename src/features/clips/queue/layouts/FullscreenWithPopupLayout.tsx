@@ -1,12 +1,12 @@
 import { Button, Container, Grid, Group, Portal, Stack } from '@mantine/core';
 import { randomId } from '@mantine/hooks';
-import React, { PropsWithChildren, useEffect, useState } from 'react';
+import { PropsWithChildren, useEffect, useState, Fragment } from 'react';
 import AppLayout from '../../../../app/AppLayout';
-import Player from '../Player';
 import PlayerButtons from '../PlayerButtons';
 import PlayerTitle from '../PlayerTitle';
 import Queue from '../Queue';
 import QueueControlPanel from '../QueueControlPanel';
+import Player from '../Player';
 
 function copyStyles(sourceDoc: Document, targetDoc: Document) {
   Array.from(sourceDoc.styleSheets).forEach((styleSheet) => {
@@ -71,7 +71,7 @@ function FullscreenWithPopupLayout() {
   const [key, setKey] = useState(randomId());
 
   return (
-    <React.Fragment key={key}>
+    <Fragment key={key}>
       <Container fluid py="md">
         <Button variant="default" onClick={() => setKey(randomId())}>
           Reload layout
@@ -90,7 +90,7 @@ function FullscreenWithPopupLayout() {
       <Popup>
         <PopupContent />
       </Popup>
-    </React.Fragment>
+    </Fragment>
   );
 }
 

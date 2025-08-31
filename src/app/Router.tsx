@@ -16,7 +16,7 @@ const PageLoader = () => (
 
 function Router() {
   return (
-    <BrowserRouter basename={process.env.REACT_APP_BASEPATH}>
+    <BrowserRouter basename={import.meta.env.VITE_BASEPATH}>
       <Routes>
         <Route
           path="auth"
