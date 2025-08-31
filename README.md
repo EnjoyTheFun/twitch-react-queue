@@ -18,7 +18,8 @@ Twitch React Queue is a custom build of [twitch-clip-queue](https://github.com/j
   - Instagram posts (EXPERIMENTAL)
 - Advanced queue management - additional Twitch chat commands, import from Discord/APIs, autoplay options
 - UI improvements
-- Authentication & Privacy - **unchanged. Most logic still runs client‑side!**
+- Migrate from the deprecated Create React App build tool to Vite
+- Authentication & Privacy - **unchanged. Everything you do as a user is saved only on your end!**
 - [More](https://github.com/EnjoyTheFun/twitch-react-queue/releases)
 
 ### Contributing
