@@ -21,10 +21,11 @@ const createClient = ({ token, username }: { token: string; username: string }) 
       skipMembership: true,
     },
     logger: {
+      debug: logger.debug.bind(logger),
+      error: logger.error.bind(logger),
       info: logger.info.bind(logger),
       warn: logger.warn.bind(logger),
-      error: logger.error.bind(logger),
-    },
+    } as any,
     identity: {
       username: username,
       password: `oauth:${token}`,
@@ -127,8 +128,8 @@ const createTwitchChatMiddleware = (): Middleware<{}, RootState> => {
             }
           });
           client.on('message', handleMessage(storeApi));
-          client.on('redeem', (channel: string, username: string, rewardType: string, tags: ChatUserstate) => {
-            logger.info('redeem', channel, username, rewardType, tags);
+          client.on('redeem', (channel: any, username: any, type: any, tags: any) => {
+            logger.info('redeem', channel, username, type, tags);
           });
           client.on('messagedeleted', handleMessageDeleted(storeApi));
 

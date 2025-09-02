@@ -75,7 +75,8 @@ html {
 .chip-anim-0, .top-submitter {
   background: linear-gradient(90deg, #ff8a00, #e52e71, #7b61ff);
   background-size: 200% 100%;
-  // animation: gradientShift 3s linear infinite;
+  -webkit-animation: gradientShift 3s linear infinite;
+  animation: gradientShift 3s linear infinite;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -83,7 +84,8 @@ html {
 .chip-anim-1 {
   background: linear-gradient(90deg, #7b61ff, #00c6ff, #e84bee);
   background-size: 200% 100%;
-  // animation: gradientShift 3s linear infinite;
+  -webkit-animation: gradientShift 3s linear infinite;
+  animation: gradientShift 3s linear infinite;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -91,7 +93,8 @@ html {
 .chip-anim-2 {
   background: linear-gradient(90deg, #00b894, #2ecc71, #fdd41d);
   background-size: 200% 100%;
-  // animation: gradientShift 3s linear infinite;
+  -webkit-animation: gradientShift 3s linear infinite;
+  animation: gradientShift 3s linear infinite;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -246,4 +249,55 @@ html {
 
 *::-webkit-scrollbar-track {
   background: transparent;
+}
+
+@media (max-width: 768px) {
+  .classic-layout {
+    .classic-layout-inner { flex-direction: column !important; }
+
+    .player-area { flex: 0 0 auto !important; width: 100% !important; min-width: 0 !important; }
+
+    .classic-resizer { display: none !important; }
+
+    .queue-area { width: 100% !important; max-height: none !important; }
+
+    .player-meta-group {
+      display: flex !important;
+      flex-direction: column;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .player-buttons { display: flex; justify-content: flex-end; }
+
+    .player-title {
+      font-size: 0.95rem;
+    }
+
+    .player-title .mantine-Text-root:nth-child(2),
+    .player-title .mantine-Text-root:nth-child(3) {
+      font-size: 0.8rem;
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media (max-width: 420px) {
+      .player-title .mantine-Text-root:nth-child(2),
+      .player-title .mantine-Text-root:nth-child(3) {
+        font-size: 0.72rem;
+      }
+    }
+
+  }
+}
+
+.nav-link { display: inline-flex; align-items: center; gap: 8px; }
+.nav-icon { display: none; }
+.nav-text { display: inline; }
+
+@media (max-width: 768px) {
+  .nav-icon { display: inline-flex; }
+  .nav-text { display: none; }
 }

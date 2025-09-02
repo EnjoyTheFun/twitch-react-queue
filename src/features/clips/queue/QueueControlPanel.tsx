@@ -16,8 +16,7 @@ import QueueQuickMenu from './QueueQuickMenu';
 import TopSubmittersMarquee from './TopSubmittersMarquee';
 import { useModals } from '@mantine/modals';
 import ImportLinksModal from './ImportLinksModal';
-import { IconFileImport } from '@tabler/icons-react';
-import { IconPalette, IconPaletteOff, IconCrown, IconCrownOff, IconThumbDown, IconThumbDownOff } from '@tabler/icons-react';
+import { IconFileImport, IconPalette, IconPaletteOff, IconCrown, IconCrownOff, IconThumbDown, IconThumbDownOff } from '@tabler/icons-react';
 
 interface QueueControlPanelProps {
   className?: string;

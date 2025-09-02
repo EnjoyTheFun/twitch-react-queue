@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ActionIcon, ActionIconProps, Button, Group, Header, Space, Text, ThemeIcon, Box } from '@mantine/core';
+import { IconHome, IconList, IconHistory } from '@tabler/icons-react';
 import { PropsWithChildren } from 'react';
 import { NavLinkProps, useLocation } from 'react-router-dom';
 import ColorSchemeSwitch from '../common/components/ColorSchemeSwitch';
@@ -34,18 +35,24 @@ const NavBarIcon = ({ children, ...props }: PropsWithChildren<ActionIconProps<an
   </ActionIcon>
 );
 
-const NavBarButton = ({ children, type, className, style, ...props }: PropsWithChildren<NavLinkProps>) => (
-  <Button
-    component={NavLink}
-    variant="subtle"
-    {...props}
-    activeStyle={({ isActive }: { isActive: boolean }) => ({
-      borderBottom: isActive ? '1px solid' : undefined,
-    })}
-  >
-    {children}
-  </Button>
-);
+const NavBarButton = ({ children, type, className, style, icon, ...props }: PropsWithChildren<NavLinkProps & { icon?: React.ReactNode }>) => {
+  const label = typeof children === 'string' ? children : undefined;
+  return (
+    <Button
+      component={NavLink}
+      variant="subtle"
+      aria-label={label}
+      {...props}
+      className="nav-link"
+      activeStyle={({ isActive }: { isActive: boolean }) => ({
+        borderBottom: isActive ? '1px solid' : undefined,
+      })}
+    >
+      {icon && <span className="nav-icon" aria-hidden>{icon}</span>}
+      <span className="nav-text">{children}</span>
+    </Button>
+  );
+};
 
 const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
   const dispatch = useAppDispatch();
@@ -79,10 +86,16 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
                   alignItems: 'center',
                 }}
               >
-                <NavBarButton to="/">Home</NavBarButton>
+                <NavBarButton to="/" icon={<IconHome />}>
+                  Home
+                </NavBarButton>
                 <IfAuthenticated>
-                  <NavBarButton to="queue">Queue</NavBarButton>
-                  <NavBarButton to="history">History</NavBarButton>
+                  <NavBarButton to="queue" icon={<IconList />}>
+                    Queue
+                  </NavBarButton>
+                  <NavBarButton to="history" icon={<IconHistory />}>
+                    History
+                  </NavBarButton>
                 </IfAuthenticated>
               </Group>
             )}

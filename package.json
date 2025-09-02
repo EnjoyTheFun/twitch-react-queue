@@ -1,6 +1,6 @@
 {
   "name": "twitch-react-queue",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "homepage": "https://enjoythefun.github.io/twitch-react-queue/",
   "scripts": {
     "dev": "vite",

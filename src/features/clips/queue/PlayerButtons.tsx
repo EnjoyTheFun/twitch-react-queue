@@ -7,9 +7,12 @@ import {
   selectAutoplayEnabled,
   selectClipLimit,
   selectNextId,
+  autoplayTimeoutHandleChanged,
+  currentClipWatched,
+  selectCurrentId,
+  previousClipWatched,
+  selectHasPrevious
 } from '../clipQueueSlice';
-import { autoplayTimeoutHandleChanged } from '../clipQueueSlice';
-import { currentClipWatched, selectCurrentId, previousClipWatched, selectHasPrevious } from '../clipQueueSlice';
 
 function PlayerButtons({ className }: { className?: string }) {
   const dispatch = useAppDispatch();

@@ -11,8 +11,7 @@ import {
   selectLayout,
   selectProviders,
 } from '../clips/clipQueueSlice';
-import { selectChannel, selectCommandPrefix, settingsChanged, selectClipMemoryRetentionDays } from './settingsSlice';
-import { selectSkipThreshold } from './settingsSlice';
+import { selectChannel, selectCommandPrefix, settingsChanged, selectClipMemoryRetentionDays, selectSkipThreshold } from './settingsSlice';
 
 function SettingsModal({ closeModal }: { closeModal: () => void }) {
   const dispatch = useAppDispatch();

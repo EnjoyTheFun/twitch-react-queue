@@ -1,8 +1,7 @@
 import { Box, Text, useMantineTheme } from '@mantine/core';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { useAppSelector } from '../../../app/hooks';
-import { selectCurrentClip } from '../clipQueueSlice';
-import { selectTopNSubmitters } from '../clipQueueSlice';
+import { selectCurrentClip, selectTopNSubmitters } from '../clipQueueSlice';
 import Platform from '../../../common/components/BrandPlatforms';
 
 interface PlayerTitleProps {

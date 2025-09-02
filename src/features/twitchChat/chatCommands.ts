@@ -17,8 +17,8 @@ import {
   currentClipForceReplaced,
   setProviders,
 } from '../clips/clipQueueSlice';
-import clipProvider from '../clips/providers/providers';
 import type { Clip } from '../clips/clipQueueSlice';
+import clipProvider from '../clips/providers/providers';
 import { settingsChanged } from '../settings/settingsSlice';
 import { createLogger } from '../../common/logging';
 import { urlDeleted, Userstate, urlEnqueue } from './actions';

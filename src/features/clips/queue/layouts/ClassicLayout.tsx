@@ -12,7 +12,7 @@ function ClassicLayout() {
   const rectRef = useRef({ left: 0, width: 0 });
   const [playerPercent, setPlayerPercent] = useState(79);
 
-  const MIN_PLAYER = 50;
+  const MIN_PLAYER = 30;
   const MAX_PLAYER = 85;
 
   useEffect(() => {
@@ -67,25 +67,25 @@ function ClassicLayout() {
   };
 
   return (
-    <Container fluid py="md" sx={{ height: '100%'}}>
+    <Container fluid py="md" sx={{ height: '100%'}} className="classic-layout">
       <Grid sx={{ height: '100%' }} columns={24}>
         <Grid.Col span={24} sx={{ height: '100%' }}>
-          <Box ref={containerRef} sx={{ display: 'flex', height: '100%', gap: 3 }}>
-            <Box sx={{ flex: `0 0 ${playerPercent}%`, minWidth: 0 }}>
+          <Box ref={containerRef} className="classic-layout-inner" sx={{ display: 'flex', height: '100%', gap: 3 }}>
+            <Box className="player-area" sx={{ flex: `0 0 ${playerPercent}%`, minWidth: 0 }}>
               <Stack justify="flex-start" spacing="xs" sx={{ height: '100%' }}>
                 <Player />
-                <Group position="apart" sx={{ alignItems: 'flex-start', width: '100%' }}>
-                  <PlayerTitle />
-                  <PlayerButtons />
+                <Group position="apart" className="player-meta-group" sx={{ alignItems: 'flex-start', width: '100%' }}>
+                  <PlayerTitle className="player-title" />
+                  <PlayerButtons className="player-buttons" />
                 </Group>
               </Stack>
             </Box>
 
-            <Box onPointerDown={onHandlePointerDown} sx={{ width: 8, touchAction: 'none', cursor: 'col-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Box className="classic-resizer" onPointerDown={onHandlePointerDown} sx={{ width: 8, touchAction: 'none', cursor: 'col-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Box sx={{ width: 2, height: '40%', background: 'rgba(0,0,0,0.25)', borderRadius: 2 }} />
             </Box>
 
-            <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Box className="queue-area" sx={{ flex: 1, minWidth: 0 }}>
               <Stack justify="flex-start" sx={{ height: '100%', maxHeight: '100%', gap: 3 }}>
                 <QueueControlPanel />
                 <ScrollArea sx={{ '.mantine-ScrollArea-viewport > div': { display: 'block !important' } }}>
