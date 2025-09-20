@@ -2,8 +2,7 @@ import React from 'react';
 import { Stack, Textarea, Button, Group, Text } from '@mantine/core';
 import { useModals } from '@mantine/modals';
 import { useAppDispatch } from '../../../app/hooks';
-import { urlEnqueue } from '../../twitchChat/actions';
-import { Userstate } from '../../twitchChat/actions';
+import { urlEnqueue, Userstate } from '../../twitchChat/actions';
 
 function ImportLinksModal() {
   const modals = useModals();

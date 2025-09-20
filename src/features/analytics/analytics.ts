@@ -14,5 +14,5 @@ export function trace(value: string, type = 'custom') {
         umami.trackEvent(value, type);
       }
     }
-  } catch {}
+  } catch { }
 }

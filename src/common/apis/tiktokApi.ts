@@ -15,8 +15,8 @@ const getClip = async (id: string): Promise<TikTokOEmbedResponse | undefined> =>
       url = `https://www.tiktok.com/oembed?url=https://www.tiktok.com/@_/video/${id}`;
     }
 
-  const { data } = await axios.get<TikTokOEmbedResponse>(url);
-  return data;
+    const { data } = await axios.get<TikTokOEmbedResponse>(url);
+    return data;
   } catch {
     return undefined;
   }

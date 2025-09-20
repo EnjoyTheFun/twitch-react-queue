@@ -24,6 +24,8 @@ export interface Clip {
   Platform?: PlatformType;
 
   thumbnailUrl?: string;
+  duration?: number;
+  views?: number;
 }
 
 interface ClipQueueState {
@@ -465,6 +467,9 @@ const clipQueueSlice = createSlice({
       }
       if (payload.reorderOnDuplicate !== undefined) {
         state.reorderOnDuplicate = payload.reorderOnDuplicate;
+      }
+      if (payload.autoplayDelay !== undefined) {
+        state.autoplayDelay = payload.autoplayDelay * 1000;
       }
     });
     builder.addCase(legacyDataMigrated, (state, { payload }) => {

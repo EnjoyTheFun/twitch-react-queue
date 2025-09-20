@@ -19,7 +19,7 @@ import {
 } from '../clips/clipQueueSlice';
 import type { Clip } from '../clips/clipQueueSlice';
 import clipProvider from '../clips/providers/providers';
-import { settingsChanged } from '../settings/settingsSlice';
+import { settingsChanged, addBlacklist, removeBlacklist } from '../settings/settingsSlice';
 import { createLogger } from '../../common/logging';
 import { urlDeleted, Userstate, urlEnqueue } from './actions';
 
@@ -127,6 +127,14 @@ const commands: Record<string, CommmandFunction> = {
   providers: (dispatch, args) => {
     if (!args || args.length === 0) return;
     dispatch(setProviders(args));
+  },
+  block: (dispatch, [name]) => {
+    if (!name) return;
+    dispatch(addBlacklist(name));
+  },
+  unblock: (dispatch, [name]) => {
+    if (!name) return;
+    dispatch(removeBlacklist(name));
   },
 };
 

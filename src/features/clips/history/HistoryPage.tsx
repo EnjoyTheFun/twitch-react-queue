@@ -9,9 +9,9 @@ function MemoryPage() {
   const dispatch = useAppDispatch();
   const [activePage, setPage] = useState(1);
   const selectHistoryPageClips = useMemo(() => makeSelectHistoryPageClips(), []);
-  
+
   const clipObjects = useAppSelector((state) => selectHistoryPageClips(state, activePage, 24));
-  
+
   const totalClips = useAppSelector(selectHistoryIds).length;
   const totalPages = Math.ceil(totalClips / 24);
   return (
@@ -34,7 +34,7 @@ function MemoryPage() {
                     platform={clip!.Platform || undefined}
                     card
                     clipId={clip!.id}
-                    onClick={() => {}}
+                    onClick={() => { }}
                     onCrossClick={(e) => {
                       e.preventDefault();
                       dispatch(memoryClipRemoved(clip!.id));

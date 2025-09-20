@@ -40,10 +40,10 @@ const getPlayerComponent = (
 
   const handleEnded = autoplayEnabled && nextClipId
     ? () => {
-        if (!autoplayTimeoutHandle) {
-          dispatch(autoplayTimeoutHandleChanged({ set: true }));
-        }
+      if (!autoplayTimeoutHandle) {
+        dispatch(autoplayTimeoutHandleChanged({ set: true }));
       }
+    }
     : undefined;
 
 
@@ -209,13 +209,10 @@ function Player({ className }: PlayerProps) {
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 3,
-            background: 'rgba(0,0,0,0.6)',
+            background: 'rgba(0, 0, 0, 0.6)',
             color: 'white',
             padding: '6px 10px',
-            borderTopLeftRadius: 0,
-            borderTopRightRadius: 0,
-            borderBottomLeftRadius: 12,
-            borderBottomRightRadius: 12,
+            borderRadius: '0 0 12px 12px',
             fontWeight: 600,
             fontSize: 12,
           }}

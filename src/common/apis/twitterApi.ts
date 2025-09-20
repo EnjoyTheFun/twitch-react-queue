@@ -22,6 +22,9 @@ export async function getClipFromTweet(id: string): Promise<TweetClip | undefine
 
   const createdAt = data.date ? formatISO(new Date(data.date)) : '';
 
+  const durationMs = data.media_extended?.[0]?.duration_millis || data.qrt?.media_extended?.[0]?.duration_millis;
+  const duration = durationMs ? Math.round(durationMs / 1000) : undefined;
+
   const clip: TweetClip = {
     id,
     author: data.user_name || '',
@@ -29,6 +32,8 @@ export async function getClipFromTweet(id: string): Promise<TweetClip | undefine
     submitters: [],
     thumbnailUrl,
     createdAt,
+    duration,
+    views: data.likes,
     Platform: 'Twitter',
     url: tweetUrl,
   };

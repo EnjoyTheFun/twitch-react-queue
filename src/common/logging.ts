@@ -21,7 +21,7 @@ let globalLogLevel: LogLevel;
 const setLogLevel = (level: LogLevels) => globalLogLevel = LogLevel[level] ?? LogLevel.info;
 
 class ConsoleLogger implements Logger {
-  constructor(private name: string) {}
+  constructor(private name: string) { }
 
   public debug(message: any, ...data: any[]): void {
     this.log(LogLevel.debug, message, ...data);

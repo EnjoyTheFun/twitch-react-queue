@@ -27,10 +27,10 @@ function PlayerTitle({ className }: PlayerTitleProps) {
     const roleColor = chatUser.broadcaster
       ? theme.colors.red[6]
       : chatUser.vip
-      ? theme.colors.pink[6]
-      : chatUser.mod
-      ? theme.colors.green[6]
-      : undefined;
+        ? theme.colors.pink[6]
+        : chatUser.mod
+          ? theme.colors.green[6]
+          : undefined;
 
     return roleColor ? { color: roleColor } : undefined;
   })();

@@ -17,6 +17,7 @@ interface SettingsState {
   skipThreshold?: number;
   clipMemoryRetentionDays?: number | null;
   reorderOnDuplicate?: boolean;
+  autoplayDelay?: number;
 }
 
 const initialState: SettingsState = {
@@ -29,6 +30,7 @@ const initialState: SettingsState = {
   skipThreshold: 20,
   clipMemoryRetentionDays: null,
   reorderOnDuplicate: true,
+  autoplayDelay: 5,
 };
 
 const settingsSlice = createSlice({
@@ -52,7 +54,7 @@ const settingsSlice = createSlice({
         state.commandPrefix = payload.commandPrefix;
       }
       if (payload.blacklist) {
-        state.blacklist = payload.blacklist.map((s) => s.toLowerCase());
+        state.blacklist = payload.blacklist.map((s) => s.trim().toLowerCase()).filter(Boolean);
       }
       if (payload.blurredProviders) {
         state.blurredProviders = payload.blurredProviders;
@@ -69,6 +71,9 @@ const settingsSlice = createSlice({
       if (payload.reorderOnDuplicate !== undefined) {
         state.reorderOnDuplicate = payload.reorderOnDuplicate;
       }
+      if (payload.autoplayDelay !== undefined) {
+        state.autoplayDelay = Math.max(0, Math.min(5, payload.autoplayDelay));
+      }
     },
     toggleShowTopSubmitters: (state) => {
       state.showTopSubmitters = !state.showTopSubmitters;
@@ -78,6 +83,14 @@ const settingsSlice = createSlice({
     },
     setVolume: (state, action) => {
       state.volume = action.payload;
+    },
+    addBlacklist: (state, { payload }: PayloadAction<string>) => {
+      const name = payload.trim().toLowerCase();
+      if (name && !state.blacklist.includes(name)) state.blacklist.push(name);
+    },
+    removeBlacklist: (state, { payload }: PayloadAction<string>) => {
+      const name = payload.trim().toLowerCase();
+      state.blacklist = state.blacklist.filter((c) => c !== name);
     },
   },
   extraReducers: (builder) => {
@@ -110,8 +123,9 @@ export const selectSkipThreshold = (state: RootState) => state.settings.skipThre
 export const selectClipMemoryRetentionDays = (state: RootState) => state.settings.clipMemoryRetentionDays ?? null;
 
 export const selectReorderOnDuplicate = (state: RootState) => state.settings.reorderOnDuplicate !== false;
+export const selectAutoplayDelay = (state: RootState) => state.settings.autoplayDelay ?? 5;
 
-export const { colorSchemeToggled, channelChanged, settingsChanged, toggleShowTopSubmitters, setShowTopSubmitters } = settingsSlice.actions;
+export const { colorSchemeToggled, channelChanged, settingsChanged, toggleShowTopSubmitters, setShowTopSubmitters, addBlacklist, removeBlacklist, setVolume } = settingsSlice.actions;
 
 const settingsReducer = persistReducer(
   {
@@ -122,5 +136,4 @@ const settingsReducer = persistReducer(
   settingsSlice.reducer
 );
 
-export const { setVolume } = settingsSlice.actions;
 export default settingsReducer;

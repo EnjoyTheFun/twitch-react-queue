@@ -3,12 +3,14 @@ import { MouseEventHandler, useEffect, useRef } from 'react';
 import { IconTrash } from '@tabler/icons-react';
 import { useAppSelector } from '../../app/hooks';
 import { selectClipById, selectTopNSubmitters, selectHighlightedClipId } from './clipQueueSlice';
-import type { PlatformType } from '../../common/utils';
+import { getProviderKeysForPlatform, type PlatformType } from '../../common/utils';
 import Platform from '../../common/components/BrandPlatforms';
+import StatBadge from './components/StatBadge';
 
 interface ClipProps {
   clipId: string;
   platform: PlatformType;
+
   onClick?: MouseEventHandler<HTMLDivElement>;
   onCrossClick?: MouseEventHandler<HTMLButtonElement>;
 
@@ -17,24 +19,9 @@ interface ClipProps {
   queueIndex?: number;
 }
 
-const PLATFORM_PROVIDER_MAP: Record<string, string[]> = {
-  Twitch: ['twitch-clip', 'twitch-vod'],
-  YouTube: ['youtube'],
-  TikTok: ['tiktok'],
-  Twitter: ['twitter'],
-  Instagram: ['instagram'],
-  Kick: ['kick-clip'],
-  Streamable: ['streamable'],
-};
-
-const platformToProviderKey = (platform?: PlatformType): string[] => {
-  if (!platform) return [];
-  return PLATFORM_PROVIDER_MAP[platform] ?? [];
-};
-
 const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueIndex }: ClipProps) => {
   const clip = useAppSelector(selectClipById(clipId));
-  const { title, thumbnailUrl = '', author, submitters } = clip || {};
+  const { title, thumbnailUrl = '', author, submitters, duration, views } = clip || {};
 
   const highlightedClipId = useAppSelector(selectHighlightedClipId);
   const theme = useMantineTheme();
@@ -77,16 +64,16 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
     const roleColor = chatUser.broadcaster
       ? theme.colors.red[6]
       : chatUser.vip
-      ? theme.colors.pink[6]
-      : chatUser.mod
-      ? theme.colors.green[6]
-      : undefined;
+        ? theme.colors.pink[6]
+        : chatUser.mod
+          ? theme.colors.green[6]
+          : undefined;
 
     return roleColor ? { color: roleColor } : undefined;
   })();
 
-  const providerKeys = platformToProviderKey(platform);
-  const shouldBlur = providerKeys.some((k) => blurredProviders.includes(k));
+  const providers = getProviderKeysForPlatform(platform);
+  const shouldBlur = providers.some((k) => blurredProviders.includes(k));
 
   const boxSx = (theme: any) => ({
     position: 'relative' as const,
@@ -99,7 +86,11 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
     overflow: 'hidden',
     zIndex: 2,
     '& .clip--action-icon': { display: 'none' },
+    '& .clip--duration-badge': { display: 'none' },
+    '& .clip--queue-index': { display: 'block' },
     '&:hover .clip--action-icon': { display: 'block' },
+    '&:hover .clip--duration-badge': { display: 'flex' },
+    '&:hover .clip--queue-index': { display: 'none' },
     '&:hover .clip--title': { color: onClick ? theme.colors.indigo[5] : undefined },
     ...(isHighlighted && {
       '&::after': {
@@ -163,6 +154,7 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
     <Box ref={clipRef} sx={boxSx}>
       {queueIndex && (
         <Box
+          className="clip--queue-index"
           sx={{
             position: 'absolute',
             top: 1,
@@ -189,17 +181,24 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
         sx={groupSx}
         onClick={onClick}
       >
-        <AspectRatio ratio={16 / 9} sx={aspectRatioSx}>
-          <Skeleton visible={!thumbnailUrl}>
-            <Image
-              src={thumbnailUrl}
-              sx={{
-                backgroundColor: '#373A40',
-                borderRadius: 4,
-                filter: shouldBlur ? 'blur(6px)' : undefined,
-              }}
-            />
-          </Skeleton>
+        <AspectRatio ratio={16 / 9} sx={{ ...aspectRatioSx }}>
+          <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
+            <Skeleton visible={!thumbnailUrl}>
+              <Image
+                src={thumbnailUrl}
+                sx={{
+                  backgroundColor: '#373A40',
+                  borderRadius: 4,
+                  filter: shouldBlur ? 'blur(6px)' : undefined,
+                }}
+              />
+            </Skeleton>
+            {(duration && duration > 0) || (views && views > 0) ? (
+              <Box className="clip--duration-badge" sx={{ position: 'absolute', bottom: 0, left: 0 }}>
+                <StatBadge duration={duration} views={views} />
+              </Box>
+            ) : null}
+          </Box>
         </AspectRatio>
         <Stack spacing={0} align="flex-start" sx={{ width: '100%' }}>
           <Skeleton visible={!title}>
@@ -222,12 +221,12 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
           </Skeleton>
           {submitters?.[0] && (
             <Text size="xs" color="dimmed" lineClamp={1} title={submitters.join('\n')}>
-                Submitted by{' '}
-                <strong className={submitterClass} style={submitterStyle}>
-                  {submitters[0]}
-                </strong>
-                {submitters.length > 1 && ` +${submitters.length - 1}`}
-              </Text>
+              Submitted by{' '}
+              <strong className={submitterClass} style={submitterStyle}>
+                {submitters[0]}
+              </strong>
+              {submitters.length > 1 && ` +${submitters.length - 1}`}
+            </Text>
           )}
         </Stack>
       </Group>

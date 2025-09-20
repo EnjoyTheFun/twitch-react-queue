@@ -10,9 +10,10 @@ type Props = {
   variant?: any;
   className?: string;
   style?: React.CSSProperties;
+  clearWhenIdle?: boolean;
 };
 
-export default function CircularButton({ children, onClick, title, size = 'lg', color, variant = 'filled', className, style }: Props) {
+export default function CircularButton({ children, onClick, title, size = 'lg', color, variant = 'filled', className, style, clearWhenIdle = false }: Props) {
   const [hover, setHover] = useState(false);
   const onMouseEnter = () => setHover(true);
   const onMouseLeave = () => setHover(false);
@@ -25,6 +26,14 @@ export default function CircularButton({ children, onClick, title, size = 'lg', 
     pointerEvents: 'auto',
     ...style,
   };
+
+  if (clearWhenIdle && !hover) {
+    Object.assign(baseStyle, {
+      backgroundColor: 'transparent',
+      boxShadow: 'none',
+      border: 'none',
+    });
+  }
 
   return (
     <ActionIcon

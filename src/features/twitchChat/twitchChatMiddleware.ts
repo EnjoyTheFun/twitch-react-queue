@@ -42,6 +42,14 @@ const createClient = ({ token, username }: { token: string; username: string }) 
 const handleMessage =
   (storeApi: AppMiddlewareAPI) => (channel: string, chatUserstate: ChatUserstate, message: string, self: boolean) => {
     const { commandPrefix } = storeApi.getState().settings;
+    const blacklisted = storeApi.getState().settings.blacklist || [];
+    const blacklistedSet = new Set(blacklisted.map((c: string) => c.toLowerCase()));
+
+    const senderUsername = (chatUserstate.username || '').toLowerCase();
+    const senderDisplay = (chatUserstate['display-name'] || '').toLowerCase();
+    if (blacklistedSet.has(senderUsername) || (senderDisplay && blacklistedSet.has(senderDisplay))) {
+      return;
+    }
 
     const userstate: Userstate = {
       username: chatUserstate['display-name'] ?? chatUserstate.username ?? 'Twitch Chat User',

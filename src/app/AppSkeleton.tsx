@@ -15,7 +15,7 @@ import { TitleIcon, TitleText } from './AppHeader';
 function AppSkeleton() {
   const preferredColorScheme = useColorScheme();
   return (
-    <ColorSchemeProvider colorScheme={preferredColorScheme} toggleColorScheme={() => {}}>
+    <ColorSchemeProvider colorScheme={preferredColorScheme} toggleColorScheme={() => { }}>
       <MantineProvider
         theme={{ colorScheme: preferredColorScheme, primaryColor: 'indigo' }}
         withNormalizeCSS

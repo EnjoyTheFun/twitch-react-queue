@@ -120,7 +120,6 @@ function SpotlightLayout() {
 
           <div className="player-box" style={{ height: playerDesiredHeight }}>
             <Player />
-            <TitleHover />
           </div>
 
           <div className="side-panel right">
@@ -159,6 +158,7 @@ function SpotlightLayout() {
         <CircularButton
           onClick={toggleQueue}
           title={queueOpen ? 'Hide queue' : 'Show queue'}
+          clearWhenIdle
         >
           {queueOpen ? <IconX /> : <IconMenu2 />}
         </CircularButton>
@@ -171,6 +171,10 @@ function SpotlightLayout() {
           checked={autoplayEnabled}
           onChange={handleAutoplayChange}
         />
+      </div>
+
+      <div className="info-toggle">
+        <TitleHover />
       </div>
     </Container>
   );

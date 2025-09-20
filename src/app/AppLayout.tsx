@@ -1,10 +1,9 @@
 import { AppShell, Box } from '@mantine/core';
 import { PropsWithChildren } from 'react';
 import AppHeader from './AppHeader';
-import useQueueStatusTitle from './QueueStatus';
+import AppTitle from './AppTitle';
 
 const AppLayout = ({ children, noNav = false }: PropsWithChildren<{ noNav?: boolean }>) => {
-  useQueueStatusTitle();
 
   return (
     <AppShell
@@ -19,6 +18,7 @@ const AppLayout = ({ children, noNav = false }: PropsWithChildren<{ noNav?: bool
         },
       }}
     >
+      <AppTitle />
       <Box
         sx={{
           height: '100%',

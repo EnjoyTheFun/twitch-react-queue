@@ -17,4 +17,5 @@ export interface AllSettings {
   skipThreshold?: number;
   clipMemoryRetentionDays?: number | null;
   reorderOnDuplicate?: boolean;
+  autoplayDelay?: number;
 }

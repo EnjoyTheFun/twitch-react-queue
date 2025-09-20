@@ -45,6 +45,8 @@ class KickClipProvider implements ClipProvider {
       url: clipInfo.video_url,
       createdAt: clipInfo.created_at,
       thumbnailUrl: clipInfo.thumbnail_url.replace('%{width}x%{height}', '480x272'),
+      duration: clipInfo.duration,
+      views: clipInfo.views || clipInfo.view_count,
       submitters: [],
       Platform: 'Kick',
     };

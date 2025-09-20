@@ -11,7 +11,8 @@ import {
   selectLayout,
   selectProviders,
 } from '../clips/clipQueueSlice';
-import { selectChannel, selectCommandPrefix, settingsChanged, selectClipMemoryRetentionDays, selectSkipThreshold } from './settingsSlice';
+import { getProviders } from '../../common/utils';
+import { selectChannel, selectCommandPrefix, settingsChanged, selectClipMemoryRetentionDays, selectSkipThreshold, selectAutoplayDelay } from './settingsSlice';
 
 function SettingsModal({ closeModal }: { closeModal: () => void }) {
   const dispatch = useAppDispatch();
@@ -26,16 +27,17 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
   const existingBlurred = useAppSelector((s) => s.settings.blurredProviders) || [];
   const existingSkipThreshold = useAppSelector(selectSkipThreshold);
   const existingClipMemoryRetentionDays = useAppSelector(selectClipMemoryRetentionDays);
+  const existingAutoplayDelay = useAppSelector(selectAutoplayDelay);
   const theme = useMantineTheme();
   const form = useForm({
-    initialValues: { channel, commandPrefix, clipLimit, enabledProviders, layout, blacklist: existingBlacklist.join(', '), blurredProviders: existingBlurred, skipThreshold: existingSkipThreshold, clipMemoryRetentionDays: existingClipMemoryRetentionDays },
+    initialValues: { channel, commandPrefix, clipLimit, enabledProviders, layout, blacklist: existingBlacklist.join('\n'), blurredProviders: existingBlurred, skipThreshold: existingSkipThreshold, clipMemoryRetentionDays: existingClipMemoryRetentionDays, autoplayDelay: existingAutoplayDelay },
   });
 
   return (
     <form
       onSubmit={form.onSubmit((settings) => {
         const blacklistArr = (settings.blacklist || '')
-          .split(',')
+          .split('\n')
           .map((s: string) => s.trim())
           .filter((s: string) => s.length > 0);
 
@@ -82,16 +84,7 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
               />
               <Stack spacing="sm">
                 <Text size="sm">Clip providers</Text>
-                {[
-                  { key: 'twitch-clip', label: 'Twitch Clips' },
-                  { key: 'twitch-vod', label: 'Twitch Videos / VODs' },
-                  { key: 'kick-clip', label: 'Kick Clips' },
-                  { key: 'youtube', label: 'YouTube' },
-                  { key: 'streamable', label: 'Streamable' },
-                  { key: 'tiktok', label: 'TikToks' },
-                  { key: 'twitter', label: 'X / Twitter (Third-party API)' },
-                  { key: 'instagram', label: 'Instagram (Experimental)' },
-                ].map((p) => {
+                {getProviders().map((p) => {
                   const enabled = form.values.enabledProviders?.includes(p.key);
                   const blurred = form.values.blurredProviders?.includes(p.key);
                   return (
@@ -180,12 +173,12 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
           </Tabs.Tab>
           <Tabs.Tab label="Moderation" icon={<IconBan size={16} />} {...({} as any)}>
             <Stack>
-              <Text size="sm">User blacklist (comma-separated). Submissions from these usernames will be ignored.</Text>
+              <Text size="sm">User blacklist (one per line). These users will be prevented from submitting clips and using chat commands.</Text>
               <Textarea
-                autosize
-                minRows={2}
-                placeholder="nightbot, streamelements"
+                minRows={6}
+                placeholder={"nightbot\nstreamelements"}
                 {...form.getInputProps('blacklist')}
+                style={{ maxHeight: '12rem', overflow: 'auto', resize: 'none' }}
               />
               <NumberInput
                 label="Skip votes required"
@@ -194,6 +187,16 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
                 step={1}
                 value={form.values.skipThreshold}
                 onChange={(v) => form.setFieldValue('skipThreshold', v ?? 20)}
+              />
+              <NumberInput
+                label="Autoplay delay"
+                description="Delay in seconds before auto-switching to next video (0 = instant, 5 = 5 seconds with overlay and timer)"
+                min={0}
+                max={5}
+                step={0.1}
+                precision={1}
+                value={form.values.autoplayDelay}
+                onChange={(v) => form.setFieldValue('autoplayDelay', v ?? 5)}
               />
             </Stack>
           </Tabs.Tab>

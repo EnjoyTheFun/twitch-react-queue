@@ -38,8 +38,10 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
           return next(action);
         }
 
-        const blacklist = storeAPI.getState().settings.blacklist || [];
-        if (blacklist.map((b: string) => b.toLowerCase()).includes((sender || '').toLowerCase())) {
+        const blacklisted = storeAPI.getState().settings.blacklist || [];
+        const senderNorm = (sender || '').toLowerCase();
+        const blacklistedSet = new Set(blacklisted.map((b: string) => b.toLowerCase()));
+        if (blacklistedSet.has(senderNorm)) {
           return next(action);
         }
 
@@ -68,6 +70,10 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
       } else if (urlEnqueue.match(action)) {
         const { url, userstate } = action.payload;
         const sender = userstate.username;
+        const blacklisted = storeAPI.getState().settings.blacklist || [];
+        const senderNorm = (sender || '').toLowerCase();
+        const blacklistedSet = new Set(blacklisted.map((b: string) => b.toLowerCase()));
+        if (blacklistedSet.has(senderNorm)) return next(action);
         const id = clipProvider.getIdFromUrl(url);
         if (id) {
           const clip: Clip | undefined = storeAPI.getState().clipQueue.byId[id];
@@ -107,8 +113,12 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
             if (existingHandle) {
               clearTimeout(existingHandle);
             }
-            
+
             const delay = storeAPI.getState().clipQueue.autoplayDelay;
+            if (delay === 0) {
+              storeAPI.dispatch(currentClipWatched());
+              return next(action);
+            }
             const handle = setTimeout(() => {
               storeAPI.dispatch(currentClipWatched());
             }, delay);

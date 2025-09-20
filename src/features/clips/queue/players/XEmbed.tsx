@@ -1,9 +1,7 @@
 import { useEffect } from 'react';
 import { XEmbed } from 'react-social-media-embed';
 import { useAppDispatch } from '../../../../app/hooks';
-import {
-  autoplayTimeoutHandleChanged,
-} from '../../clipQueueSlice';
+import { autoplayTimeoutHandleChanged } from '../../clipQueueSlice';
 
 export default function XEmbedWithTimeout({
   url,

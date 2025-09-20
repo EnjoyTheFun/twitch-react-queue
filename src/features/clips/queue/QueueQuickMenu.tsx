@@ -3,9 +3,8 @@ import { useModals } from '@mantine/modals';
 import { FormEvent, useState } from 'react';
 import { IconTrashX, IconTallymarks, IconReorder } from '@tabler/icons-react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { settingsChanged } from '../../settings/settingsSlice';
+import { settingsChanged, selectReorderOnDuplicate } from '../../settings/settingsSlice';
 import { queueCleared, selectClipLimit } from '../clipQueueSlice';
-import { selectReorderOnDuplicate } from '../../settings/settingsSlice';
 
 function ClipLimitModal({ onSubmit }: { onSubmit: () => void }) {
   const dispatch = useAppDispatch();

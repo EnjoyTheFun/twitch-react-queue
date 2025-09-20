@@ -2,7 +2,14 @@ import { isAnyOf, Middleware } from '@reduxjs/toolkit';
 import { AppMiddlewareAPI, RootState } from '../../app/store';
 import { trace } from './analytics';
 import { authenticateWithToken } from '../auth/authSlice';
-import { clipDetailsFailed, clipDetailsReceived, clipStubReceived, currentClipWatched, isOpenChanged, queueCleared } from '../clips/clipQueueSlice';
+import {
+  clipDetailsFailed,
+  clipDetailsReceived,
+  clipStubReceived,
+  currentClipWatched,
+  isOpenChanged,
+  queueCleared
+} from '../clips/clipQueueSlice';
 import { settingsChanged } from '../settings/settingsSlice';
 
 const createAnalyticsMiddleware = (): Middleware<{}, RootState> => {
