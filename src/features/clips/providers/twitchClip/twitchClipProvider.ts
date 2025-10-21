@@ -54,7 +54,7 @@ class TwitchClipProvider implements ClipProvider {
   }
 
   getEmbedUrl(id: string): string | undefined {
-    return `https://clips.twitch.tv/embed?clip=${id}&autoplay=true&parent=${window.location.hostname}`;
+    return `https://clips.twitch.tv/embed?clip=${id}&parent=${window.location.hostname}&autoplay=true`;
   }
 
   async getAutoplayUrl(id: string): Promise<string | undefined> {
