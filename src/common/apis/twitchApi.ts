@@ -24,32 +24,42 @@ const twitchGqlClient = axios.create({
 });
 
 const getDirectUrl = async (id: string): Promise<string | undefined> => {
-  const data = [
-    {
-      operationName: 'ClipsDownloadButton',
-      variables: {
-        slug: id,
-      },
-      extensions: {
-        persistedQuery: {
-          version: 1,
-          sha256Hash: '6e465bb8446e2391644cf079851c0cb1b96928435a240f07ed4b240f0acc6f1b',
+  try {
+    const data = [
+      {
+        operationName: 'ClipsDownloadButton',
+        variables: {
+          slug: id,
+        },
+        extensions: {
+          persistedQuery: {
+            version: 1,
+            sha256Hash: '6e465bb8446e2391644cf079851c0cb1b96928435a240f07ed4b240f0acc6f1b',
+          },
         },
       },
-    },
-  ];
+    ];
 
-  const resp = await twitchGqlClient.post('', data);
-  const [respData] = resp.data;
-  const playbackAccessToken = respData.data.clip.playbackAccessToken;
-  const url =
-    respData.data.clip.videoQualities[0].sourceURL +
-    '?sig=' +
-    playbackAccessToken.signature +
-    '&token=' +
-    encodeURIComponent(playbackAccessToken.value);
+    const resp = await twitchGqlClient.post('', data);
+    const [respData] = resp.data;
+    const playbackAccessToken = respData?.data?.clip?.playbackAccessToken;
+    const qualities = respData?.data?.clip?.videoQualities;
+    if (!playbackAccessToken || !qualities?.length) {
+      console.warn('Twitch GQL returned unexpected payload for clip', id, respData);
+      return undefined;
+    }
+    const url =
+      qualities[0].sourceURL +
+      '?sig=' +
+      playbackAccessToken.signature +
+      '&token=' +
+      encodeURIComponent(playbackAccessToken.value);
 
-  return url;
+    return url;
+  } catch (e: any) {
+    console.warn('getDirectUrl failed for Twitch clip', id, e?.message || e);
+    return undefined;
+  }
 };
 
 twitchApiClient.interceptors.request.use((request) => {
