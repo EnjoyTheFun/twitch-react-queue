@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import type { Clip } from '../clipQueueSlice';
 import {
   autoplayTimeoutHandleChanged,
+  currentClipWatched,
   selectAutoplayEnabled,
   selectAutoplayTimeoutHandle,
   selectCurrentClip,
@@ -167,6 +168,12 @@ function Player({ className }: PlayerProps) {
       return;
     }
 
+    if (autoplayEnabled && nextClipId && currentClip.id?.startsWith('twitch-vod:')) {
+      // skip autoplay for twitch VODs
+      dispatch(currentClipWatched());
+      return;
+    }
+
     setVideoSrc(undefined);
     let Flag = true;
 
@@ -190,7 +197,7 @@ function Player({ className }: PlayerProps) {
     return () => {
       Flag = false;
     };
-  }, [currentClip]);
+  }, [currentClip, autoplayEnabled, nextClipId, dispatch]);
 
   const player = getPlayerComponent(currentClip, videoSrc, autoplayEnabled, nextClipId, autoplayTimeoutHandle, dispatch);
 

@@ -24,36 +24,57 @@ const twitchGqlClient = axios.create({
 });
 
 const getDirectUrl = async (id: string): Promise<string | undefined> => {
-  try {
-    const data = [
-      {
-        operationName: 'ClipsDownloadButton',
-        variables: {
-          slug: id,
-        },
-        extensions: {
-          persistedQuery: {
-            version: 1,
-            sha256Hash: '6e465bb8446e2391644cf079851c0cb1b96928435a240f07ed4b240f0acc6f1b',
-          },
+  const operationName = 'ClipsDownloadButton';
+  const persistedBody = [
+    {
+      operationName,
+      variables: { slug: id },
+      extensions: {
+        persistedQuery: {
+          version: 1,
+          sha256Hash: '6e465bb8446e2391644cf079851c0cb1b96928435a240f07ed4b240f0acc6f1b',
         },
       },
-    ];
+    },
+  ];
 
-    const resp = await twitchGqlClient.post('', data);
-    const [respData] = resp.data;
-    const playbackAccessToken = respData?.data?.clip?.playbackAccessToken;
-    const qualities = respData?.data?.clip?.videoQualities;
+  const fullQuery =
+    'query ClipsDownloadButton($slug: ID!, $params: PlaybackAccessTokenParams!) {\n' +
+    '  clip(slug: $slug) {\n' +
+    '    playbackAccessToken(params: $params) { signature value }\n' +
+    '    videoQualities { quality sourceURL frameRate }\n' +
+    '  }\n' +
+    '}';
+
+  const fullQueryVariables = {
+    slug: id,
+    params: { platform: 'web', playerBackend: 'mediaplayer', playerType: 'embed' },
+  } as Record<string, unknown>;
+
+  try {
+    let resp = await twitchGqlClient.post('', persistedBody);
+    let node = Array.isArray(resp.data) ? resp.data[0] : resp.data;
+
+    let token = node?.data?.clip?.playbackAccessToken;
+    let qualities = node?.data?.clip?.videoQualities as Array<{ sourceURL: string }> | undefined;
+
+    if (!token || !qualities?.length) {
+      const fullQueryBody = [{ operationName, variables: fullQueryVariables, query: fullQuery }];
+      resp = await twitchGqlClient.post('', fullQueryBody);
+      node = Array.isArray(resp.data) ? resp.data[0] : resp.data;
+      token = node?.data?.clip?.playbackAccessToken;
+      qualities = node?.data?.clip?.videoQualities as Array<{ sourceURL: string }> | undefined;
+    }
+
+    const playbackAccessToken = token;
     if (!playbackAccessToken || !qualities?.length) {
-      console.warn('Twitch GQL returned unexpected payload for clip', id, respData);
+      console.warn('Twitch GQL returned unexpected payload for clip', id, node);
       return undefined;
     }
-    const url =
-      qualities[0].sourceURL +
-      '?sig=' +
-      playbackAccessToken.signature +
-      '&token=' +
-      encodeURIComponent(playbackAccessToken.value);
+
+    const url = `${qualities[0].sourceURL}?sig=${playbackAccessToken.signature}&token=${encodeURIComponent(
+      playbackAccessToken.value
+    )}`;
 
     return url;
   } catch (e: any) {
