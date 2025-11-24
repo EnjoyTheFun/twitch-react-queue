@@ -20,9 +20,11 @@ const AppLayout = ({ children, noNav = false }: PropsWithChildren<{ noNav?: bool
     >
       <AppTitle />
       <Box
+        className="app-scroll-container"
         sx={{
           height: '100%',
           overflow: 'auto',
+          scrollbarGutter: 'stable',
         }}
       >
         {children}

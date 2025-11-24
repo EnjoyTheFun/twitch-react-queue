@@ -112,6 +112,12 @@ function FeaturesSection() {
             <List.Item>
               <Code>!q voteskip</Code> - (public) vote to skip
             </List.Item>
+            <List.Item>
+              <Code>!q block &lt;username&gt;</Code> - blacklist a user (prevents submissions and using commands)
+            </List.Item>
+            <List.Item>
+              <Code>!q unblock &lt;username&gt;</Code> - remove a user from the blacklist
+            </List.Item>
           </List>
           <Text size="sm" color="dimmed" mt="sm">Note: some commands are moderator-only; prefix may vary by configuration.</Text>
         </Box>

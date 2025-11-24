@@ -1,5 +1,5 @@
 import { Group, Button, Switch, Box } from '@mantine/core';
-import { IconPlayerSkipForward, IconPlayerTrackNext, IconPlayerTrackPrev } from '@tabler/icons-react';
+import { IconPlayerSkipForward, IconPlayerTrackNext, IconPlayerTrackPrev, IconExternalLink } from '@tabler/icons-react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import {
   autoplayChanged,
@@ -11,8 +11,10 @@ import {
   currentClipWatched,
   selectCurrentId,
   previousClipWatched,
-  selectHasPrevious
+  selectHasPrevious,
+  selectCurrentClip
 } from '../clipQueueSlice';
+import clipProvider from '../providers/providers';
 
 function PlayerButtons({ className }: { className?: string }) {
   const dispatch = useAppDispatch();
@@ -21,15 +23,30 @@ function PlayerButtons({ className }: { className?: string }) {
   const clipLimit = useAppSelector(selectClipLimit);
   const autoplayEnabled = useAppSelector(selectAutoplayEnabled);
   const hasPrevious = useAppSelector(selectHasPrevious);
+  const currentClip = useAppSelector(selectCurrentClip);
   return (
     <Group align="center" className={className} sx={{ flexShrink: 0, marginLeft: 'auto' }}>
       <Group align="center" spacing="xs">
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Switch size="sm" label="Autoplay" checked={autoplayEnabled} onChange={(event) => {
+        <Box className="autoplay-toggle-inline" sx={{ display: 'flex', alignItems: 'center' }}>
+          <Switch size="xs" label="Autoplay" checked={autoplayEnabled} onChange={(event) => {
             dispatch(autoplayTimeoutHandleChanged({ set: false }));
             dispatch(autoplayChanged(event.currentTarget.checked));
           }} />
         </Box>
+        {currentClip && (
+          <Button
+            size="xs"
+            variant="default"
+            px={8}
+            onClick={() => {
+              const href = clipProvider.getUrl(currentClip.id) || currentClip.url;
+              if (href) window.open(href, '_blank', 'noopener,noreferrer');
+            }}
+            title="Open"
+          >
+            <IconExternalLink size={16} />
+          </Button>
+        )}
         {clipLimit && (
           <Button
             size="xs"

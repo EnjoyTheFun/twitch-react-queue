@@ -29,8 +29,32 @@ export default function TitleHover() {
   return (
     <div style={containerStyle} onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
       <div style={buttonStyle}>
-        <ActionIcon variant="filled" size="md" title="Show info" style={{ opacity: 0.3, transition: 'opacity 120ms' }} onMouseEnter={(e: React.MouseEvent) => ((e.currentTarget as HTMLElement).style.opacity = '1')} onMouseLeave={(e: React.MouseEvent) => ((e.currentTarget as HTMLElement).style.opacity = '0.3')}>
-          <IconInfoCircle />
+        <ActionIcon
+          variant="filled"
+          size="xl"
+          style={{
+            opacity: 0.35,
+            transition: 'opacity 140ms, transform 160ms',
+            width: 64,
+            height: 64,
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 32
+          }}
+          onMouseEnter={(e: React.MouseEvent) => {
+            const el = e.currentTarget as HTMLElement;
+            el.style.opacity = '1';
+            el.style.transform = 'scale(1.05)';
+          }}
+          onMouseLeave={(e: React.MouseEvent) => {
+            const el = e.currentTarget as HTMLElement;
+            el.style.opacity = '0.35';
+            el.style.transform = 'scale(1)';
+          }}
+        >
+          <IconInfoCircle size={36} />
         </ActionIcon>
       </div>
       {show && (

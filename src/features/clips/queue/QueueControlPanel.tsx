@@ -1,22 +1,16 @@
-import { Group, Text, SegmentedControl, Stack, ActionIcon } from '@mantine/core';
+import { Group, Text, Stack, ActionIcon } from '@mantine/core';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import {
-  isOpenChanged,
   selectClipLimit,
-  selectIsOpen,
   selectQueueIds,
   selectTotalQueueLength,
-  submitterColorsToggled,
-  selectColoredSubmitterNames,
   selectSkipVotingEnabled,
   skipVotingToggled,
 } from '../clipQueueSlice';
-import { selectShowTopSubmitters, toggleShowTopSubmitters } from '../../settings/settingsSlice';
+import { selectShowTopSubmitters, toggleShowTopSubmitters, selectSubOnlyMode, settingsChanged } from '../../settings/settingsSlice';
 import QueueQuickMenu from './QueueQuickMenu';
 import TopSubmittersMarquee from './TopSubmittersMarquee';
-import { useModals } from '@mantine/modals';
-import ImportLinksModal from './ImportLinksModal';
-import { IconFileImport, IconPalette, IconPaletteOff, IconCrown, IconCrownOff, IconThumbDown, IconThumbDownOff } from '@tabler/icons-react';
+import { IconCrown, IconCrownOff, IconThumbDown, IconThumbDownOff, IconUserCheck, IconUsers, IconVideo } from '@tabler/icons-react';
 
 interface QueueControlPanelProps {
   className?: string;
@@ -24,73 +18,40 @@ interface QueueControlPanelProps {
 
 const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
   const dispatch = useAppDispatch();
-  const isOpen = useAppSelector(selectIsOpen);
   const showMarquee = useAppSelector(selectShowTopSubmitters);
-  const colored = useAppSelector(selectColoredSubmitterNames);
+
   const skipVotingEnabled = useAppSelector(selectSkipVotingEnabled);
+  const subOnlyMode = useAppSelector(selectSubOnlyMode);
   const clipLimit = useAppSelector(selectClipLimit);
   const totalClips = useAppSelector(selectTotalQueueLength);
   const clipsLeft = useAppSelector(selectQueueIds).length;
-  const modals = useModals();
 
-  const handleQueueToggle = (state: string) => {
-    dispatch(isOpenChanged(state === 'open'));
-  };
-
-  const handleImportModal = () => {
-    modals.openModal({
-      title: 'Import links',
-      children: <ImportLinksModal />,
-      size: 'lg'
-    });
-  };
 
   const handleSkipVotingToggle = () => {
     dispatch(skipVotingToggled());
-  };
-
-  const handleColorsToggle = () => {
-    dispatch(submitterColorsToggled());
   };
 
   const handleTopSubmittersToggle = () => {
     dispatch(toggleShowTopSubmitters());
   };
 
-  const queueText = `${clipsLeft} of ${totalClips}${clipLimit ? `/${clipLimit}` : ''} clips left`;
+  const handleSubOnlyModeToggle = () => {
+    dispatch(settingsChanged({ subOnlyMode: !subOnlyMode }));
+  };
+
+  const queueCount = `${clipsLeft}/${totalClips}${clipLimit ? `/${clipLimit}` : ''}`;
 
   return (
-    <Stack spacing={0} className={className}>
-      <Group>
-        <Text size="lg" weight={700} sx={{ flexGrow: 1 }}>
-          Queue
-        </Text>
-        <SegmentedControl
-          size="xs"
-          sx={{ flexBasis: 196 }}
-          value={isOpen ? 'open' : 'closed'}
-          data={[
-            { label: 'Closed', value: 'closed' },
-            { label: 'Open', value: 'open' },
-          ]}
-          onChange={handleQueueToggle}
-        />
-        <QueueQuickMenu />
-      </Group>
+    <Stack spacing={0} className={className} sx={{ marginTop: '-0.5rem' }}>
       <Group position="apart" align="center" sx={{ width: '100%' }} mt={0}>
-        <Text size="md" weight={700} sx={{ flex: 1, margin: 0, padding: 0 }}>
-          {queueText}
-        </Text>
+        <Group spacing={6} align="center" sx={{ flex: 1, margin: 0, padding: 0 }}>
+          <Text size="md" weight={700} sx={{ margin: 0, padding: 0 }}>
+            {queueCount}
+          </Text>
+          <IconVideo size={18} style={{ marginTop: 2 }} />
+        </Group>
         <Group spacing={6} align="center" sx={{ alignItems: 'center', margin: 4 }}>
-          <ActionIcon
-            size="sm"
-            variant="light"
-            onClick={handleImportModal}
-            title="Import links"
-            aria-label="Import links"
-          >
-            <IconFileImport size={18} />
-          </ActionIcon>
+
 
           <ActionIcon
             size="sm"
@@ -105,12 +66,14 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
           <ActionIcon
             size="sm"
             variant="light"
-            onClick={handleColorsToggle}
-            title={colored ? 'Disable submitter colors' : 'Enable submitter colors'}
-            aria-label="Toggle submitter colors"
+            onClick={handleSubOnlyModeToggle}
+            title={subOnlyMode ? 'Disable subscriber-only mode' : 'Enable subscriber-only mode'}
+            aria-label="Toggle subscriber-only mode"
           >
-            {colored ? <IconPalette size={18} /> : <IconPaletteOff size={18} />}
+            {subOnlyMode ? <IconUserCheck size={18} /> : <IconUsers size={18} />}
           </ActionIcon>
+
+
           <ActionIcon
             size="sm"
             variant="light"
@@ -119,6 +82,7 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
           >
             {showMarquee ? <IconCrown size={18} /> : <IconCrownOff size={18} />}
           </ActionIcon>
+          <QueueQuickMenu />
         </Group>
       </Group>
 

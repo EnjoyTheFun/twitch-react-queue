@@ -50,6 +50,7 @@ class TiktokProvider implements ClipProvider {
         submitters: [],
         thumbnailUrl: data.thumbnail_url,
         Platform: 'TikTok',
+        url: this.getUrl(id),
       };
     } catch {
       return undefined;

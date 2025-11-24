@@ -11,6 +11,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 export interface Clip {
   id: string;
   submitters: string[];
+  seq?: number;
 
   status?: 'watched' | 'removed';
   timestamp?: string;
@@ -53,6 +54,7 @@ interface ClipQueueState {
   autoplayUrl?: string;
   watchedHistory: string[];
   reorderOnDuplicate?: boolean;
+  nextSeq: number;
 }
 
 const initialState: ClipQueueState = {
@@ -61,7 +63,7 @@ const initialState: ClipQueueState = {
   historyIds: [],
   watchedClipCount: 0,
   watchedCounts: {},
-  providers: ['twitch-clip', 'twitch-vod', 'youtube', 'tiktok', 'twitter'],
+  providers: ['twitch-clip', 'twitch-vod', 'youtube', 'tiktok', 'twitter', 'reddit'],
   layout: 'classic',
   isOpen: false,
   autoplay: false,
@@ -72,6 +74,7 @@ const initialState: ClipQueueState = {
   skipVotingEnabled: false,
   currentSkipVoters: [],
   reorderOnDuplicate: true,
+  nextSeq: 1,
 };
 
 const addClipToQueue = (state: ClipQueueState, clip: Clip) => {
@@ -111,7 +114,12 @@ const addClipToQueue = (state: ClipQueueState, clip: Clip) => {
 
   if (!state.clipLimit || calculateTotalQueueLength(state.watchedClipCount, state.queueIds) < state.clipLimit) {
     state.queueIds.push(id);
-    state.byId[id] = clip;
+    const clipWithSeq = { ...clip };
+    if (!clipWithSeq.seq) {
+      clipWithSeq.seq = state.nextSeq;
+      state.nextSeq += 1;
+    }
+    state.byId[id] = clipWithSeq;
   }
 };
 
@@ -123,6 +131,9 @@ const removeClipFromQueue = (state: ClipQueueState, id: string) => {
     if (index > -1) {
       state.queueIds.splice(index, 1);
     }
+  }
+  if ((!state.currentId || state.currentId === undefined) && state.queueIds.length === 0) {
+    state.nextSeq = 1;
   }
 };
 
@@ -177,6 +188,7 @@ const clipQueueSlice = createSlice({
       state.queueIds = [];
       state.watchedClipCount = 0;
       state.watchedHistory = [];
+      state.nextSeq = 1;
     },
     memoryPurged: (state) => {
       const memory = state.byId;
@@ -206,23 +218,27 @@ const clipQueueSlice = createSlice({
       updateClip(state, state.currentId, { status: 'watched', rememberedAt: new Date().toISOString() });
       state.autoplayTimeoutHandle = undefined;
       state.currentSkipVoters = [];
+
+      if (!state.currentId && state.queueIds.length === 0) {
+        state.nextSeq = 1;
+      }
     },
     previousClipWatched: (state) => {
       const currentId = state.currentId;
-      if (currentId) {
-        state.watchedHistory.pop();
-      }
-      const previousId = state.watchedHistory[state.watchedHistory.length - 1];
-      if (previousId) {
-        state.currentId = previousId;
-        if (currentId) {
-          state.queueIds.unshift(currentId);
-          state.watchedClipCount -= 1;
-          state.historyIds = state.historyIds.filter((id) => id !== currentId);
-        }
-        state.watchedHistory = state.watchedHistory.filter((id) => state.historyIds.includes(id));
-      }
+      if (!currentId || state.watchedHistory.length < 2) return;
+
+      const previousId = state.watchedHistory[state.watchedHistory.length - 2];
+      if (!previousId) return;
+
+      state.queueIds.unshift(currentId);
+      state.watchedClipCount = Math.max(0, state.watchedClipCount - 1);
+
+      state.watchedHistory.pop();
+      state.historyIds = state.historyIds.filter((id) => id !== currentId);
+
+      state.currentId = previousId;
       state.currentSkipVoters = [];
+      state.autoplayTimeoutHandle = undefined;
     },
 
     currentClipSkipped: (state) => {
@@ -238,6 +254,10 @@ const clipQueueSlice = createSlice({
           const key = submitter.toLowerCase();
           state.watchedCounts[key] = (state.watchedCounts[key] || 0) + 1;
         }
+      }
+
+      if (!state.currentId && state.queueIds.length === 0) {
+        state.nextSeq = 1;
       }
     },
     clipStubReceived: (state, { payload: clip }: PayloadAction<Clip>) => addClipToQueue(state, clip),
@@ -262,9 +282,9 @@ const clipQueueSlice = createSlice({
       updateClip(state, payload, { status: 'removed' });
     },
     queueClipRemoveByIndex: (state, { payload }: PayloadAction<string>) => {
-      const idx = Number.parseInt(payload, 10);
-      if (!isNaN(idx) && idx > 0) {
-        const clipId = state.queueIds[idx - 1];
+      const seq = Number.parseInt(payload, 10);
+      if (!isNaN(seq) && seq > 0) {
+        const clipId = state.queueIds.find(id => state.byId[id]?.seq === seq);
         if (clipId) {
           removeClipFromQueue(state, clipId);
           addClipToHistory(state, clipId);
@@ -302,38 +322,57 @@ const clipQueueSlice = createSlice({
       }
     },
     currentClipForceReplaced: (state, { payload }: PayloadAction<Clip>) => {
+      const incomingId = payload.id;
+      if (!incomingId) return;
+
       const previousCurrent = state.currentId;
 
-      state.byId[payload.id] = payload;
-
-      const existingReplacementIndex = state.queueIds.indexOf(payload.id);
-      if (existingReplacementIndex > -1) state.queueIds.splice(existingReplacementIndex, 1);
-
-      if (state.historyIds[0] !== payload.id) {
-        addClipToHistory(state, payload.id);
+      const clipWithSeq: Clip = { ...payload };
+      if (!clipWithSeq.seq) {
+        clipWithSeq.seq = state.nextSeq;
+        state.nextSeq += 1;
       }
-      if (state.watchedHistory[state.watchedHistory.length - 1] !== payload.id) {
-        state.watchedHistory.push(payload.id);
+
+      state.byId[incomingId] = clipWithSeq;
+
+      state.queueIds = state.queueIds.filter((id) => id !== incomingId);
+
+      if (previousCurrent && previousCurrent !== incomingId) {
+        const previousClip = state.byId[previousCurrent];
+        if (previousClip) {
+          previousClip.status = undefined;
+          previousClip.rememberedAt = undefined;
+        }
+
+        state.queueIds = state.queueIds.filter((id) => id !== previousCurrent);
+        state.historyIds = state.historyIds.filter((id) => id !== previousCurrent);
+        state.watchedHistory = state.watchedHistory.filter((id) => id !== previousCurrent);
+
+        if (previousClip) {
+          if (!previousClip.seq) {
+            previousClip.seq = state.nextSeq;
+            state.nextSeq += 1;
+          }
+          state.queueIds.unshift(previousCurrent);
+        }
       }
+
+      state.historyIds = state.historyIds.filter((id) => id !== incomingId);
+      addClipToHistory(state, incomingId);
+
+      state.watchedHistory = state.watchedHistory.filter((id) => id !== incomingId);
+      state.watchedHistory.push(incomingId);
+
       state.watchedClipCount += 1;
-      updateClip(state, payload.id, { status: 'watched', rememberedAt: new Date().toISOString() });
+      updateClip(state, incomingId, { status: 'watched', rememberedAt: new Date().toISOString() });
 
-      const replacedClip = state.byId[payload.id];
-      const submitter = replacedClip?.submitters?.[0];
+      const submitter = state.byId[incomingId]?.submitters?.[0];
       if (submitter) {
         const key = submitter.toLowerCase();
         state.watchedCounts[key] = (state.watchedCounts[key] || 0) + 1;
       }
 
-      if (previousCurrent && previousCurrent !== payload.id) {
-        const existingIndex = state.queueIds.indexOf(previousCurrent);
-        if (existingIndex > -1) {
-          state.queueIds.splice(existingIndex, 1);
-        }
-        state.queueIds.unshift(previousCurrent);
-      }
-
-      state.currentId = payload.id;
+      state.currentId = incomingId;
       state.autoplayTimeoutHandle = undefined;
       state.currentSkipVoters = [];
     },
@@ -386,11 +425,12 @@ const clipQueueSlice = createSlice({
       state.currentSkipVoters = [];
     },
     bumpClipToTop: (state, { payload }: PayloadAction<string>) => {
-      const idx = Number.parseInt(payload, 10);
-      if (!isNaN(idx) && idx > 0 && idx <= state.queueIds.length) {
-        const clipId = state.queueIds[idx - 1];
+      const seq = Number.parseInt(payload, 10);
+      if (!isNaN(seq) && seq > 0) {
+        const clipId = state.queueIds.find(id => state.byId[id]?.seq === seq);
         if (clipId) {
-          state.queueIds.splice(idx - 1, 1);
+          const idx = state.queueIds.indexOf(clipId);
+          state.queueIds.splice(idx, 1);
           state.queueIds.unshift(clipId);
         }
       }
@@ -554,6 +594,8 @@ export const selectSkipVoteCount = (state: RootState) => (state.clipQueue.curren
 export const selectTopSubmitter = createSelector([selectWatchedCounts], (counts) => {
   let top: { username: string | null; count: number } = { username: null, count: 0 };
   for (const [user, cnt] of Object.entries(counts || {})) {
+    const uname = (user || '').toLowerCase();
+    if (uname === 'import*' || uname.includes('(r/lsf)')) continue;
     if (cnt > (top.count || 0)) {
       top = { username: user, count: cnt };
     }
@@ -564,7 +606,10 @@ export const selectTopSubmitter = createSelector([selectWatchedCounts], (counts)
 export const selectTopNSubmitters = (n: number) =>
   createSelector([selectWatchedCounts], (counts) => {
     const arr = Object.entries(counts || {})
-      .filter(([username]) => username !== 'import*')
+      .filter(([username]) => {
+        const uname = (username || '').toLowerCase();
+        return uname !== 'import*' && !uname.includes('(r/lsf)');
+      })
       .map(([username, count]) => ({ username, count }));
     arr.sort((a, b) => b.count - a.count);
     return arr.slice(0, n);
@@ -610,11 +655,12 @@ export const highlightClipFrame = createAsyncThunk<void, void, { state: RootStat
 
 export const highlightClipByIndex = createAsyncThunk<void, string, { state: RootState }>(
   'clipQueue/highlightClipByIndex',
-  async (idxStr, { dispatch, getState }) => {
-    const idx = Number.parseInt(idxStr, 10);
-    if (!isNaN(idx) && idx > 0) {
-      const queueIds = selectQueueIds(getState());
-      const clipId = queueIds[idx - 1];
+  async (seqStr, { dispatch, getState }) => {
+    const seq = Number.parseInt(seqStr, 10);
+    if (!isNaN(seq) && seq > 0) {
+      const state = getState();
+      const queueIds = selectQueueIds(state);
+      const clipId = queueIds.find(id => state.clipQueue.byId[id]?.seq === seq);
       if (clipId) {
         dispatch(highlightClip(clipId));
         setTimeout(() => dispatch(clearHighlight()), 3000);
@@ -713,8 +759,43 @@ const clipQueueReducer = persistReducer(
   {
     key: 'clipQueue',
     storage: storage('twitch-react-queue'),
-    version: 1,
+    version: 2,
     blacklist: ['isOpen'],
+    migrate: (state: any) => {
+      if (!state) return Promise.resolve(initialState);
+
+      if (state._persist?.version === 1 || !state.nextSeq) {
+        let maxSeq = 0;
+
+        if (state.byId) {
+          for (const clip of Object.values(state.byId)) {
+            if ((clip as any).seq && (clip as any).seq > maxSeq) {
+              maxSeq = (clip as any).seq;
+            }
+          }
+        }
+
+        let nextSeq = maxSeq + 1;
+
+        if (state.queueIds && Array.isArray(state.queueIds)) {
+          state.queueIds.forEach((id: string) => {
+            if (state.byId[id] && !state.byId[id].seq) {
+              state.byId[id].seq = nextSeq;
+              nextSeq += 1;
+            }
+          });
+        }
+
+        if (state.currentId && state.byId[state.currentId] && !state.byId[state.currentId].seq) {
+          state.byId[state.currentId].seq = nextSeq;
+          nextSeq += 1;
+        }
+
+        state.nextSeq = nextSeq;
+      }
+
+      return Promise.resolve(state);
+    },
   },
   clipQueueSlice.reducer
 );

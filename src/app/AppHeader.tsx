@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActionIcon, ActionIconProps, Button, Group, Header, Space, Text, ThemeIcon, Box } from '@mantine/core';
+import { ActionIcon, ActionIconProps, Button, Group, Header, Space, Text, ThemeIcon, Box, SegmentedControl } from '@mantine/core';
 import { IconHome, IconList, IconHistory } from '@tabler/icons-react';
 import { PropsWithChildren } from 'react';
 import { NavLinkProps, useLocation } from 'react-router-dom';
@@ -7,10 +7,10 @@ import ColorSchemeSwitch from '../common/components/ColorSchemeSwitch';
 import NavLink from '../common/components/NavLink';
 import MyCredits from '../common/components/MyCredits';
 import IfAuthenticated from '../features/auth/IfAuthenticated';
-import { useAppDispatch } from './hooks';
+import { useAppDispatch, useAppSelector } from './hooks';
 import { login } from '../features/auth/authSlice';
 import AppMenu from './AppMenu';
-import ImportLinksButton from '../features/clips/queue/ImportLinksButton';
+import { isOpenChanged, selectIsOpen } from '../features/clips/clipQueueSlice';
 
 const TitleIcon = () => {
   const favicon = `${import.meta.env.BASE_URL || ''}favicon.svg`;
@@ -58,6 +58,7 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
   const dispatch = useAppDispatch();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const isOpen = useAppSelector(selectIsOpen);
 
   const handleLogin = () => {
     dispatch(login(location.pathname));
@@ -65,6 +66,10 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
 
   const toggleCollapsed = () => {
     setCollapsed(prev => !prev);
+  };
+
+  const handleQueueToggle = (state: string) => {
+    dispatch(isOpenChanged(state === 'open'));
   };
 
   return (
@@ -108,9 +113,58 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
               </Group>
             }
           >
-            <Group spacing="xs" align="center" sx={{ flexWrap: 'nowrap', gap: '0.5rem', minWidth: 0 }}>
-              <ImportLinksButton />
-              <div className="app-menu-container">
+            <Group spacing="xs" align="center" sx={{ flexWrap: 'nowrap', gap: '1rem', minWidth: 0, overflowX: 'auto', alignItems: 'center' }}>
+              <Group
+                spacing={6}
+                align="center"
+                className="status-group"
+                sx={(theme) => ({
+                  padding: '8px 8px',
+                  borderRadius: 4,
+                  flexShrink: 0
+                })}
+              >
+                <Text className="status-label hide-on-mobile" size="sm" weight={600} sx={{ lineHeight: 1, fontSize: '1rem' }}>Status:</Text>
+                <SegmentedControl
+                  size="sm"
+                  sx={{
+                    display: 'flex',
+                    width: '176px',
+                    '& .mantine-SegmentedControl-control': {
+                      display: 'flex',
+                      width: '100%'
+                    },
+                      '& .mantine-SegmentedControl-item': {
+                        flex: '1 1 0% !important',
+                        width: '50% !important',
+                        minWidth: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        paddingLeft: '6px',
+                        paddingRight: '6px'
+                      },
+                      '& .mantine-SegmentedControl-item button, & .mantine-SegmentedControl-item [role="button"]': {
+                        width: '100% !important',
+                        display: 'block'
+                      },
+                      '& .mantine-SegmentedControl-label': {
+                        fontSize: '0.9rem',
+                        fontWeight: 600,
+                        textAlign: 'center',
+                        width: '100%'
+                      }
+                  }}
+                  value={isOpen ? 'open' : 'closed'}
+                  data={[
+                    { label: 'Closed', value: 'closed' },
+                    { label: 'Open', value: 'open' },
+                  ]}
+                  onChange={handleQueueToggle}
+                />
+              </Group>
+
+              <div className="app-menu-container" style={{ flexShrink: 0 }}>
                 <AppMenu />
               </div>
             </Group>

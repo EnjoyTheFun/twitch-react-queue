@@ -42,7 +42,7 @@ class KickClipProvider implements ClipProvider {
       title: clipInfo.title,
       author: clipInfo.channel.username,
       category: clipInfo.category.name,
-      url: clipInfo.video_url,
+      url: this.getUrl(id) ?? clipInfo.video_url,
       createdAt: clipInfo.created_at,
       thumbnailUrl: clipInfo.thumbnail_url.replace('%{width}x%{height}', '480x272'),
       duration: clipInfo.duration,

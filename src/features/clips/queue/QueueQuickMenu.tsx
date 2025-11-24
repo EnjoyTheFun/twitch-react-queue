@@ -1,10 +1,11 @@
 import { Menu, Badge, NumberInput, Button, Stack, Switch } from '@mantine/core';
 import { useModals } from '@mantine/modals';
 import { FormEvent, useState } from 'react';
-import { IconTrashX, IconTallymarks, IconReorder } from '@tabler/icons-react';
+import { IconTrashX, IconTallymarks, IconReorder, IconPalette, IconPaletteOff, IconBulb } from '@tabler/icons-react';
+import ImportLinksModal from './ImportLinksModal';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { settingsChanged, selectReorderOnDuplicate } from '../../settings/settingsSlice';
-import { queueCleared, selectClipLimit } from '../clipQueueSlice';
+import { queueCleared, selectClipLimit, selectColoredSubmitterNames, submitterColorsToggled } from '../clipQueueSlice';
 
 function ClipLimitModal({ onSubmit }: { onSubmit: () => void }) {
   const dispatch = useAppDispatch();
@@ -47,6 +48,7 @@ function QueueQuickMenu() {
   const dispatch = useAppDispatch();
   const clipLimit = useAppSelector(selectClipLimit);
   const reorderOnDuplicate = useAppSelector(selectReorderOnDuplicate);
+  const coloredSubmitters = useAppSelector(selectColoredSubmitterNames);
 
   const openClipLimitModal = () => {
     const id = modals.openModal({
@@ -55,10 +57,19 @@ function QueueQuickMenu() {
     });
   };
 
+  const openImportLinksModal = () => {
+    const id = modals.openModal({
+      title: 'Import links',
+      children: <ImportLinksModal />,
+      size: 'lg',
+    });
+  };
+
   return (
     <div className="queue-quick-menu-container">
       <Menu
-        withinPortal={false}
+        withinPortal={true}
+        zIndex={2200}
         position="bottom"
         placement="end"
         closeOnItemClick={true}
@@ -69,6 +80,12 @@ function QueueQuickMenu() {
           onClick={() => openClipLimitModal()}
         >
           Set queue limit
+        </Menu.Item>
+        <Menu.Item icon={<IconBulb size={14} />} onClick={() => openImportLinksModal()}>
+          Import links
+        </Menu.Item>
+        <Menu.Item icon={coloredSubmitters ? <IconPalette size={14} /> : <IconPaletteOff size={14} />} rightSection={<Switch size="sm" checked={coloredSubmitters} onChange={() => dispatch(submitterColorsToggled())} />}>
+          Submitter colors
         </Menu.Item>
         <Menu.Item icon={<IconReorder size={14} />} rightSection={<Switch size="sm" checked={reorderOnDuplicate} onChange={(e) => dispatch(settingsChanged({ reorderOnDuplicate: e.currentTarget.checked }))} />}>
           Popularity sort

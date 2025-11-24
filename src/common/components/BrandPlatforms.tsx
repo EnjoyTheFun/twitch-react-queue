@@ -1,4 +1,4 @@
-import { IconBrandTwitch, IconBrandKick, IconBrandYoutube, IconBrandInstagram, IconBrandTiktok, IconBrandX } from '@tabler/icons-react';
+import { IconBrandTwitch, IconBrandKick, IconBrandYoutube, IconBrandInstagram, IconBrandTiktok, IconBrandX, IconBrandReddit } from '@tabler/icons-react';
 import type { PlatformType } from '../utils';
 
 interface BrandPlatformsProps {
@@ -13,6 +13,7 @@ const iconComponents = {
   TikTok: IconBrandTiktok,
   Instagram: IconBrandInstagram,
   Twitter: IconBrandX,
+  Reddit: IconBrandReddit,
   Streamable: null,
 } as const;
 

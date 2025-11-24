@@ -46,6 +46,7 @@ class TwitchClipProvider implements ClipProvider {
       duration: clipInfo.duration,
       views: clipInfo.view_count,
       Platform: 'Twitch',
+      url: this.getUrl(id),
     };
   }
 

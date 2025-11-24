@@ -1,12 +1,12 @@
 import {
   UnstyledButton,
   Avatar,
-  Divider,
   Menu,
   Switch,
   Text,
   Group,
   useMantineColorScheme,
+  Divider,
 } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { IconMoonStars, IconSettings, IconLogout, IconChevronDown } from '@tabler/icons-react';
@@ -29,7 +29,7 @@ const AppMenu = () => {
 
   return (
     <Menu
-      withinPortal={false}
+      withinPortal={true}
       position="bottom"
       placement="end"
       closeOnItemClick={true}

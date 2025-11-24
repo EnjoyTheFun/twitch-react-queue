@@ -1,4 +1,4 @@
-export type PlatformType = 'Twitch' | 'Kick' | 'YouTube' | 'Streamable' | 'TikTok' | 'Twitter' | 'Instagram' | undefined;
+export type PlatformType = 'Twitch' | 'Kick' | 'YouTube' | 'Streamable' | 'TikTok' | 'Twitter' | 'Instagram' | 'Reddit' | undefined;
 
 export const getUrlFromMessage = (message: string) => {
   const urlStart = message.indexOf('http');
@@ -47,6 +47,10 @@ const PLATFORM_META: Record<string, { label: string; providers: ProviderMeta[] }
   Instagram: {
     label: 'Instagram',
     providers: [{ key: 'instagram', label: 'Instagram (Experimental)' }],
+  },
+  Reddit: {
+    label: 'Reddit',
+    providers: [{ key: 'reddit', label: 'Reddit Videos' }],
   },
 };
 

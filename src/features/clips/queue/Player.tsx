@@ -86,6 +86,8 @@ const getPlayerComponent = (
       />);
     case 'Kick':
       return <VideoPlayer key={`${currentClip.id}-${videoSrc}-${autoplayEnabled}`} src={embedUrl} onEnded={handleEnded} />;
+    case 'Reddit':
+      return <VideoPlayer key={`${currentClip.id}-${videoSrc}-${autoplayEnabled}`} src={videoSrc} onEnded={handleEnded} />;
     case 'Instagram':
       return (
         <InstagramEmbedWithTimeout

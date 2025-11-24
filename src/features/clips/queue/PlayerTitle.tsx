@@ -40,18 +40,6 @@ function PlayerTitle({ className }: PlayerTitleProps) {
       <Text size="xl" weight={700} lineClamp={1}>
         {currentClip?.title ?? _nbsp}
       </Text>
-      {currentClip?.url && currentClip?.Platform && (currentClip.Platform === 'Twitter' || currentClip.Platform === 'Instagram') && (
-        <Text size="xs" weight={700} lineClamp={1}>
-          <a
-            href={currentClip?.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: '#228be6', textDecoration: 'underline' }}
-          >
-            {currentClip.url || _nbsp}
-          </a>
-        </Text>
-      )}
       <Text sx={{ display: 'flex', alignItems: 'center', gap: '.25rem' }} color="dimmed" size="sm" lineClamp={1}>
         <Platform platform={currentClip?.Platform} />
         <strong>{currentClip?.author ?? _nbsp}</strong>

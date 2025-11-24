@@ -79,12 +79,12 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
     position: 'relative' as const,
     border: '3px solid transparent',
     borderRadius: 8,
-    transition: 'border 0.3s, box-shadow 0.3s, transform 0.25s',
     height: '100%',
     width: '100%',
     maxWidth: '100%',
     overflow: 'hidden',
     zIndex: 2,
+    transition: 'border 0.3s, box-shadow 0.3s, transform 0.25s, background 0.12s ease-in-out',
     '& .clip--action-icon': { display: 'none' },
     '& .clip--duration-badge': { display: 'none' },
     '& .clip--queue-index': { display: 'block' },
@@ -92,6 +92,7 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
     '&:hover .clip--duration-badge': { display: 'flex' },
     '&:hover .clip--queue-index': { display: 'none' },
     '&:hover .clip--title': { color: onClick ? theme.colors.indigo[5] : undefined },
+    '&:hover': { background: theme.colorScheme === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' },
     ...(isHighlighted && {
       '&::after': {
         content: '""',
@@ -151,7 +152,12 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
   if (!clip) return null;
 
   return (
-    <Box ref={clipRef} sx={boxSx}>
+    <Box
+      ref={clipRef}
+      sx={(theme) => ({
+        ...boxSx(theme),
+      })}
+    >
       {queueIndex && (
         <Box
           className="clip--queue-index"
@@ -167,6 +173,7 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
             fontWeight: 'bold',
             zIndex: 2,
             pointerEvents: 'none',
+            backdropFilter: 'blur(1px)',
           }}
         >
           {queueIndex}

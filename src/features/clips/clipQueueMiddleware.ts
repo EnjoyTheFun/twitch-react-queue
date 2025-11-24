@@ -45,6 +45,14 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
           return next(action);
         }
 
+        const subOnlyMode = storeAPI.getState().settings.subOnlyMode === true;
+        if (subOnlyMode) {
+          const isPrivileged = userstate.subscriber || userstate.mod || userstate.vip || userstate.broadcaster;
+          if (!isPrivileged) {
+            return next(action);
+          }
+        }
+
         const id = clipProvider.getIdFromUrl(url);
         if (id) {
           const clip: Clip | undefined = storeAPI.getState().clipQueue.byId[id];
@@ -56,6 +64,13 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
               .getClipById(id)
               .then((clip) => {
                 if (clip) {
+                  const blockedChannels = storeAPI.getState().settings.blockedChannels || [];
+                  const channelNorm = (clip.author || '').toLowerCase();
+                  const blockedSet = new Set(blockedChannels.map((c: string) => c.toLowerCase()));
+                  if (blockedSet.has(channelNorm)) {
+                    storeAPI.dispatch(clipDetailsFailed(id));
+                    return;
+                  }
                   storeAPI.dispatch(clipDetailsReceived(clip));
                 } else {
                   storeAPI.dispatch(clipDetailsFailed(id));
@@ -74,6 +89,12 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
         const senderNorm = (sender || '').toLowerCase();
         const blacklistedSet = new Set(blacklisted.map((b: string) => b.toLowerCase()));
         if (blacklistedSet.has(senderNorm)) return next(action);
+
+        const subOnlyMode = storeAPI.getState().settings.subOnlyMode === true;
+        if (subOnlyMode) {
+          const isPrivileged = userstate.subscriber || userstate.mod || userstate.vip || userstate.broadcaster;
+          if (!isPrivileged) return next(action);
+        }
         const id = clipProvider.getIdFromUrl(url);
         if (id) {
           const clip: Clip | undefined = storeAPI.getState().clipQueue.byId[id];
@@ -85,6 +106,13 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
               .getClipById(id)
               .then((clip) => {
                 if (clip) {
+                  const blockedChannels = storeAPI.getState().settings.blockedChannels || [];
+                  const channelNorm = (clip.author || '').toLowerCase();
+                  const blockedSet = new Set(blockedChannels.map((c: string) => c.toLowerCase()));
+                  if (blockedSet.has(channelNorm)) {
+                    storeAPI.dispatch(clipDetailsFailed(id));
+                    return;
+                  }
                   storeAPI.dispatch(clipDetailsReceived(clip));
                 } else {
                   storeAPI.dispatch(clipDetailsFailed(id));

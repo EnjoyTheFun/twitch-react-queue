@@ -115,6 +115,7 @@ const createTwitchChatMiddleware = (): Middleware<{}, RootState> => {
               message: 'Connected',
               autoClose: true,
               color: 'indigo',
+              style: { marginBottom: 82 },
             });
             const channel = storeApi.getState().settings.channel ?? username;
             client?.join(channel.toLowerCase());
@@ -129,6 +130,7 @@ const createTwitchChatMiddleware = (): Middleware<{}, RootState> => {
               title: 'Twitch Chat',
               message: 'Disconnected from chat.',
               color: 'red',
+              style: { marginBottom: 82 },
             });
             if (pruneInterval) {
               clearInterval(pruneInterval);
@@ -151,6 +153,7 @@ const createTwitchChatMiddleware = (): Middleware<{}, RootState> => {
               title: 'Twitch Chat',
               message: 'Disconnected from chat, trying to reconnect...',
               color: 'red',
+              style: { marginBottom: 82 },
             });
           });
 

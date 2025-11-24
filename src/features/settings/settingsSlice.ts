@@ -12,12 +12,15 @@ interface SettingsState {
   commandPrefix: string;
   volume: number;
   blacklist: string[];
+  blockedChannels: string[];
   blurredProviders: string[];
   showTopSubmitters?: boolean;
+  subOnlyMode?: boolean;
   skipThreshold?: number;
   clipMemoryRetentionDays?: number | null;
   reorderOnDuplicate?: boolean;
   autoplayDelay?: number;
+  playerPercentDefault?: number;
 }
 
 const initialState: SettingsState = {
@@ -25,12 +28,15 @@ const initialState: SettingsState = {
   commandPrefix: '!q',
   volume: 1,
   blacklist: [],
+  blockedChannels: [],
   blurredProviders: [],
   showTopSubmitters: false,
+  subOnlyMode: false,
   skipThreshold: 20,
   clipMemoryRetentionDays: null,
   reorderOnDuplicate: true,
   autoplayDelay: 5,
+  playerPercentDefault: 79,
 };
 
 const settingsSlice = createSlice({
@@ -56,11 +62,17 @@ const settingsSlice = createSlice({
       if (payload.blacklist) {
         state.blacklist = payload.blacklist.map((s) => s.trim().toLowerCase()).filter(Boolean);
       }
+      if (payload.blockedChannels) {
+        state.blockedChannels = payload.blockedChannels.map((s: string) => s.trim().toLowerCase()).filter(Boolean);
+      }
       if (payload.blurredProviders) {
         state.blurredProviders = payload.blurredProviders;
       }
       if (payload.showTopSubmitters !== undefined) {
         state.showTopSubmitters = payload.showTopSubmitters;
+      }
+      if (payload.subOnlyMode !== undefined) {
+        state.subOnlyMode = payload.subOnlyMode;
       }
       if (payload.skipThreshold !== undefined) {
         state.skipThreshold = payload.skipThreshold;
@@ -73,6 +85,9 @@ const settingsSlice = createSlice({
       }
       if (payload.autoplayDelay !== undefined) {
         state.autoplayDelay = Math.max(0, Math.min(5, payload.autoplayDelay));
+      }
+      if (payload.playerPercentDefault !== undefined) {
+        state.playerPercentDefault = Math.max(30, Math.min(85, payload.playerPercentDefault));
       }
     },
     toggleShowTopSubmitters: (state) => {
@@ -111,6 +126,7 @@ const selectSettings = (state: RootState): SettingsState => state.settings;
 export const selectChannel = (state: RootState) => state.settings.channel;
 export const selectCommandPrefix = (state: RootState) => state.settings.commandPrefix;
 export const selectBlacklist = (state: RootState) => state.settings.blacklist || [];
+export const selectBlockedChannels = (state: RootState) => state.settings.blockedChannels || [];
 export const selectBlurredProviders = (state: RootState) => state.settings.blurredProviders || [];
 
 export const selectColorScheme = createSelector(
@@ -119,11 +135,13 @@ export const selectColorScheme = createSelector(
 );
 
 export const selectShowTopSubmitters = (state: RootState) => state.settings.showTopSubmitters !== false;
+export const selectSubOnlyMode = (state: RootState) => state.settings.subOnlyMode === true;
 export const selectSkipThreshold = (state: RootState) => state.settings.skipThreshold ?? 20;
 export const selectClipMemoryRetentionDays = (state: RootState) => state.settings.clipMemoryRetentionDays ?? null;
 
 export const selectReorderOnDuplicate = (state: RootState) => state.settings.reorderOnDuplicate !== false;
 export const selectAutoplayDelay = (state: RootState) => state.settings.autoplayDelay ?? 5;
+export const selectPlayerPercentDefault = (state: RootState) => state.settings.playerPercentDefault ?? 79;
 
 export const { colorSchemeToggled, channelChanged, settingsChanged, toggleShowTopSubmitters, setShowTopSubmitters, addBlacklist, removeBlacklist, setVolume } = settingsSlice.actions;
 

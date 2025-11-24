@@ -29,7 +29,7 @@ class InstagramProvider implements ClipProvider {
       thumbnailUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Instagram_logo_2022.svg/1200px-Instagram_logo_2022.svg.png',
       createdAt: '',
       Platform: 'Instagram',
-      url: `https://www.instagram.com/reel/${id}/`,
+      url: this.getUrl(id),
     };
   }
 

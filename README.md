@@ -4,7 +4,7 @@ Twitch React Queue is a custom build of [twitch-clip-queue](https://github.com/j
 
 ### Live demo
 - **[GitHub Pages](https://enjoythefun.github.io/twitch-react-queue)**
-- **[Vercel](https://etf-clip-q.vercel.app/)**<sup>(*experimental*)</sup>
+- **[Vercel](https://etf-clip-q.vercel.app/)**<sup>(*testing new features here first*)</sup>
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/611be338-7f69-4125-96b8-31777cdbac7a" alt="Twitch React Queue Screenshot" width="800"/>
@@ -12,7 +12,7 @@ Twitch React Queue is a custom build of [twitch-clip-queue](https://github.com/j
 
 
 ### Features
-(For an up to date list of changes check out [Releases](https://github.com/EnjoyTheFun/twitch-react-queue/releases))
+*(For an up to date list of changes check out [Releases](https://github.com/EnjoyTheFun/twitch-react-queue/releases))*
 - Multi-platform support
   - Twitch clips & VODs
   - YouTube videos & shorts
@@ -21,17 +21,19 @@ Twitch React Queue is a custom build of [twitch-clip-queue](https://github.com/j
   - TikTok videos & photo reels
   - Twitter/X media - videos, images, posts
   - Instagram posts (EXPERIMENTAL)
-- Advanced queue management - additional Twitch chat commands, import from Discord/APIs, autoplay options
+  - Reddit video posts
+- Advanced queue management - additional Twitch chat commands, import in bulk, import from Discord/Reddit, autoplay options,  filtering & more
 - Improved UI/UX
 - Modern build system - migrated from the deprecated Create React App build tool to Vite
-- Authentication & Privacy - **all data stays local. Nothing is stored on a server!**
+- Authentication & Privacy - **all data stays local. Nothing is stored on a server! Only requirement is reading permission for twitch chat messages.**
+
 - [More](https://github.com/EnjoyTheFun/twitch-react-queue/releases)
 
 ### Contributing
 Contributions are welcome! Open an issue or PR if you have ideas, improvements, or bug fixes.
 
 ### Notes
-*The name "Clip Queue" didn’t make sense anymore since the app now supports many media types beyond clips. Because most creators use it for reaction content, "React Queue" felt more fitting. It also distinguishes this custom build from the original project. If you are looking for the clip-only version of Clip Queue, visit the original creator's [repository](https://github.com/jakemiki/twitch-clip-queue).*
+*The name "Clip Queue" didn't make sense anymore since the app now supports many media types beyond clips. Because most creators use it for reaction content, "React Queue" felt more fitting. It also distinguishes this custom build from the original project. If you are looking for the clip-only version of Clip Queue, visit the original creator's [repository](https://github.com/jakemiki/twitch-clip-queue).*
 
 ### Troubleshooting
 Some browser tracker/privacy extensions (for example, Privacy Badger) may block third-party requests used to fetch metadata for TikTok and Streamable links. If clips from these platforms do not queue or appear without thumbnails/titles, try one of the following:
@@ -41,4 +43,4 @@ Some browser tracker/privacy extensions (for example, Privacy Badger) may block 
 
 Make sure you've enabled these providers in the app settings first!
 
-Tested and working on **Firefox**, **Chrome** and **Brave** with default tracking protection (no advanced tracking extensions)!
+*Tested and working on **Firefox** and **Chrome** with default tracking protection (no advanced tracking extensions)!*

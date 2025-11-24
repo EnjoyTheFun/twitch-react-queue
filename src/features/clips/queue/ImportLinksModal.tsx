@@ -48,7 +48,7 @@ function ImportLinksModal() {
 
   return (
     <Stack>
-      <Text size="sm">Paste JSON array of strings or objects with a <code>url</code> property.</Text>
+      <Text size="sm">Paste JSON array of strings or objects with a <code>url</code> property. You can also paste a list of urls separated by commas or new lines.</Text>
       <Textarea
         placeholder='[
   { "url": "https://youtu.be/dQw4w9WgXcQ", "submitter": "alice" },

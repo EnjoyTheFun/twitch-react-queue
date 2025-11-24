@@ -33,6 +33,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
       aspectRatio: '16:9',
       bigPlayButton: false,
       preload: 'auto',
+      playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
       sources: YouTube
         ? [{ src, type: 'video/youtube' }]
         : [{ src, type: src.includes('.m3u8') ? 'application/x-mpegURL' : 'video/mp4' }],

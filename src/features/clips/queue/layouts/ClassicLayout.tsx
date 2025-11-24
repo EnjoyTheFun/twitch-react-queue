@@ -1,5 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
 import { Container, Grid, Group, Stack, ScrollArea, Box } from '@mantine/core';
+import { useAppDispatch, useAppSelector } from '../../../../app/hooks';
+import { selectPlayerPercentDefault } from '../../../settings/settingsSlice';
+import { settingsChanged } from '../../../settings/settingsSlice';
 import PlayerButtons from '../PlayerButtons';
 import PlayerTitle from '../PlayerTitle';
 import Queue from '../Queue';
@@ -10,7 +13,9 @@ function ClassicLayout() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const draggingRef = useRef(false);
   const rectRef = useRef({ left: 0, width: 0 });
-  const [playerPercent, setPlayerPercent] = useState(79);
+  const dispatch = useAppDispatch();
+  const defaultPlayerPercent = useAppSelector(selectPlayerPercentDefault);
+  const [playerPercent, setPlayerPercent] = useState(defaultPlayerPercent);
 
   const MIN_PLAYER = 30;
   const MAX_PLAYER = 85;
@@ -39,6 +44,7 @@ function ClassicLayout() {
         cancelAnimationFrame(rafId.id);
         rafId.id = 0;
       }
+      dispatch(settingsChanged({ playerPercentDefault: pendingRef.pct }));
     };
 
     window.addEventListener('pointermove', onPointerMove as any);
@@ -51,11 +57,15 @@ function ClassicLayout() {
     };
   }, [MIN_PLAYER, MAX_PLAYER, playerPercent]);
 
+  useEffect(() => {
+    if (draggingRef.current) return;
+    setPlayerPercent(defaultPlayerPercent);
+  }, [defaultPlayerPercent]);
+
   const onHandlePointerDown = (e: React.PointerEvent) => {
     const target = e.currentTarget as Element;
     try {
-      // @ts-ignore setPointerCapture exists on PointerEventTarget
-      target.setPointerCapture && (target as any).setPointerCapture(e.pointerId);
+      (target as any).setPointerCapture?.(e.pointerId);
     } catch { }
     draggingRef.current = true;
     if (containerRef.current) {
@@ -67,7 +77,7 @@ function ClassicLayout() {
   };
 
   return (
-    <Container fluid py="md" sx={{ height: '100%'}} className="classic-layout">
+    <Container fluid py="md" sx={{ height: '100%' }} className="classic-layout">
       <Grid sx={{ height: '100%' }} columns={24}>
         <Grid.Col span={24} sx={{ height: '100%' }}>
           <Box ref={containerRef} className="classic-layout-inner" sx={{ display: 'flex', height: '100%', gap: 3 }}>
@@ -88,7 +98,17 @@ function ClassicLayout() {
             <Box className="queue-area" sx={{ flex: 1, minWidth: 0 }}>
               <Stack justify="flex-start" sx={{ height: '100%', maxHeight: '100%', gap: 3 }}>
                 <QueueControlPanel />
-                <ScrollArea sx={{ '.mantine-ScrollArea-viewport > div': { display: 'block !important' } }}>
+                <ScrollArea
+                  sx={{
+                    '.mantine-ScrollArea-viewport > div': { display: 'block !important' },
+                    '.mantine-ScrollArea-viewport': { paddingRight: '9px' },
+                    '.mantine-ScrollArea-scrollbar': {
+                      width: '9px !important',
+                      paddingRight: '2px'
+                    }
+                  }}
+                  scrollbarSize={9}
+                >
                   <Group direction="column" sx={{ height: '100%', gap: 3 }}>
                     <Queue />
                   </Group>

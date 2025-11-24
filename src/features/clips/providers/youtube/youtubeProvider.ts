@@ -77,6 +77,7 @@ class YoutubeProvider implements ClipProvider {
       thumbnailUrl: clipInfo.thumbnail_url,
       submitters: [],
       Platform: 'YouTube',
+      url: this.getUrl(id),
     };
   }
 

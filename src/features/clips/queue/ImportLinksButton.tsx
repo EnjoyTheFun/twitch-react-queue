@@ -74,7 +74,7 @@ function ImportLinksButton() {
           try {
             const clip = await clipProvider.getClipById(id);
             if (clip) {
-              dispatch(clipStubReceived({ ...clip, submitters: [discordUsername + "*"], url }));
+              dispatch(clipStubReceived({ ...clip, submitters: [discordUsername + "*"], url: clip.url || url }));
               successCount++;
             } else {
               dispatch(clipStubReceived({ id, submitters: [discordUsername + "*"], url }));
