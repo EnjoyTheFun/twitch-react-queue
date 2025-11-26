@@ -7,7 +7,7 @@ Twitch React Queue is a custom build of [twitch-clip-queue](https://github.com/j
 - **[Vercel](https://etf-clip-q.vercel.app/)**<sup>(*testing new features here first*)</sup>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/611be338-7f69-4125-96b8-31777cdbac7a" alt="Twitch React Queue Screenshot" width="800"/>
+  <img src="https://github.com/user-attachments/assets/465c2081-ddd1-440a-9d78-9ebb87bd07a5" alt="Twitch React Queue Screenshot" width="800"/>
 </p>
 
 
