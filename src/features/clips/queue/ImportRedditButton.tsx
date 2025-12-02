@@ -3,7 +3,7 @@ import { Button, Popover, Group, NumberInput, Divider, Text } from '@mantine/cor
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { clipStubReceived } from '../clipQueueSlice';
 import clipProvider from '../providers/providers';
-import { IconBrandReddit, IconChevronDown } from '@tabler/icons-react';
+import { IconBrandReddit } from '@tabler/icons-react';
 import { selectUsername } from '../../auth/authSlice';
 import redditApi from '../../../common/apis/redditApi';
 import type { RedditSort } from '../../../common/models/reddit';
@@ -53,7 +53,7 @@ function ImportRedditButton() {
               dispatch(clipStubReceived({
                 ...clip,
                 submitters: [`${redditUsername} (r/LSF)`],
-                 url: clip.url || url,
+                url: clip.url || url,
                 title: title || clip.title
               }));
               successCount++;

@@ -1,11 +1,12 @@
 import { ActionIcon, AspectRatio, Image, Box, Group, Skeleton, Stack, Text, useMantineTheme } from '@mantine/core';
 import { MouseEventHandler, useEffect, useRef } from 'react';
-import { IconTrash } from '@tabler/icons-react';
+import { IconTrash, IconStarFilled } from '@tabler/icons-react';
 import { useAppSelector } from '../../app/hooks';
 import { selectClipById, selectTopNSubmitters, selectHighlightedClipId } from './clipQueueSlice';
 import { getProviderKeysForPlatform, type PlatformType } from '../../common/utils';
 import Platform from '../../common/components/BrandPlatforms';
 import StatBadge from './components/StatBadge';
+import { selectFavoriteSubmitters } from '../settings/settingsSlice';
 
 interface ClipProps {
   clipId: string;
@@ -21,7 +22,7 @@ interface ClipProps {
 
 const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueIndex }: ClipProps) => {
   const clip = useAppSelector(selectClipById(clipId));
-  const { title, thumbnailUrl = '', author, submitters, duration, views } = clip || {};
+  const { title, thumbnailUrl, author, submitters, duration, views } = clip || {};
 
   const highlightedClipId = useAppSelector(selectHighlightedClipId);
   const theme = useMantineTheme();
@@ -30,6 +31,7 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
   const blurredProviders = useAppSelector((s) => s.settings.blurredProviders || []);
   const topN = useAppSelector(selectTopNSubmitters(3));
   const colored = useAppSelector((s) => s.clipQueue.coloredSubmitterNames !== false);
+  const favoriteSubmitters = useAppSelector(selectFavoriteSubmitters);
 
   const isHighlighted = highlightedClipId === clipId;
 
@@ -55,11 +57,24 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
   })();
 
   const topIndex = submitters?.[0] ? topN.findIndex((t) => t.username === submitters[0].toLowerCase()) : -1;
+  const isFavorite = submitters?.[0] ? favoriteSubmitters.includes(submitters[0].toLowerCase()) : false;
   const topClass = topIndex >= 0 ? `chip-anim-${topIndex}` : undefined;
   const submitterClass = colored && topClass ? topClass : undefined;
 
   const submitterStyle = (() => {
-    if (!colored || topClass || !chatUser) return undefined;
+    if (!colored) return undefined;
+
+    if (isFavorite) {
+      return {
+        background: 'linear-gradient(90deg, #FFD700, #FFA500, #FFD700)',
+        backgroundSize: '200% auto',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text',
+      };
+    }
+
+    if (topClass || !chatUser) return undefined;
 
     const roleColor = chatUser.broadcaster
       ? theme.colors.red[6]
@@ -192,7 +207,7 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
           <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
             <Skeleton visible={!thumbnailUrl}>
               <Image
-                src={thumbnailUrl}
+                src={thumbnailUrl || undefined}
                 sx={{
                   backgroundColor: '#373A40',
                   borderRadius: 4,
@@ -230,6 +245,7 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
             <Text size="xs" color="dimmed" lineClamp={1} title={submitters.join('\n')}>
               Submitted by{' '}
               <strong className={submitterClass} style={submitterStyle}>
+                {isFavorite && <IconStarFilled size={11} style={{ display: 'inline', marginRight: 2 }} />}
                 {submitters[0]}
               </strong>
               {submitters.length > 1 && ` +${submitters.length - 1}`}

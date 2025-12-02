@@ -1,4 +1,3 @@
-
 enum LogLevel {
   debug = 0,
   info,

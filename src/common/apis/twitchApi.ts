@@ -23,6 +23,8 @@ const twitchGqlClient = axios.create({
   },
 });
 
+const gameCache = new Map<string, TwitchGame>();
+
 const getDirectUrl = async (id: string): Promise<string | undefined> => {
   const operationName = 'ClipsDownloadButton';
   const persistedBody = [
@@ -104,10 +106,19 @@ const getVideo = async (id: string): Promise<TwitchVideo> => {
   return data.data[0];
 };
 
-const getGame = async (id: string): Promise<TwitchGame> => {
-  const { data } = await twitchApiClient.get<{ data: TwitchGame[] }>(`games?id=${id}`);
+const getGame = async (id: string): Promise<TwitchGame | undefined> => {
+  if (!id) return undefined;
+  const cached = gameCache.get(id);
+  if (cached) return cached;
 
-  return data.data[0];
+  try {
+    const { data } = await twitchApiClient.get<{ data: TwitchGame[] }>(`games?id=${id}`);
+    const game = data?.data?.[0];
+    if (game) gameCache.set(id, game);
+    return game;
+  } catch {
+    return undefined;
+  }
 };
 
 const twitchApi = {

@@ -1,0 +1,161 @@
+.spotlight-layout {
+  position: relative;
+  user-select: none;
+
+  .stage {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .spotlight-edge-zone {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 25vw;
+    z-index: 85;
+    cursor: pointer;
+    transition: background 0.15s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &.left {
+      left: 0;
+      justify-content: flex-start;
+      padding-left: 50px;
+    }
+
+    &.right {
+      right: 0;
+      justify-content: flex-end;
+      padding-right: 50px;
+    }
+  }
+
+  .spotlight-edge-icon {
+    transition: opacity 0.2s ease-out, transform 0.25s ease-out;
+    color: rgba(255, 255, 255, 0.9);
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
+    pointer-events: none;
+  }
+
+  .player-box {
+    position: relative;
+    width: 100vw;
+    min-width: 480px;
+    max-width: 100vw;
+    z-index: 95;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* Spotlight queue overlay */
+  .spotlight-queue-overlay {
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    width: min(92vw, 1080px);
+    max-height: 60vh;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.35);
+    border-radius: 18px 18px 0 0;
+    overflow: hidden;
+    z-index: 2000;
+    transform: translate(-50%, 100%);
+    transition: transform 420ms cubic-bezier(.33, .07, .19, .97), opacity 320ms ease;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .spotlight-queue-overlay.open {
+    transform: translate(-50%, 0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .spotlight-queue-overlay.closed {
+    pointer-events: none;
+  }
+
+  .spotlight-queue-overlay .panel-section {
+    padding: 10px 18px 14px;
+    overflow-y: auto;
+  }
+
+  .spotlight-queue-grid {
+    --spotlight-queue-card-height: 230px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    max-height: calc((var(--spotlight-queue-card-height) * 2) + 16px);
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+
+  .spotlight-queue-item {
+    min-height: var(--spotlight-queue-card-height);
+    display: flex;
+  }
+
+  .spotlight-queue-toggle {
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    transform: translate(-50%, 50%);
+    z-index: 2100;
+    pointer-events: auto;
+    transition: transform 220ms ease, opacity 180ms ease;
+    opacity: 0.85;
+  }
+
+  .spotlight-queue-toggle:hover {
+    transform: translate(-50%, 50%) scale(1.06);
+    opacity: 1;
+  }
+
+  .spotlight-queue-close {
+    position: absolute;
+    left: 50%;
+    top: 5px;
+    transform: translate(-50%, 0);
+    z-index: 2050;
+  }
+
+  .autoplay-toggle {
+    position: fixed;
+    right: 20px;
+    bottom: 5px;
+    z-index: 2000;
+  }
+
+  .info-toggle {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    z-index: 2000;
+  }
+
+  .content-container {
+    width: 83%;
+    margin: 0 auto;
+  }
+}
+
+// Hide scrollbars in spotlight layout
+.spotlight-layout,
+.spotlight-layout * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.spotlight-layout *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}

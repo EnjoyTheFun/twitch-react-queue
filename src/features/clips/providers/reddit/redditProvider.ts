@@ -4,6 +4,11 @@ import type { ClipProvider } from '../providers';
 
 class RedditProvider implements ClipProvider {
   name = 'reddit';
+  allowNsfw: boolean = false;
+
+  setAllowNsfw(allow: boolean) {
+    this.allowNsfw = allow;
+  }
 
   getIdFromUrl(url: string): string | undefined {
     let uri: URL;
@@ -25,7 +30,7 @@ class RedditProvider implements ClipProvider {
   }
 
   async getClipById(id: string): Promise<Clip | undefined> {
-    const clipInfo = await redditApi.getClip(id);
+    const clipInfo = await redditApi.getClip(id, this.allowNsfw);
 
     if (clipInfo) {
       return {

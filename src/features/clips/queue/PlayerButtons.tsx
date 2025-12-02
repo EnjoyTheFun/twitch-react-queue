@@ -15,6 +15,7 @@ import {
   selectCurrentClip
 } from '../clipQueueSlice';
 import clipProvider from '../providers/providers';
+import FavoriteButton from './FavoriteButton';
 
 function PlayerButtons({ className }: { className?: string }) {
   const dispatch = useAppDispatch();
@@ -26,13 +27,14 @@ function PlayerButtons({ className }: { className?: string }) {
   const currentClip = useAppSelector(selectCurrentClip);
   return (
     <Group align="center" className={className} sx={{ flexShrink: 0, marginLeft: 'auto' }}>
-      <Group align="center" spacing="xs">
+      <Group align="center" spacing={4}>
         <Box className="autoplay-toggle-inline" sx={{ display: 'flex', alignItems: 'center' }}>
           <Switch size="xs" label="Autoplay" checked={autoplayEnabled} onChange={(event) => {
             dispatch(autoplayTimeoutHandleChanged({ set: false }));
             dispatch(autoplayChanged(event.currentTarget.checked));
           }} />
         </Box>
+        <FavoriteButton />
         {currentClip && (
           <Button
             size="xs"

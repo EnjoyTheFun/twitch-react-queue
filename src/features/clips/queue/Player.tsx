@@ -1,4 +1,4 @@
-import { Stack } from '@mantine/core';
+import { Stack, Loader } from '@mantine/core';
 import { useEffect, useState, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import type { Clip } from '../clipQueueSlice';
@@ -20,6 +20,8 @@ import TwitterImagePlayer from './players/TwitterImagePlayer';
 import InstagramEmbedWithTimeout from './players/InstagramEmbed';
 import XEmbedWithTimeout from './players/XEmbed';
 import StreamablePlayer from './players/StreamablePlayer';
+import { useRef } from 'react';
+import { preloadImage, preloadVideo, preloadHlsManifest, preloadGenericHead, PreloadHandle } from './preloadMedia';
 
 interface PlayerProps {
   className?: string;
@@ -87,6 +89,23 @@ const getPlayerComponent = (
     case 'Kick':
       return <VideoPlayer key={`${currentClip.id}-${videoSrc}-${autoplayEnabled}`} src={embedUrl} onEnded={handleEnded} />;
     case 'Reddit':
+      const isRedditImage = videoSrc && (
+        /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(videoSrc) ||
+        videoSrc.includes('preview.redd.it') ||
+        videoSrc.includes('i.redd.it')
+      );
+
+      if (isRedditImage) {
+        return (
+          <TwitterImagePlayer
+            key={`${id}-${videoSrc}-${autoplayEnabled}`}
+            src={videoSrc}
+            title={title}
+            autoplayEnabled={autoplayEnabled && !!nextClipId}
+            dispatch={dispatch}
+          />
+        );
+      }
       return <VideoPlayer key={`${currentClip.id}-${videoSrc}-${autoplayEnabled}`} src={videoSrc} onEnded={handleEnded} />;
     case 'Instagram':
       return (
@@ -156,7 +175,11 @@ function Player({ className }: PlayerProps) {
   const autoplayTimeoutHandle = useAppSelector(selectAutoplayTimeoutHandle);
   const [videoSrc, setVideoSrc] = useState<string | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showLoader, setShowLoader] = useState<boolean>(false);
   const skipVoteCount = useAppSelector(selectSkipVoteCount);
+  const loaderTimerRef = useRef<number | null>(null);
+
 
   const handleCancel = useCallback(() => {
     dispatch(autoplayTimeoutHandleChanged({ set: false }));
@@ -167,6 +190,7 @@ function Player({ className }: PlayerProps) {
     if (!currentClip) {
       setVideoSrc(undefined);
       setError(null);
+      setIsLoading(false);
       return;
     }
 
@@ -177,7 +201,19 @@ function Player({ className }: PlayerProps) {
     }
 
     setVideoSrc(undefined);
+    setIsLoading(true);
+    setShowLoader(false);
+    if (loaderTimerRef.current) {
+      clearTimeout(loaderTimerRef.current as any);
+      loaderTimerRef.current = null;
+    }
     let Flag = true;
+
+    // Show the spinner only if loading lasts longer than 1s
+    loaderTimerRef.current = window.setTimeout(() => {
+      if (Flag) setShowLoader(true);
+      loaderTimerRef.current = null;
+    }, 1000);
 
     const fetchVideoUrl = async () => {
       try {
@@ -185,11 +221,23 @@ function Player({ className }: PlayerProps) {
         if (Flag) {
           setVideoSrc(url);
           setError(null);
+          setIsLoading(false);
+          if (loaderTimerRef.current) {
+            clearTimeout(loaderTimerRef.current as any);
+            loaderTimerRef.current = null;
+          }
+          setShowLoader(false);
         }
       } catch (err) {
         if (Flag) {
           setError('Failed to load video');
           setVideoSrc(undefined);
+          setIsLoading(false);
+          if (loaderTimerRef.current) {
+            clearTimeout(loaderTimerRef.current as any);
+            loaderTimerRef.current = null;
+          }
+          setShowLoader(false);
         }
       }
     };
@@ -198,8 +246,64 @@ function Player({ className }: PlayerProps) {
 
     return () => {
       Flag = false;
+      if (loaderTimerRef.current) {
+        clearTimeout(loaderTimerRef.current as any);
+        loaderTimerRef.current = null;
+      }
+      setShowLoader(false);
     };
   }, [currentClip, autoplayEnabled, nextClipId, dispatch]);
+
+  const preloadRef = useRef<PreloadHandle | null>(null);
+  const preloadAbortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    preloadRef.current?.cleanup();
+    preloadRef.current = null;
+    try {
+      preloadAbortRef.current?.abort();
+    } catch { }
+    preloadAbortRef.current = null;
+
+    if (!currentClip || !nextClipId) return;
+
+    if (!autoplayEnabled) return;
+
+    const nav = (navigator as any);
+    if (nav?.connection?.saveData) return;
+    const effectiveType = nav?.connection?.effectiveType;
+    if (effectiveType && /2g/.test(effectiveType)) return;
+
+    const controller = new AbortController();
+    preloadAbortRef.current = controller;
+
+    (async () => {
+      try {
+        const url = await clipProvider.getAutoplayUrl(nextClipId);
+        if (!url) return;
+
+        let handle: PreloadHandle | null = null;
+        if (/\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url) || url.includes('preview.redd.it') || url.includes('i.redd.it') || url.includes('i.imgur.com')) {
+          handle = preloadImage(url);
+        } else if (/\.mp4(\?|$)/i.test(url)) {
+          handle = preloadVideo(url);
+        } else if (/\.m3u8(\?|$)/i.test(url)) {
+          handle = await preloadHlsManifest(url, controller.signal);
+        } else {
+          handle = await preloadGenericHead(url, controller.signal);
+        }
+
+        preloadRef.current = handle;
+      } catch (err) { }
+    })();
+
+    return () => {
+      preloadRef.current?.cleanup();
+      preloadRef.current = null;
+      try { preloadAbortRef.current?.abort(); } catch { }
+      preloadAbortRef.current = null;
+    };
+  }, [currentClip?.id, nextClipId, autoplayEnabled]);
 
   const player = getPlayerComponent(currentClip, videoSrc, autoplayEnabled, nextClipId, autoplayTimeoutHandle, dispatch);
 
@@ -209,7 +313,22 @@ function Player({ className }: PlayerProps) {
       sx={{ background: 'black', width: '100%', aspectRatio: '16 / 9', position: 'relative', flex: '0 0 auto' }}
       className={className}
     >
-      {error ? <div style={{ color: 'red' }}>{error}</div> : videoSrc || !autoplayEnabled ? player : <div></div>}
+      {error ? (
+        <div style={{ color: 'red' }}>{error}</div>
+      ) : isLoading && showLoader ? (
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)'
+        }}>
+          <Loader size="xl" color="white" />
+        </div>
+      ) : videoSrc || !autoplayEnabled ? (
+        player
+      ) : (
+        <div></div>
+      )}
       {skipVoteCount > 0 && (
         <div
           style={{

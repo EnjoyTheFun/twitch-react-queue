@@ -18,15 +18,8 @@ const iconComponents = {
 } as const;
 
 const Platform = ({ platform, size = 15 }: BrandPlatformsProps) => {
-  if (!platform || !iconComponents[platform]) {
-    return null;
-  }
-
-  const IconComponent = iconComponents[platform];
-
-  if (!IconComponent) return null;
-
-  return <IconComponent size={size} />;
+  const IconComponent = platform ? iconComponents[platform] : null;
+  return IconComponent ? <IconComponent size={size} /> : null;
 };
 
 Platform.displayName = 'Platform';

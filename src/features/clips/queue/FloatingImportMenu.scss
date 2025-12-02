@@ -1,0 +1,92 @@
+.floating-import-menu {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.fab-main {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1001;
+  opacity: 0.3;
+  transition: opacity 180ms ease, transform 220ms ease;
+}
+
+.fab-main .tabler-icon {
+  transition: transform 220ms ease;
+}
+
+.fab-main.open .tabler-icon {
+  transform: rotate(45deg);
+}
+
+.fab-main.open,
+.fab-main:hover,
+.floating-import-menu:hover .fab-main {
+  opacity: 1;
+}
+
+.fab-items {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.fab-item {
+  position: absolute;
+  right: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  transform-origin: bottom right;
+  transform: scale(0);
+  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 160ms ease;
+  pointer-events: none;
+}
+
+.fab-items.open .fab-item {
+  opacity: 0.3;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.fab-item-1 {
+  bottom: 60px;
+}
+
+.fab-item-2 {
+  bottom: 130px;
+}
+
+.fab-item-3 {
+  bottom: 165px;
+}
+
+.fab-item:hover {
+  transform: scale(1.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  opacity: 1;
+}
+
+.floating-import-menu:hover .fab-items .fab-item {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .floating-import-menu {
+    right: 16px;
+    bottom: 16px;
+  }
+}
+
+.reddit-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}

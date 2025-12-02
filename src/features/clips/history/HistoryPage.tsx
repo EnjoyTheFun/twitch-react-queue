@@ -1,7 +1,7 @@
-import { Anchor, Center, Container, Grid, Pagination, Text } from '@mantine/core';
+import { Anchor, Center, Container, Grid, Pagination, Text, Group, Button, Box } from '@mantine/core';
 import { useState, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { memoryClipRemoved, selectHistoryIds, makeSelectHistoryPageClips } from '../clipQueueSlice';
+import { memoryClipRemoved, memoryPurged, selectHistoryIds, makeSelectHistoryPageClips } from '../clipQueueSlice';
 import Clip from '../Clip';
 import clipProvider from '../providers/providers';
 
@@ -16,6 +16,15 @@ function MemoryPage() {
   const totalPages = Math.ceil(totalClips / 24);
   return (
     <Container size="xl" py="md">
+      <Button
+        color="red"
+        size="xs"
+        onClick={() => dispatch(memoryPurged())}
+        sx={{ position: 'fixed', top: 75, right: 16 }}
+      >
+        Clear
+      </Button>
+
       {totalPages > 0 ? (
         <>
           <Center>

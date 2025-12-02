@@ -19,15 +19,23 @@ function TwitterImagePlayer({ src, title, autoplayEnabled, dispatch }: {
 
   return (
     // iframes render images with their original size on Chromium browsers - fix by using img
+    // use max-width/max-height to constrain within parent's aspect ratio without breaking out
     <img
       src={src}
       alt={title}
       style={{
-        width: '100%',
-        height: '100%',
+        maxWidth: '100%',
+        maxHeight: '100%',
+        width: 'auto',
+        height: 'auto',
         objectFit: 'contain',
         display: 'block',
         background: 'black',
+        margin: 'auto',
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
       }}
     />)
 }

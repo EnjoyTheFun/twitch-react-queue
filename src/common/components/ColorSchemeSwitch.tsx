@@ -29,7 +29,7 @@ const ColorSchemeSwitch = ({
       aria-label={ariaLabel}
       title={ariaLabel}
     >
-      {children ? children : <ModeIcon />}
+      {children ?? <ModeIcon />}
     </Component>
   );
 };

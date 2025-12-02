@@ -3,12 +3,14 @@ export interface RedditPostData {
   url_overridden_by_dest?: string;
   domain?: string;
   is_video?: boolean;
+  post_hint?: string;
   author?: string;
   title?: string;
   id?: string;
   permalink?: string;
   created_utc?: number;
   thumbnail?: string;
+  over_18?: boolean;
   preview?: {
     images?: Array<{
       source?: {

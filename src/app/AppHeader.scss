@@ -1,0 +1,45 @@
+.app-title-section {
+  @media (max-width: 1000px) {
+    display: none !important;
+  }
+}
+
+.app-credits.navbar {
+  .credits-extended {
+    @media (max-width: 1000px) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 750px) {
+    display: none;
+  }
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-icon {
+  display: none;
+}
+
+.nav-text {
+  display: inline;
+}
+
+@media (max-width: 768px) {
+  .nav-icon {
+    display: inline-flex;
+  }
+
+  .nav-text {
+    display: none;
+  }
+
+  .hide-on-mobile {
+    display: none !important;
+  }
+}

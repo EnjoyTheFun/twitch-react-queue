@@ -6,7 +6,7 @@ const redditApiClient = axios.create({
   timeout: 10000,
 });
 
-const getClip = async (id: string): Promise<RedditClipInfo | undefined> => {
+const getClip = async (id: string, allowNsfw: boolean = true): Promise<RedditClipInfo | undefined> => {
   try {
     const { data } = await redditApiClient.get<RedditResponse>(`/comments/${id}.json`);
 
@@ -15,12 +15,15 @@ const getClip = async (id: string): Promise<RedditClipInfo | undefined> => {
     }
 
     const postData = data[0]?.data?.children?.[0]?.data;
-    if (!postData) {
-      return undefined;
-    }
+    if (!postData) return undefined;
+    if (!allowNsfw && postData.over_18 === true) return undefined;
 
     const videoInfo = postData.secure_media?.reddit_video || postData.media?.reddit_video;
-    if (!videoInfo?.fallback_url) {
+
+    const isImagePost = postData.post_hint === 'image' ||
+      (postData.url && /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(postData.url));
+
+    if (!videoInfo?.fallback_url && !isImagePost) {
       return undefined;
     }
 
@@ -32,18 +35,33 @@ const getClip = async (id: string): Promise<RedditClipInfo | undefined> => {
       thumbnailUrl = thumbnailUrl.replace(/&amp;/g, '&');
     }
 
-    let videoUrl = videoInfo.fallback_url;
-    if (videoInfo.has_audio && videoInfo.hls_url) {
-      videoUrl = videoInfo.hls_url.replace(/&amp;/g, '&');
+    let videoUrl: string | undefined;
+
+    if (isImagePost) {
+      videoUrl = postData.url_overridden_by_dest || postData.url;
+      if (videoUrl) {
+        videoUrl = videoUrl.replace(/&amp;/g, '&');
+      }
+      if (!videoUrl || (!videoUrl.includes('i.redd.it') && !videoUrl.includes('i.imgur.com') && !videoUrl.includes('preview.redd.it'))) {
+        const previewUrl = postData.preview?.images?.[0]?.source?.url;
+        if (previewUrl) {
+          videoUrl = previewUrl.replace(/&amp;/g, '&');
+        }
+      }
+    } else if (videoInfo) {
+      videoUrl = videoInfo.fallback_url;
+      if (videoInfo.has_audio && videoInfo.hls_url) {
+        videoUrl = videoInfo.hls_url.replace(/&amp;/g, '&');
+      }
     }
 
     return {
       id,
-      title: postData.title || `Reddit video ${id}`,
+      title: postData.title || (isImagePost ? `Reddit image ${id}` : `Reddit video ${id}`),
       author: postData.author || 'Unknown',
       thumbnailUrl,
       videoUrl,
-      duration: videoInfo.duration,
+      duration: isImagePost ? undefined : videoInfo?.duration,
       createdAt: postData.created_utc ? new Date(postData.created_utc * 1000).toISOString() : undefined,
       permalink: postData.permalink,
     };
@@ -77,6 +95,11 @@ const getSubredditPosts = async (
       if (!url) continue;
 
       const domain = postData.domain || '';
+      const isImagePost = postData.post_hint === 'image' ||
+        domain.includes('i.redd.it') ||
+        domain.includes('i.imgur.com') ||
+        (postData.url && /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(postData.url));
+
       const isVideoPost =
         postData.is_video ||
         domain.includes('twitch.tv') ||
@@ -90,7 +113,7 @@ const getSubredditPosts = async (
         domain.includes('streamable.com') ||
         domain.includes('instagram.com');
 
-      if (isVideoPost) {
+      if (isVideoPost || isImagePost) {
         if (domain.includes('v.redd.it')) {
           const hasMedia = postData.secure_media?.reddit_video || postData.media?.reddit_video;
           if (!hasMedia) {
@@ -99,6 +122,10 @@ const getSubredditPosts = async (
           if (postData.permalink) {
             url = `https://www.reddit.com${postData.permalink}`;
           }
+        }
+
+        if (isImagePost && !isVideoPost && domain.includes('i.redd.it') && postData.permalink) {
+          url = `https://www.reddit.com${postData.permalink}`;
         }
 
         posts.push({
@@ -120,13 +147,16 @@ const getSubredditPosts = async (
 const redditApi = {
   getClip,
   getSubredditPosts,
-  getPostUrl: async (postId: string): Promise<string | undefined> => {
+  getPostUrl: async (postId: string, allowNsfw: boolean = true): Promise<string | undefined> => {
     try {
       const { data } = await redditApiClient.get<RedditResponse>(`/comments/${postId}.json`);
       if (!data || !Array.isArray(data) || data.length === 0) {
         return undefined;
       }
       const postData = data[0]?.data?.children?.[0]?.data;
+
+      if (!allowNsfw && postData?.over_18 === true) return undefined;
+
       return postData?.url_overridden_by_dest || postData?.url;
     } catch (error) {
       console.error('Failed to fetch Reddit post URL:', postId, error);

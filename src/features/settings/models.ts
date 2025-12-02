@@ -5,11 +5,13 @@ export interface AllSettings {
   channel?: string;
   colorScheme?: ColorScheme;
   commandPrefix?: string;
-  blacklist?: string[];
-  blockedChannels?: string[];
+  blockedSubmitters?: string[];
+  blockedCreators?: string[];
+  favoriteSubmitters?: string[];
 
   enabledProviders?: string[];
   blurredProviders?: string[];
+  allowRedditNsfw?: boolean;
 
   showTopSubmitters?: boolean;
   subOnlyMode?: boolean;

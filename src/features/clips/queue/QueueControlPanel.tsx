@@ -10,7 +10,7 @@ import {
 import { selectShowTopSubmitters, toggleShowTopSubmitters, selectSubOnlyMode, settingsChanged } from '../../settings/settingsSlice';
 import QueueQuickMenu from './QueueQuickMenu';
 import TopSubmittersMarquee from './TopSubmittersMarquee';
-import { IconCrown, IconCrownOff, IconThumbDown, IconThumbDownOff, IconUserCheck, IconUsers, IconVideo } from '@tabler/icons-react';
+import { IconCrown, IconCrownOff, IconThumbDown, IconThumbDownOff, IconUserCheck, IconUsers, IconListDetails } from '@tabler/icons-react';
 
 interface QueueControlPanelProps {
   className?: string;
@@ -48,7 +48,7 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
           <Text size="md" weight={700} sx={{ margin: 0, padding: 0 }}>
             {queueCount}
           </Text>
-          <IconVideo size={18} style={{ marginTop: 2 }} />
+          <IconListDetails size={18} style={{ marginTop: 2 }} />
         </Group>
         <Group spacing={6} align="center" sx={{ alignItems: 'center', margin: 4 }}>
 

@@ -9,8 +9,9 @@ import {
   Divider,
 } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
-import { IconMoonStars, IconSettings, IconLogout, IconChevronDown } from '@tabler/icons-react';
+import { IconMoonStars, IconSettings, IconLogout, IconChevronDown, IconToggleLeftFilled, IconToggleRightFilled } from '@tabler/icons-react';
 import { selectUsername, selectProfilePictureUrl, logout } from '../features/auth/authSlice';
+import { isOpenChanged, selectIsOpen } from '../features/clips/clipQueueSlice';
 import useSettingsModal from '../features/settings/SettingsModal';
 import { useAppDispatch, useAppSelector } from './hooks';
 
@@ -26,6 +27,9 @@ const AppMenu = () => {
     navigate('/');
     dispatch(logout());
   };
+
+  const isOpen = useAppSelector(selectIsOpen);
+  const handleToggleQueue = () => dispatch(isOpenChanged(!isOpen));
 
   return (
     <Menu
@@ -55,7 +59,7 @@ const AppMenu = () => {
                 overflow: 'hidden',
                 maxWidth: 140,
                 display: 'block',
-                '@media (max-width: 560px)': {
+                '@media (max-width: 800px)': {
                   display: 'none',
                 },
               }}
@@ -73,6 +77,14 @@ const AppMenu = () => {
         rightSection={<Switch size="xs" checked={colorScheme === 'dark'} readOnly />}
       >
         Dark mode
+      </Menu.Item>
+      { /* Mobile-only queue toggle */ }
+      <Menu.Item
+        icon={isOpen ? <IconToggleRightFilled size={14} /> : <IconToggleLeftFilled size={14} />}
+        onClick={handleToggleQueue}
+        sx={{ '@media (min-width: 551px)': { display: 'none' } }}
+      >
+        {isOpen ? 'Close Queue' : 'Open Queue'}
       </Menu.Item>
       <Menu.Item icon={<IconSettings size={14} />} onClick={() => openSettingsModal()}>
         Settings

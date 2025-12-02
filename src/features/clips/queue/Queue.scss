@@ -1,0 +1,33 @@
+.queue-area {
+  .mantine-ScrollArea-scrollbar {
+    padding-right: 0;
+  }
+
+  .mantine-ScrollArea-thumb {
+    background: rgba(134, 142, 150, 0.6) !important;
+  }
+
+  &::-webkit-scrollbar {
+    width: 9px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    margin-right: 2px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(134, 142, 150, 0.6);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(134, 142, 150, 0.8);
+  }
+
+  .clip--title {
+    padding-top: 2px;
+    line-height: 1.25;
+    margin-bottom: 5px;
+  }
+}

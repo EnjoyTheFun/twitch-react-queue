@@ -14,12 +14,13 @@ import {
   selectSkipVotingEnabled,
   clipStubReceived,
   clipDetailsFailed,
+  clipUpvoted,
   currentClipForceReplaced,
   setProviders,
 } from '../clips/clipQueueSlice';
 import type { Clip } from '../clips/clipQueueSlice';
 import clipProvider from '../clips/providers/providers';
-import { settingsChanged, addBlacklist, removeBlacklist } from '../settings/settingsSlice';
+import { settingsChanged, addBlockedSubmitter, removeBlockedSubmitter, addBlockedCreator, removeBlockedCreator } from '../settings/settingsSlice';
 import { createLogger } from '../../common/logging';
 import { urlDeleted, Userstate, urlEnqueue } from './actions';
 
@@ -43,12 +44,27 @@ export const voteskipCommand = (username?: string) => (dispatch: Dispatch, getSt
   dispatch(checkSkipVotes());
 };
 
+export const voteupCommand = (seqStr?: string, username?: string) => (dispatch: Dispatch, getState: AppMiddlewareAPI['getState']) => {
+  if (!seqStr || !username) return;
+  const seq = Number.parseInt(seqStr, 10);
+  if (!Number.isInteger(seq) || seq <= 0) return;
+
+  const state = getState();
+  const { queueIds, byId } = state.clipQueue;
+  const clipId = queueIds.find((id) => byId[id]?.seq === seq);
+  if (!clipId) return;
+
+  dispatch(clipUpvoted({ clipId, username }));
+};
+
 const commands: Record<string, CommmandFunction> = {
   open: (dispatch) => dispatch(isOpenChanged(true)),
   close: (dispatch) => dispatch(isOpenChanged(false)),
   next: (dispatch) => dispatch(currentClipWatched()),
   skip: (dispatch) => dispatch(currentClipSkipped()),
   voteskip: (dispatch, args, userstate) => dispatch(voteskipCommand(userstate?.username)),
+  voteup: (dispatch, [seqStr], userstate) => dispatch(voteupCommand(seqStr, userstate?.username)),
+  up: (dispatch, [seqStr], userstate) => dispatch(voteupCommand(seqStr, userstate?.username)),
   remove: (dispatch, [url]) => url && dispatch(urlDeleted(url)),
   removeidx: (dispatch, [idx]) => idx && dispatch(queueClipRemoveByIndex(idx)),
   add: (dispatch, args, userstate) => {
@@ -130,16 +146,25 @@ const commands: Record<string, CommmandFunction> = {
   },
   block: (dispatch, [name]) => {
     if (!name) return;
-    dispatch(addBlacklist(name));
+    dispatch(addBlockedSubmitter(name));
   },
   unblock: (dispatch, [name]) => {
     if (!name) return;
-    dispatch(removeBlacklist(name));
+    dispatch(removeBlockedSubmitter(name));
+  },
+  blacklist: (dispatch, [name]) => {
+    if (!name) return;
+    dispatch(addBlockedCreator(name));
+  },
+  unblacklist: (dispatch, [name]) => {
+    if (!name) return;
+    dispatch(removeBlockedCreator(name));
   },
 };
 
 export function processCommand(dispatch: Dispatch, { command, args, userstate }: ChatCommandPayload) {
-  if (command !== 'voteskip' && !userstate.mod && !userstate.broadcaster) return;
+  const publicCommands = new Set(['voteskip', 'voteup', 'up']);
+  if (!publicCommands.has(command) && !userstate?.mod && !userstate?.broadcaster) return;
 
   logger.info(`Received '${command}' command`, args);
 

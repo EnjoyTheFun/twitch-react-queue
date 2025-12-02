@@ -81,6 +81,10 @@ const addClipToQueue = (state: ClipQueueState, clip: Clip) => {
   const id = clip.id;
   const submitter = clip.submitters[0];
 
+  if ((!state.currentId || state.currentId === undefined) && state.queueIds.length === 0) {
+    state.nextSeq = 1;
+  }
+
   if (state.byId[id]) {
     let rememberedClip = state.byId[id];
     if (state.queueIds.includes(id)) {
@@ -134,6 +138,8 @@ const removeClipFromQueue = (state: ClipQueueState, id: string) => {
   }
   if ((!state.currentId || state.currentId === undefined) && state.queueIds.length === 0) {
     state.nextSeq = 1;
+    state.watchedClipCount = 0;
+    state.watchedHistory = [];
   }
 };
 
@@ -150,6 +156,20 @@ const addClipToHistory = (state: ClipQueueState, id?: string) => {
       state.historyIds.splice(existingIndex, 1);
     }
     state.historyIds.unshift(id);
+
+    const MAX_HISTORY_ENTRIES = 300;
+    if (state.historyIds.length > MAX_HISTORY_ENTRIES) {
+      const removed = state.historyIds.splice(MAX_HISTORY_ENTRIES);
+
+      for (const remId of removed) {
+        if (remId === state.currentId) continue;
+        if (state.queueIds.includes(remId)) continue;
+        if ((state.watchedHistory || []).includes(remId)) continue;
+        if (state.byId && state.byId[remId]) {
+          delete state.byId[remId];
+        }
+      }
+    }
   }
 };
 
@@ -221,6 +241,8 @@ const clipQueueSlice = createSlice({
 
       if (!state.currentId && state.queueIds.length === 0) {
         state.nextSeq = 1;
+        state.watchedClipCount = 0;
+        state.watchedHistory = [];
       }
     },
     previousClipWatched: (state) => {
@@ -258,6 +280,8 @@ const clipQueueSlice = createSlice({
 
       if (!state.currentId && state.queueIds.length === 0) {
         state.nextSeq = 1;
+        state.watchedClipCount = 0;
+        state.watchedHistory = [];
       }
     },
     clipStubReceived: (state, { payload: clip }: PayloadAction<Clip>) => addClipToQueue(state, clip),
@@ -274,6 +298,36 @@ const clipQueueSlice = createSlice({
       removeClipFromQueue(state, payload);
       if (state.byId[payload]) {
         delete state.byId[payload];
+      }
+    },
+    clipUpvoted: (state, { payload }: PayloadAction<{ clipId: string; username: string }>) => {
+      const { clipId, username } = payload;
+      const clip = state.byId[clipId];
+      if (!clip) return;
+
+      const voter = (username || '').trim();
+      if (!voter) return;
+      const voterLower = voter.toLowerCase();
+
+      const submitters = clip.submitters || [];
+      const alreadySubmitter = submitters.some((name) => name.toLowerCase() === voterLower);
+      if (alreadySubmitter) return;
+
+      clip.submitters = [...submitters, voter];
+
+      if (state.reorderOnDuplicate !== false) {
+        const index = state.queueIds.indexOf(clipId);
+        if (index > -1) {
+          state.queueIds.splice(index, 1);
+          const newIndex = state.queueIds.findIndex(
+            (otherId) => state.byId[otherId].submitters.length < clip.submitters.length
+          );
+          if (newIndex > -1) {
+            state.queueIds.splice(newIndex, 0, clipId);
+          } else {
+            state.queueIds.push(clipId);
+          }
+        }
       }
     },
     queueClipRemoved: (state, { payload }: PayloadAction<string>) => {
@@ -734,6 +788,7 @@ export const {
   clipStubReceived,
   clipDetailsReceived,
   clipDetailsFailed,
+  clipUpvoted,
   queueClipRemoved,
   queueClipRemoveByIndex,
   memoryClipRemoved,

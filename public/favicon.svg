@@ -3,44 +3,17 @@
 
 <svg
    width="1000"
-   height="1000"
-   viewBox="0 0 264.58334 264.58333"
+   height="1000.0001"
+   viewBox="0 0 264.58334 264.58335"
    version="1.1"
    id="svg1"
-   inkscape:export-filename="Desktop\logo 32x32.png"
-   inkscape:export-xdpi="48"
-   inkscape:export-ydpi="48"
-   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
-   sodipodi:docname="react queue logo 3.svg"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview1"
-     pagecolor="#ffffff"
-     bordercolor="#000000"
-     borderopacity="0.25"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:document-units="mm"
-     inkscape:zoom="0.50835206"
-     inkscape:cx="478.99875"
-     inkscape:cy="272.44898"
-     inkscape:window-width="1920"
-     inkscape:window-height="1009"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
   <defs
      id="defs1">
     <linearGradient
-       id="linearGradient8"
-       inkscape:collect="always">
+       id="linearGradient8">
       <stop
          style="stop-color:#646dee;stop-opacity:1;"
          offset="0"
@@ -51,8 +24,7 @@
          id="stop9" />
     </linearGradient>
     <linearGradient
-       id="linearGradient6"
-       inkscape:collect="always">
+       id="linearGradient6">
       <stop
          style="stop-color:#646dee;stop-opacity:1;"
          offset="0"
@@ -63,8 +35,7 @@
          id="stop7" />
     </linearGradient>
     <linearGradient
-       id="linearGradient4"
-       inkscape:collect="always">
+       id="linearGradient4">
       <stop
          style="stop-color:#646dee;stop-opacity:1;"
          offset="0"
@@ -75,39 +46,34 @@
          id="stop5" />
     </linearGradient>
     <linearGradient
-       inkscape:collect="always"
        xlink:href="#linearGradient4"
        id="linearGradient5"
-       x1="1.4871438"
-       y1="9.7644081"
-       x2="13.393393"
-       y2="9.7644081"
+       x1="-0.40587571"
+       y1="1.5121017"
+       x2="8.7735672"
+       y2="11.652261"
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(17.595222,3.4621286e-8,-3.4621288e-8,17.595222,-8.7807017,-17.286015)" />
     <linearGradient
-       inkscape:collect="always"
        xlink:href="#linearGradient6"
        id="linearGradient7"
-       x1="-0.99776459"
-       y1="10.280859"
-       x2="10.908484"
-       y2="10.280859"
+       x1="-2.5393655"
+       y1="-0.31559095"
+       x2="6.6757007"
+       y2="12.829229"
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(17.595222,-7.2522921e-8,7.2522919e-8,17.595222,-5.6743383,-18.539389)" />
     <linearGradient
-       inkscape:collect="always"
        xlink:href="#linearGradient8"
        id="linearGradient9"
-       x1="3.2368963"
-       y1="9.2799044"
-       x2="15.259161"
-       y2="9.2799044"
+       x1="-1.2297349"
+       y1="1.6777573"
+       x2="11.029173"
+       y2="10.758922"
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(17.595222,0,0,17.595222,-10.671149,-16.187456)" />
   </defs>
   <g
-     inkscape:label="Слой 1"
-     inkscape:groupmode="layer"
      id="layer1">
     <rect
        style="fill:#4797f3;fill-opacity:1;stroke:url(#linearGradient7);stroke-width:2.04133;stroke-dasharray:none"
@@ -117,8 +83,6 @@
        x="-23.230221"
        y="57.608055"
        ry="45.073704"
-       inkscape:transform-center-x="72.699185"
-       inkscape:transform-center-y="-38.293078"
        transform="rotate(-16.376064)" />
     <rect
        style="fill:#95c2f9;fill-opacity:1;stroke:url(#linearGradient5);stroke-width:2.04133;stroke-dasharray:none"
@@ -128,8 +92,6 @@
        x="17.38592"
        y="49.774368"
        ry="45.073704"
-       inkscape:transform-center-x="65.023081"
-       inkscape:transform-center-y="-50.234757"
        transform="rotate(-6.4647991)" />
     <rect
        style="fill:#cae1fb;fill-opacity:1;stroke:url(#linearGradient9);stroke-width:2.04133;stroke-dasharray:none;stroke-opacity:1"
@@ -141,8 +103,7 @@
        ry="45.073704" />
     <path
        id="rect2"
-       style="fill:#646dee;fill-opacity:1;stroke-width:2.07166"
-       d="m 194.54784,147.05102 -61.5218,-37.27445 0.14322,74.63592 z"
-       sodipodi:nodetypes="cccc" />
+       style="fill:#8593f3;fill-opacity:1;stroke:#8593f3;stroke-width:6.072;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 194.54784,147.05102 -61.5218,-37.27445 0.14322,74.63592 z" />
   </g>
 </svg>

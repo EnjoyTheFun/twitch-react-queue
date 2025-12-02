@@ -11,9 +11,11 @@ interface SettingsState {
   channel?: string;
   commandPrefix: string;
   volume: number;
-  blacklist: string[];
-  blockedChannels: string[];
+  blockedSubmitters: string[];
+  blockedCreators: string[];
+  favoriteSubmitters: string[];
   blurredProviders: string[];
+  allowRedditNsfw: boolean;
   showTopSubmitters?: boolean;
   subOnlyMode?: boolean;
   skipThreshold?: number;
@@ -27,9 +29,11 @@ const initialState: SettingsState = {
   colorScheme: null,
   commandPrefix: '!q',
   volume: 1,
-  blacklist: [],
-  blockedChannels: [],
+  blockedSubmitters: [],
+  blockedCreators: [],
+  favoriteSubmitters: [],
   blurredProviders: [],
+  allowRedditNsfw: false,
   showTopSubmitters: false,
   subOnlyMode: false,
   skipThreshold: 20,
@@ -59,14 +63,20 @@ const settingsSlice = createSlice({
       if (payload.commandPrefix) {
         state.commandPrefix = payload.commandPrefix;
       }
-      if (payload.blacklist) {
-        state.blacklist = payload.blacklist.map((s) => s.trim().toLowerCase()).filter(Boolean);
+      if (payload.blockedSubmitters) {
+        state.blockedSubmitters = payload.blockedSubmitters.map((s) => s.trim().toLowerCase()).filter(Boolean);
       }
-      if (payload.blockedChannels) {
-        state.blockedChannels = payload.blockedChannels.map((s: string) => s.trim().toLowerCase()).filter(Boolean);
+      if (payload.blockedCreators) {
+        state.blockedCreators = payload.blockedCreators.map((s: string) => s.trim().toLowerCase()).filter(Boolean);
+      }
+      if (payload.favoriteSubmitters) {
+        state.favoriteSubmitters = payload.favoriteSubmitters.map((s: string) => s.trim().toLowerCase()).filter(Boolean);
       }
       if (payload.blurredProviders) {
         state.blurredProviders = payload.blurredProviders;
+      }
+      if (payload.allowRedditNsfw !== undefined) {
+        state.allowRedditNsfw = payload.allowRedditNsfw;
       }
       if (payload.showTopSubmitters !== undefined) {
         state.showTopSubmitters = payload.showTopSubmitters;
@@ -99,13 +109,31 @@ const settingsSlice = createSlice({
     setVolume: (state, action) => {
       state.volume = action.payload;
     },
-    addBlacklist: (state, { payload }: PayloadAction<string>) => {
+    addBlockedSubmitter: (state, { payload }: PayloadAction<string>) => {
       const name = payload.trim().toLowerCase();
-      if (name && !state.blacklist.includes(name)) state.blacklist.push(name);
+      if (name && !state.blockedSubmitters.includes(name)) state.blockedSubmitters.push(name);
     },
-    removeBlacklist: (state, { payload }: PayloadAction<string>) => {
+    removeBlockedSubmitter: (state, { payload }: PayloadAction<string>) => {
       const name = payload.trim().toLowerCase();
-      state.blacklist = state.blacklist.filter((c) => c !== name);
+      state.blockedSubmitters = state.blockedSubmitters.filter((c) => c !== name);
+    },
+    addBlockedCreator: (state, { payload }: PayloadAction<string>) => {
+      const name = payload.trim().toLowerCase();
+      if (name && !state.blockedCreators.includes(name)) state.blockedCreators.push(name);
+    },
+    removeBlockedCreator: (state, { payload }: PayloadAction<string>) => {
+      const name = payload.trim().toLowerCase();
+      state.blockedCreators = state.blockedCreators.filter((c) => c !== name);
+    },
+    addFavoriteSubmitter: (state, { payload }: PayloadAction<string>) => {
+      const name = payload.trim().toLowerCase();
+      if (!state.favoriteSubmitters) state.favoriteSubmitters = [];
+      if (name && !state.favoriteSubmitters.includes(name)) state.favoriteSubmitters.push(name);
+    },
+    removeFavoriteSubmitter: (state, { payload }: PayloadAction<string>) => {
+      const name = payload.trim().toLowerCase();
+      if (!state.favoriteSubmitters) state.favoriteSubmitters = [];
+      state.favoriteSubmitters = state.favoriteSubmitters.filter((c) => c !== name);
     },
   },
   extraReducers: (builder) => {
@@ -125,9 +153,11 @@ const settingsSlice = createSlice({
 const selectSettings = (state: RootState): SettingsState => state.settings;
 export const selectChannel = (state: RootState) => state.settings.channel;
 export const selectCommandPrefix = (state: RootState) => state.settings.commandPrefix;
-export const selectBlacklist = (state: RootState) => state.settings.blacklist || [];
-export const selectBlockedChannels = (state: RootState) => state.settings.blockedChannels || [];
+export const selectBlockedSubmitters = (state: RootState) => state.settings.blockedSubmitters || [];
+export const selectBlockedCreators = (state: RootState) => state.settings.blockedCreators || [];
+export const selectFavoriteSubmitters = (state: RootState) => state.settings.favoriteSubmitters || [];
 export const selectBlurredProviders = (state: RootState) => state.settings.blurredProviders || [];
+export const selectAllowRedditNsfw = (state: RootState) => state.settings.allowRedditNsfw === true;
 
 export const selectColorScheme = createSelector(
   [selectSettings, (_, defaultColorScheme: ColorScheme) => defaultColorScheme],
@@ -143,7 +173,7 @@ export const selectReorderOnDuplicate = (state: RootState) => state.settings.reo
 export const selectAutoplayDelay = (state: RootState) => state.settings.autoplayDelay ?? 5;
 export const selectPlayerPercentDefault = (state: RootState) => state.settings.playerPercentDefault ?? 79;
 
-export const { colorSchemeToggled, channelChanged, settingsChanged, toggleShowTopSubmitters, setShowTopSubmitters, addBlacklist, removeBlacklist, setVolume } = settingsSlice.actions;
+export const { colorSchemeToggled, channelChanged, settingsChanged, toggleShowTopSubmitters, setShowTopSubmitters, addBlockedSubmitter, removeBlockedSubmitter, addBlockedCreator, removeBlockedCreator, addFavoriteSubmitter, removeFavoriteSubmitter, setVolume } = settingsSlice.actions;
 
 const settingsReducer = persistReducer(
   {

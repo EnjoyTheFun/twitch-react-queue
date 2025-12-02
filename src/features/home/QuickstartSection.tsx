@@ -5,10 +5,9 @@ function QuickstartSection() {
     <Box mb="md">
       <Title order={2}>Quickstart</Title>
       <Text component="p">
-        Simply <Text component="span" weight="bold">Login with Twitch</Text>. You'll be redirected to Twitch and
-        asked to allow the application to get your username and read chat in your name. Any information received from Twitch is not
-        sent anywhere but Twitch. By default you'll join your channel's chat, but you can change the channel afterwards.
-        The only thing left to do is to <Text component="span" weight="bold">open the queue</Text> and wait for some clip links to be posted in chat.
+        Simply <Text component="span" weight="bold">Login with Twitch</Text>. Twitch will ask you to allow the app to get your username and read chat.
+        Any information received from Twitch is not sent anywhere but Twitch. By default the app connects to your channel's chat (you can change it later).
+        Then <Text component="span" weight="bold">open the queue</Text> and wait for media links to be posted in chat.
       </Text>
     </Box>
   );

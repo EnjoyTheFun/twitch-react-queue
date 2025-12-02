@@ -41,7 +41,7 @@ function Popup({ children }: PropsWithChildren<{}>) {
       window.addEventListener('unload', closePopup);
 
       popup.document.body.appendChild(containerEl);
-      popup.document.title = 'Twitch Clip Queue — Player';
+      popup.document.title = 'Twitch React Queue — Player';
       setTimeout(() => copyStyles(document, popup.document), 100);
 
       return () => {

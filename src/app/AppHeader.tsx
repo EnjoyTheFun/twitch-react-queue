@@ -25,7 +25,7 @@ const TitleText = () => (
     <Text size="xl" weight={800}>
       React Queue
     </Text>
-    <MyCredits />
+    <MyCredits persist={false} />
   </Group>
 );
 
@@ -113,7 +113,7 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
               </Group>
             }
           >
-            <Group spacing="xs" align="center" sx={{ flexWrap: 'nowrap', gap: '1rem', minWidth: 0, overflowX: 'auto', alignItems: 'center' }}>
+            <Group spacing="xs" align="center" sx={{ flexWrap: 'nowrap', gap: '1rem', minWidth: 0, overflowX: 'auto', alignItems: 'center', justifyContent: 'flex-end' }}>
               <Group
                 spacing={6}
                 align="center"
@@ -121,7 +121,13 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
                 sx={(theme) => ({
                   padding: '8px 8px',
                   borderRadius: 4,
-                  flexShrink: 0
+                  flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  '@media (max-width: 550px)': {
+                    display: 'none'
+                  }
                 })}
               >
                 <Text className="status-label hide-on-mobile" size="sm" weight={600} sx={{ lineHeight: 1, fontSize: '1rem' }}>Status:</Text>
@@ -134,26 +140,26 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
                       display: 'flex',
                       width: '100%'
                     },
-                      '& .mantine-SegmentedControl-item': {
-                        flex: '1 1 0% !important',
-                        width: '50% !important',
-                        minWidth: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        paddingLeft: '6px',
-                        paddingRight: '6px'
-                      },
-                      '& .mantine-SegmentedControl-item button, & .mantine-SegmentedControl-item [role="button"]': {
-                        width: '100% !important',
-                        display: 'block'
-                      },
-                      '& .mantine-SegmentedControl-label': {
-                        fontSize: '0.9rem',
-                        fontWeight: 600,
-                        textAlign: 'center',
-                        width: '100%'
-                      }
+                    '& .mantine-SegmentedControl-item': {
+                      flex: '1 1 0% !important',
+                      width: '50% !important',
+                      minWidth: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      paddingLeft: '6px',
+                      paddingRight: '6px'
+                    },
+                    '& .mantine-SegmentedControl-item button, & .mantine-SegmentedControl-item [role="button"]': {
+                      width: '100% !important',
+                      display: 'block'
+                    },
+                    '& .mantine-SegmentedControl-label': {
+                      fontSize: '0.9rem',
+                      fontWeight: 600,
+                      textAlign: 'center',
+                      width: '100%'
+                    }
                   }}
                   value={isOpen ? 'open' : 'closed'}
                   data={[
@@ -164,9 +170,9 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
                 />
               </Group>
 
-              <div className="app-menu-container" style={{ flexShrink: 0 }}>
+              <Box sx={{ flexShrink: 0, marginLeft: '8px' }}>
                 <AppMenu />
-              </div>
+              </Box>
             </Group>
           </IfAuthenticated>
         </Group>

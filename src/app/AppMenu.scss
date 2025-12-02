@@ -1,0 +1,12 @@
+.app-menu-container,
+.queue-quick-menu-container {
+  position: relative;
+
+  .mantine-Menu-dropdown {
+    position: absolute !important;
+    transform: translateZ(0);
+    will-change: transform;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+}

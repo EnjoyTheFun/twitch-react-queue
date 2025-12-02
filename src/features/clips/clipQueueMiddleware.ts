@@ -30,6 +30,12 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
     return (next) => (action: any) => {
       if (action.type === REHYDRATE && action.key === 'clipQueue' && action.payload) {
         clipProvider.setProviders(action.payload.providers);
+        // Restore any reddit->other-provider mappings from persisted clips
+        clipProvider.restoreResolvedRedditMap(action.payload.byId);
+      } else if (action.type === REHYDRATE && action.key === 'settings' && action.payload) {
+        if (action.payload.allowRedditNsfw !== undefined) {
+          clipProvider.setAllowRedditNsfw(action.payload.allowRedditNsfw);
+        }
       } else if (urlReceived.match(action)) {
         const { url, userstate } = action.payload;
         const sender = userstate.username;
@@ -38,10 +44,10 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
           return next(action);
         }
 
-        const blacklisted = storeAPI.getState().settings.blacklist || [];
+        const blockedSubmitters = storeAPI.getState().settings.blockedSubmitters || [];
         const senderNorm = (sender || '').toLowerCase();
-        const blacklistedSet = new Set(blacklisted.map((b: string) => b.toLowerCase()));
-        if (blacklistedSet.has(senderNorm)) {
+        const blockedSubmittersSet = new Set(blockedSubmitters.map((b: string) => b.toLowerCase()));
+        if (blockedSubmittersSet.has(senderNorm)) {
           return next(action);
         }
 
@@ -64,9 +70,9 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
               .getClipById(id)
               .then((clip) => {
                 if (clip) {
-                  const blockedChannels = storeAPI.getState().settings.blockedChannels || [];
+                  const blockedCreators = storeAPI.getState().settings.blockedCreators || [];
                   const channelNorm = (clip.author || '').toLowerCase();
-                  const blockedSet = new Set(blockedChannels.map((c: string) => c.toLowerCase()));
+                  const blockedSet = new Set(blockedCreators.map((c: string) => c.toLowerCase()));
                   if (blockedSet.has(channelNorm)) {
                     storeAPI.dispatch(clipDetailsFailed(id));
                     return;
@@ -85,10 +91,10 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
       } else if (urlEnqueue.match(action)) {
         const { url, userstate } = action.payload;
         const sender = userstate.username;
-        const blacklisted = storeAPI.getState().settings.blacklist || [];
+        const blockedSubmitters = storeAPI.getState().settings.blockedSubmitters || [];
         const senderNorm = (sender || '').toLowerCase();
-        const blacklistedSet = new Set(blacklisted.map((b: string) => b.toLowerCase()));
-        if (blacklistedSet.has(senderNorm)) return next(action);
+        const blockedSubmittersSet = new Set(blockedSubmitters.map((b: string) => b.toLowerCase()));
+        if (blockedSubmittersSet.has(senderNorm)) return next(action);
 
         const subOnlyMode = storeAPI.getState().settings.subOnlyMode === true;
         if (subOnlyMode) {
@@ -106,9 +112,9 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
               .getClipById(id)
               .then((clip) => {
                 if (clip) {
-                  const blockedChannels = storeAPI.getState().settings.blockedChannels || [];
+                  const blockedCreators = storeAPI.getState().settings.blockedCreators || [];
                   const channelNorm = (clip.author || '').toLowerCase();
-                  const blockedSet = new Set(blockedChannels.map((c: string) => c.toLowerCase()));
+                  const blockedSet = new Set(blockedCreators.map((c: string) => c.toLowerCase()));
                   if (blockedSet.has(channelNorm)) {
                     storeAPI.dispatch(clipDetailsFailed(id));
                     return;
@@ -130,9 +136,12 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
           storeAPI.dispatch(queueClipRemoved(id));
         }
       } else if (settingsChanged.match(action)) {
-        const { enabledProviders } = action.payload;
+        const { enabledProviders, allowRedditNsfw } = action.payload;
         if (enabledProviders) {
           clipProvider.setProviders(enabledProviders);
+        }
+        if (allowRedditNsfw !== undefined) {
+          clipProvider.setAllowRedditNsfw(allowRedditNsfw);
         }
       } else if (autoplayTimeoutHandleChanged.match(action)) {
         if (!action.payload.handle) {

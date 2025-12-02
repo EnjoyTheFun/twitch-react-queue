@@ -36,6 +36,14 @@ class TwitchClipProvider implements ClipProvider {
       return undefined;
     }
 
+    let gameName: string | undefined;
+    try {
+      if (clipInfo.game_id) {
+        const game = await twitchApi.getGame(clipInfo.game_id);
+        gameName = game?.name;
+      }
+    } catch { }
+
     return {
       id,
       author: clipInfo.broadcaster_name,
@@ -46,6 +54,7 @@ class TwitchClipProvider implements ClipProvider {
       duration: clipInfo.duration,
       views: clipInfo.view_count,
       Platform: 'Twitch',
+      category: gameName,
       url: this.getUrl(id),
     };
   }

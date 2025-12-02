@@ -110,24 +110,6 @@ function SpotlightLayout() {
     };
   }, []);
 
-  useEffect(() => {
-    // hide browser scrollbars but allow scrolling
-    const styleId = 'etf-hide-scrollbar-style';
-    if (document.getElementById(styleId)) return;
-
-    const style = document.createElement('style');
-    style.id = styleId;
-    style.innerHTML = `
-      html, body, #root, * { scrollbar-width: none !important; -ms-overflow-style: none !important; }
-      *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
-    `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.getElementById(styleId)?.remove();
-    };
-  }, []);
-
   const toggleQueue = () => {
     setQueueOpen(prev => !prev);
   };

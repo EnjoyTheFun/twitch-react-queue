@@ -1,8 +1,10 @@
 import { Box, Text, useMantineTheme } from '@mantine/core';
 import { formatDistanceToNow, parseISO } from 'date-fns';
+import { IconStarFilled } from '@tabler/icons-react';
 import { useAppSelector } from '../../../app/hooks';
 import { selectCurrentClip, selectTopNSubmitters } from '../clipQueueSlice';
 import Platform from '../../../common/components/BrandPlatforms';
+import { selectFavoriteSubmitters } from '../../settings/settingsSlice';
 
 interface PlayerTitleProps {
   className?: string;
@@ -19,10 +21,24 @@ function PlayerTitle({ className }: PlayerTitleProps) {
   const topIndex = submitter ? topN.findIndex((t) => t.username === submitter.toLowerCase()) : -1;
   const topClass = topIndex >= 0 ? `chip-anim-${topIndex}` : undefined;
   const colored = useAppSelector((s) => s.clipQueue.coloredSubmitterNames !== false);
+  const favoriteSubmitters = useAppSelector(selectFavoriteSubmitters);
+  const isFavorite = submitter ? favoriteSubmitters.includes(submitter.toLowerCase()) : false;
 
   const submitterClass = colored && topClass ? topClass : undefined;
   const submitterStyle = (() => {
-    if (!colored || topClass || !chatUser) return undefined;
+    if (!colored) return undefined;
+
+    if (isFavorite) {
+      return {
+        background: 'linear-gradient(90deg, #FFD700, #FFA500, #FFD700)',
+        backgroundSize: '200% auto',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text',
+      };
+    }
+
+    if (topClass || !chatUser) return undefined;
 
     const roleColor = chatUser.broadcaster
       ? theme.colors.red[6]
@@ -54,6 +70,7 @@ function PlayerTitle({ className }: PlayerTitleProps) {
           <>
             , submitted by{' '}
             <strong className={submitterClass} style={submitterStyle}>
+              {isFavorite && <IconStarFilled size={11} style={{ display: 'inline', marginRight: 2 }} />}
               {currentClip?.submitters[0]}
             </strong>
             {currentClip?.submitters.length > 1 && <> and {currentClip.submitters.length - 1} other(s)</>}

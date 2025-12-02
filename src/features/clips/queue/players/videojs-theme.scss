@@ -1,0 +1,39 @@
+.video-js {
+  overflow: hidden !important;
+}
+
+.vjs-control-bar {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  transition: transform 0.3s cubic-bezier(0.5, 0, 0.2, 1) !important;
+  user-select: none !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  opacity: 1 !important;
+}
+
+.video-js .vjs-control-bar {
+  transform: translateY(0) !important;
+}
+
+.video-js.vjs-paused .vjs-control-bar,
+.video-js.vjs-waiting .vjs-control-bar {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  transition: transform 0.3s cubic-bezier(0.5, 0, 0.2, 1) !important;
+}
+
+.video-js.vjs-user-inactive:not(.vjs-paused):not(.vjs-waiting) .vjs-control-bar {
+  transform: translateY(100%) !important;
+  opacity: 1 !important;
+  transition: transform 0.3s cubic-bezier(0.5, 0, 0.2, 1) !important;
+}
+
+.video-js:not(:hover):not(.vjs-paused):not(.vjs-waiting) .vjs-control-bar {
+  transform: translateY(100%) !important;
+}
+
+.video-js:hover .vjs-control-bar,
+.video-js.vjs-user-active .vjs-control-bar {
+  transform: translateY(0) !important;
+}
