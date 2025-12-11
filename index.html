@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Enqueue and play media from Twitch Chat with multi-platform support" />
+  <meta name="keywords" content="twitch, clips, queue, react, streaming" />
+  <meta name="author" content="EnjoyTheFun" />
+  <meta property="og:title" content="React Queue - Twitch Media Manager" />
+  <meta property="og:description" content="Enqueue and play media from Twitch Chat" />
+  <meta property="og:type" content="website" />
+  <link rel="icon" type="image/svg+xml" href="/twitch-react-queue/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/twitch-react-queue/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/twitch-react-queue/favicon-16x16.png" />
+  <title>React Queue</title>
+
+  <!-- Start Single Page Apps for GitHub Pages -->
+  <script type="text/javascript">
+    // Single Page Apps for GitHub Pages
+    // MIT License
+    // https://github.com/rafgraph/spa-github-pages
+    // This script checks to see if a redirect is present in the query string,
+    // converts it back into the correct url and adds it to the
+    // browser's history using window.history.replaceState(...),
+    // which won't cause the browser to attempt to load the new url.
+    // When the single page app is loaded further down in this file,
+    // the correct url will be waiting in the browser's history for
+    // the single page app to route accordingly.
+    (function (l) {
+      if (l.search[1] === '/') {
+        var decoded = l.search.slice(1).split('&').map(function (s) {
+          return s.replace(/~and~/g, '&')
+        }).join('?');
+        window.history.replaceState(null, null,
+          l.pathname.slice(0, -1) + decoded + l.hash
+        );
+      }
+    }(window.location))
+  </script>
+  <!-- End Single Page Apps for GitHub Pages -->
+
+  <!-- Umami Analytics -->
+  <script>
+    if ('https://analytics.umami.is/script.js' && 'b7336275-7890-4905-a18f-ca4f96922f20') {
+      var script = document.createElement('script');
+      script.async = true;
+      script.defer = true;
+      script.setAttribute('data-website-id', 'b7336275-7890-4905-a18f-ca4f96922f20');
+      script.src = 'https://analytics.umami.is/script.js';
+      document.head.appendChild(script);
+    }
+  </script>
+
+  <script type="module" crossorigin src="/twitch-react-queue/assets/index.Bc3DWSdj.js"></script>
+  <link rel="modulepreload" crossorigin href="/twitch-react-queue/assets/vendor.NHdFJPub.js">
+  <link rel="modulepreload" crossorigin href="/twitch-react-queue/assets/videojs.NeURMMHm.js">
+  <link rel="modulepreload" crossorigin href="/twitch-react-queue/assets/mantine.DuT6zjM5.js">
+  <link rel="stylesheet" crossorigin href="/twitch-react-queue/assets/index.Bajqnc-m.css">
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+  <!--
+  ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠛⠉⠁⠄⢀⣤⣶⣶⣶⣶⣶⣤⣄⠄⠈⢿⣿⣿
+  ⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠋⠄⠄⠄⠄⠄⢾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣆⣼⣿⣿
+  ⣿⣿⣿⣿⣿⣿⣿⣿⠋⠄⠄⠄⠄⠄⢀⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+  ⣿⣿⣿⣿⣿⣿⣿⢃⡀⠂⠄⠄⠄⠄⢿⣿⣿⣿⣿⣿⣶⡶⠤⣬⣿⣿⣿⣿⣿⣿
+  ⣿⣿⣿⣿⣿⣿⠁⠄⠄⠄⠄⠄⠄⠄⢸⣿⣿⣿⣿⣶⣾⣏⣀⣿⣿⣿⢳⣤⣜⣿
+  ⣿⣿⣿⣿⣿⣿⠄⠄⠄⠄⠄⠄⠄⠄⢸⣿⣿⣿⣿⣿⣷⣾⣿⣿⣿⣿⣿⣁⣸⣿
+  ⣿⣿⣿⣿⣿⣿⡀⠄⠄⠄⠄⠄⠄⠄⢸⣿⣿⣿⣿⣿⣿⣿⠿⠾⠯⣭⣿⣷⣿⣿
+  ⣿⣿⣿⣿⣿⡿⠃⠄⠄⠄⠄⠄⠄⠄⢈⣿⣿⣿⣿⣿⠋⠄⠄⠄⠄⠈⠄⠙⡿⣿
+  ⣿⣿⣿⣿⡉⠄⠄⠄⠄⠄⠄⠄⠄⠄⠘⢿⣿⣽⣿⠄⠐⢦⣴⣶⢚⠋⠄⠄⣁⣿
+  ⣿⣿⣿⣿⣷⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠉⠁⠉⠁⠄⠄⠄⠸⢷⣾⡄⠄⠄⢸⣿
+  ⣿⣿⠿⠛⠋⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⢿⠇⠄⠄⢸⣿
+  ⠋⠁⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⢀⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⢸⣿
+  ⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠘⣧⣄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⣸⣿
+  -->
+</body>
+
+</html>
