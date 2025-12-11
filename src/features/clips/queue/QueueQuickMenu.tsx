@@ -85,7 +85,7 @@ function QueueQuickMenu() {
           Import links
         </Menu.Item>
         <Menu.Item icon={coloredSubmitters ? <IconPalette size={14} /> : <IconPaletteOff size={14} />} rightSection={<Switch size="sm" checked={coloredSubmitters} onChange={() => dispatch(submitterColorsToggled())} />}>
-          Submitter colors
+          Gradient paint
         </Menu.Item>
         <Menu.Item icon={<IconReorder size={14} />} rightSection={<Switch size="sm" checked={reorderOnDuplicate} onChange={(e) => dispatch(settingsChanged({ reorderOnDuplicate: e.currentTarget.checked }))} />}>
           Popularity sort

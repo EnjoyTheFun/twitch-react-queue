@@ -65,7 +65,7 @@ const TopSubmittersMarquee = ({ count = 3 }: TopSubmittersMarqueeProps) => {
           size="sm"
           variant="light"
           onClick={handleReset}
-          title="Reset top clippers"
+          title="Reset"
         >
           <IconRefresh size={14} />
         </ActionIcon>

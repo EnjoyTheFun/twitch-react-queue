@@ -345,7 +345,7 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
           <Tabs.Tab label="About" icon={<IconInfoCircle size={16} />} {...({} as any)}>
             <Stack spacing="md" p="md">
               <Box>
-                <Text size="lg" weight={600} mb="xs">React Queue v1.1.4</Text>
+                <Text size="lg" weight={600} mb="xs">React Queue v1.1.5</Text>
                 <Text size="sm" color="dimmed">
                   A Twitch-integrated media queue for streamers and content creators
                 </Text>

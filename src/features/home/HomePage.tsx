@@ -41,7 +41,7 @@ function HomePage() {
             </Text>
           </Box>
           <Text size="xs" color="dimmed" sx={{ whiteSpace: 'nowrap' }}>
-            v{process.env.npm_package_version || '1.1.4'}
+            v{process.env.npm_package_version || '1.1.5'}
           </Text>
         </Box>
       </Box>

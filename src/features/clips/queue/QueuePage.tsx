@@ -4,6 +4,7 @@ import ClassicLayout from './layouts/ClassicLayout';
 import FullscreenWithPopupLayout from './layouts/FullscreenWithPopupLayout';
 import SpotlightLayout from './layouts/SpotlightLayout';
 import FloatingImportMenu from './FloatingImportMenu';
+import PollBar from '../../twitchChat/PollBar';
 
 const QueuePage = () => {
   const layout = useAppSelector(selectLayout);
@@ -23,6 +24,7 @@ const QueuePage = () => {
         }
       })()}
       <FloatingImportMenu />
+      <PollBar />
     </>
   );
 };

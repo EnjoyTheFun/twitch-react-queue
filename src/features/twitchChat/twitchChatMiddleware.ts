@@ -9,6 +9,7 @@ import { showNotification } from '@mantine/notifications';
 import { Userstate, urlReceived, urlDeleted, userTimedOut } from './actions';
 import { processCommand } from './chatCommands';
 import { pruneOldMemory } from '../clips/clipQueueSlice';
+import { pollVoteRecorded } from './pollSlice';
 
 const logger = createLogger('Twitch Chat');
 
@@ -71,6 +72,16 @@ const handleMessage =
       const [command, ...args] = normalized.split(' ');
       processCommand(storeApi.dispatch, { command, args, userstate });
       return;
+    }
+
+    // count "VoteYea" and "VoteNay" emotes when poll is active
+    if (storeApi.getState().poll?.active) {
+      const lowerMsg = message.toLowerCase();
+      if (lowerMsg.includes('voteyea')) {
+        storeApi.dispatch(pollVoteRecorded({ username: userstate.username, vote: 'yea' }));
+      } else if (lowerMsg.includes('votenay')) {
+        storeApi.dispatch(pollVoteRecorded({ username: userstate.username, vote: 'nay' }));
+      }
     }
 
     const url = getUrlFromMessage(message);

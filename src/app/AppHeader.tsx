@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ActionIcon, ActionIconProps, Button, Group, Header, Space, Text, ThemeIcon, Box, SegmentedControl } from '@mantine/core';
-import { IconHome, IconList, IconHistory } from '@tabler/icons-react';
+import { IconHome, IconList, IconHistory, IconCrown } from '@tabler/icons-react';
 import { PropsWithChildren } from 'react';
 import { NavLinkProps, useLocation } from 'react-router-dom';
 import ColorSchemeSwitch from '../common/components/ColorSchemeSwitch';
@@ -35,7 +35,7 @@ const NavBarIcon = ({ children, ...props }: PropsWithChildren<ActionIconProps<an
   </ActionIcon>
 );
 
-const NavBarButton = ({ children, type, className, style, icon, ...props }: PropsWithChildren<NavLinkProps & { icon?: React.ReactNode }>) => {
+const NavBarButton = ({ children, type, className, style, icon, sx, ...props }: PropsWithChildren<NavLinkProps & { icon?: React.ReactNode; sx?: any }>) => {
   const label = typeof children === 'string' ? children : undefined;
   return (
     <Button
@@ -44,6 +44,7 @@ const NavBarButton = ({ children, type, className, style, icon, ...props }: Prop
       aria-label={label}
       {...props}
       className="nav-link"
+      sx={sx}
       activeStyle={({ isActive }: { isActive: boolean }) => ({
         borderBottom: isActive ? '1px solid' : undefined,
       })}
@@ -101,6 +102,11 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
                   <NavBarButton to="history" icon={<IconHistory />}>
                     History
                   </NavBarButton>
+                  <Box sx={{ '@media (max-width: 799px)': { display: 'none' } }}>
+                    <NavBarButton to="leaderboard" icon={<IconCrown />}>
+                      Leaderboard
+                    </NavBarButton>
+                  </Box>
                 </IfAuthenticated>
               </Group>
             )}

@@ -9,7 +9,7 @@ import {
   Divider,
 } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
-import { IconMoonStars, IconSettings, IconLogout, IconChevronDown, IconToggleLeftFilled, IconToggleRightFilled } from '@tabler/icons-react';
+import { IconMoonStars, IconSettings, IconLogout, IconChevronDown, IconToggleLeftFilled, IconToggleRightFilled, IconCrown } from '@tabler/icons-react';
 import { selectUsername, selectProfilePictureUrl, logout } from '../features/auth/authSlice';
 import { isOpenChanged, selectIsOpen } from '../features/clips/clipQueueSlice';
 import useSettingsModal from '../features/settings/SettingsModal';
@@ -85,6 +85,14 @@ const AppMenu = () => {
         sx={{ '@media (min-width: 551px)': { display: 'none' } }}
       >
         {isOpen ? 'Close Queue' : 'Open Queue'}
+      </Menu.Item>
+      { /* Mobile-only */ }
+      <Menu.Item
+        icon={<IconCrown size={14} />}
+        onClick={() => navigate('/leaderboard')}
+        sx={{ '@media (min-width: 800px)': { display: 'none' } }}
+      >
+        Leaderboard
       </Menu.Item>
       <Menu.Item icon={<IconSettings size={14} />} onClick={() => openSettingsModal()}>
         Settings

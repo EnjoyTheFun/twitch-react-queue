@@ -9,12 +9,14 @@ import { tryMigrateLegacyData } from '../features/migration/legacyMigration';
 import settingsReducer from '../features/settings/settingsSlice';
 import createTwitchChatMiddleware from '../features/twitchChat/twitchChatMiddleware';
 import chatUsersReducer from '../features/twitchChat/chatUsersSlice';
+import pollReducer from '../features/twitchChat/pollSlice';
 
 const rootReducer = combineReducers({
   auth: authReducer,
   settings: settingsReducer,
   chatUsers: chatUsersReducer,
   clipQueue: clipQueueReducer,
+  poll: pollReducer,
 });
 
 const persistConfig = {

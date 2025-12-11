@@ -252,7 +252,7 @@ function Player({ className }: PlayerProps) {
       }
       setShowLoader(false);
     };
-  }, [currentClip, autoplayEnabled, nextClipId, dispatch]);
+  }, [currentClip, autoplayEnabled, dispatch]);
 
   const preloadRef = useRef<PreloadHandle | null>(null);
   const preloadAbortRef = useRef<AbortController | null>(null);

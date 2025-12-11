@@ -2,15 +2,18 @@ import { PropsWithChildren, ReactElement } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { selectQueueClips, currentClipReplaced, queueClipRemoved } from '../clipQueueSlice';
 import Clip from '../Clip';
+import type { Clip as ClipType } from '../clipQueueSlice';
 
 interface QueueProps {
   card?: boolean;
   wrapper?: (props: PropsWithChildren<{}>) => ReactElement;
+  filteredClips?: ClipType[];
 }
 
-function Queue({ wrapper, card }: QueueProps) {
+function Queue({ wrapper, card, filteredClips }: QueueProps) {
   const dispatch = useAppDispatch();
-  const clips = useAppSelector(selectQueueClips);
+  const allClips = useAppSelector(selectQueueClips);
+  const clips = filteredClips ?? allClips;
   const Wrapper = wrapper ?? (({ children }) => <>{children}</>);
 
   const handleClipClick = (clipId: string) => () => dispatch(currentClipReplaced(clipId));
