@@ -74,12 +74,16 @@ const handleMessage =
       return;
     }
 
-    // count "VoteYea" and "VoteNay" emotes when poll is active
+    // count poll votes when poll is active using customizable keywords
     if (storeApi.getState().poll?.active) {
+      const { voteYeaKeyword = 'VoteYea', voteNayKeyword = 'VoteNay' } = storeApi.getState().settings || {};
+      const yeaKey = (voteYeaKeyword || 'VoteYea').toLowerCase().trim();
+      const nayKey = (voteNayKeyword || 'VoteNay').toLowerCase().trim();
+
       const lowerMsg = message.toLowerCase();
-      if (lowerMsg.includes('voteyea')) {
+      if (yeaKey && lowerMsg.includes(yeaKey)) {
         storeApi.dispatch(pollVoteRecorded({ username: userstate.username, vote: 'yea' }));
-      } else if (lowerMsg.includes('votenay')) {
+      } else if (nayKey && lowerMsg.includes(nayKey)) {
         storeApi.dispatch(pollVoteRecorded({ username: userstate.username, vote: 'nay' }));
       }
     }

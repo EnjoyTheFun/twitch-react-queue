@@ -12,7 +12,7 @@ import {
   selectProviders,
 } from '../clips/clipQueueSlice';
 import { getProviders } from '../../common/utils';
-import { selectChannel, selectCommandPrefix, settingsChanged, selectClipMemoryRetentionDays, selectSkipThreshold, selectAutoplayDelay, selectSubOnlyMode, selectPlayerPercentDefault, selectFavoriteSubmitters, removeFavoriteSubmitter, selectAllowRedditNsfw } from './settingsSlice';
+import { selectChannel, selectCommandPrefix, settingsChanged, selectClipMemoryRetentionDays, selectSkipThreshold, selectAutoplayDelay, selectSubOnlyMode, selectPlayerPercentDefault, selectFavoriteSubmitters, removeFavoriteSubmitter, selectAllowRedditNsfw, selectVoteYeaKeyword, selectVoteNayKeyword } from './settingsSlice';
 
 function SettingsModal({ closeModal }: { closeModal: () => void }) {
   const dispatch = useAppDispatch();
@@ -32,9 +32,11 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
   const existingClipMemoryRetentionDays = useAppSelector(selectClipMemoryRetentionDays);
   const existingAutoplayDelay = useAppSelector(selectAutoplayDelay);
   const existingSubOnlyMode = useAppSelector(selectSubOnlyMode);
+  const existingVoteYea = useAppSelector(selectVoteYeaKeyword);
+  const existingVoteNay = useAppSelector(selectVoteNayKeyword);
   const theme = useMantineTheme();
   const form = useForm({
-    initialValues: { channel, commandPrefix, clipLimit, enabledProviders, layout, blockedSubmitters: existingBlockedSubmitters.join('\n'), blockedCreators: existingBlockedCreators.join('\n'), blurredProviders: existingBlurred, allowRedditNsfw: existingAllowRedditNsfw, skipThreshold: existingSkipThreshold, clipMemoryRetentionDays: existingClipMemoryRetentionDays, autoplayDelay: existingAutoplayDelay, subOnlyMode: existingSubOnlyMode, playerPercentDefault: useAppSelector(selectPlayerPercentDefault) },
+    initialValues: { channel, commandPrefix, clipLimit, enabledProviders, layout, blockedSubmitters: existingBlockedSubmitters.join('\n'), blockedCreators: existingBlockedCreators.join('\n'), blurredProviders: existingBlurred, allowRedditNsfw: existingAllowRedditNsfw, skipThreshold: existingSkipThreshold, clipMemoryRetentionDays: existingClipMemoryRetentionDays, autoplayDelay: existingAutoplayDelay, subOnlyMode: existingSubOnlyMode, playerPercentDefault: useAppSelector(selectPlayerPercentDefault), voteYeaKeyword: existingVoteYea, voteNayKeyword: existingVoteNay },
   });
 
   return (
@@ -50,7 +52,15 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
           .map((s: string) => s.trim())
           .filter((s: string) => s.length > 0);
 
-        dispatch(settingsChanged({ ...settings, blockedSubmitters: blockedSubmittersArr, blockedCreators: blockedCreatorsArr, blurredProviders: settings.blurredProviders || [], allowRedditNsfw: settings.allowRedditNsfw }));
+        dispatch(settingsChanged({
+          ...settings,
+          blockedSubmitters: blockedSubmittersArr,
+          blockedCreators: blockedCreatorsArr,
+          blurredProviders: settings.blurredProviders || [],
+          allowRedditNsfw: settings.allowRedditNsfw,
+          voteYeaKeyword: settings.voteYeaKeyword?.trim() || 'VoteYea',
+          voteNayKeyword: settings.voteNayKeyword?.trim() || 'VoteNay',
+        }));
         closeModal();
       })}
     >
@@ -257,6 +267,23 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
                   value={form.values.skipThreshold}
                   onChange={(v) => form.setFieldValue('skipThreshold', v ?? 20)}
                 />
+                <Stack spacing={4}>
+                  <TextInput
+                    label="Poll vote keyword (yea)"
+                    description="Chat message that counts as a Yea vote"
+                    required
+                    value={form.values.voteYeaKeyword}
+                    onChange={(e) => form.setFieldValue('voteYeaKeyword', e.currentTarget.value)}
+                  />
+                  <TextInput
+                    label="Poll vote keyword (nay)"
+                    description="Chat message that counts as a Nay vote"
+                    required
+                    value={form.values.voteNayKeyword}
+                    onChange={(e) => form.setFieldValue('voteNayKeyword', e.currentTarget.value)}
+                  />
+                  <Text size="xs" color="dimmed">Defaults: VoteYea / VoteNay</Text>
+                </Stack>
                 <Box>
                   <Group spacing="sm" mb={8}>
                     <Text size="sm">Favorite Submitters</Text>
@@ -345,7 +372,7 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
           <Tabs.Tab label="About" icon={<IconInfoCircle size={16} />} {...({} as any)}>
             <Stack spacing="md" p="md">
               <Box>
-                <Text size="lg" weight={600} mb="xs">React Queue v1.1.5</Text>
+                <Text size="lg" weight={600} mb="xs">React Queue v1.1.6</Text>
                 <Text size="sm" color="dimmed">
                   A Twitch-integrated media queue for streamers and content creators
                 </Text>

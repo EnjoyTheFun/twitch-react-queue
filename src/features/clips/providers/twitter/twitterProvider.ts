@@ -39,9 +39,13 @@ class TwitterProvider implements ClipProvider {
   async getAutoplayUrl(id: string): Promise<string | undefined> {
     try {
       const directUrl = await getDirectMediaUrl(id);
-      return directUrl ?? (await this.getClipById(id))?.url;
+      if (directUrl && directUrl.includes('video.twimg.com')) {
+        return `https://c.vxtwitter.com/i/status/${id}`;
+      }
+
+      return directUrl ?? `https://c.vxtwitter.com/i/status/${id}`;
     } catch (error) {
-      return undefined;
+      return `https://c.vxtwitter.com/i/status/${id}`;
     }
   }
 }

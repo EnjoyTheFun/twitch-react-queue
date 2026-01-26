@@ -103,8 +103,8 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
                     History
                   </NavBarButton>
                   <Box sx={{ '@media (max-width: 799px)': { display: 'none' } }}>
-                    <NavBarButton to="leaderboard" icon={<IconCrown />}>
-                      Leaderboard
+                    <NavBarButton to="stats" icon={<IconCrown />}>
+                      Stats
                     </NavBarButton>
                   </Box>
                 </IfAuthenticated>

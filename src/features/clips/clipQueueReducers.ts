@@ -155,10 +155,11 @@ export const createReducers = () => ({
     if (state.currentId) {
       const clip = state.byId[state.currentId];
 
+      state.watchedHistory.push(state.currentId);
+
       if (!clip?.isWatched) {
         state.watchedClipCount += 1;
         state.totalMediaWatched += 1;
-        state.watchedHistory.push(state.currentId);
 
         if (clip?.submitters && Array.isArray(clip.submitters)) {
           clip.submitters.forEach((submitter) => {
@@ -186,11 +187,14 @@ export const createReducers = () => ({
     const previousId = state.watchedHistory[state.watchedHistory.length - 2];
     if (!previousId) return;
 
+    const existingIdx = state.queueIds.indexOf(currentId);
+    if (existingIdx !== -1) {
+      state.queueIds.splice(existingIdx, 1);
+    }
     state.queueIds.unshift(currentId);
     state.watchedClipCount = Math.max(0, state.watchedClipCount - 1);
 
     state.watchedHistory.pop();
-    state.historyIds = state.historyIds.filter((id) => id !== currentId);
 
     state.currentId = previousId;
     state.currentSkipVoters = [];
@@ -499,5 +503,39 @@ export const createReducers = () => ({
     if (enabledProviders.length > 0) {
       state.providers = enabledProviders;
     }
+  },
+  loadClipFromHistory: (state: ClipQueueState, { payload }: PayloadAction<string>) => {
+    const clipId = payload;
+
+    if (!state.byId[clipId]) return;
+
+    if (state.currentId && state.currentId !== clipId) {
+      const existingIndex = state.queueIds.indexOf(state.currentId);
+      if (existingIndex !== -1) {
+        state.queueIds.splice(existingIndex, 1);
+      }
+      state.queueIds.unshift(state.currentId);
+    }
+
+    const queueIndex = state.queueIds.indexOf(clipId);
+    if (queueIndex !== -1) {
+      state.queueIds.splice(queueIndex, 1);
+    }
+
+    const historyIndex = state.watchedHistory.indexOf(clipId);
+    if (historyIndex !== -1) {
+      state.watchedHistory.splice(historyIndex, 1);
+    }
+
+    state.currentId = clipId;
+
+    state.watchedHistory.push(clipId);
+
+    if (!state.historyIds.includes(clipId)) {
+      state.historyIds.unshift(clipId);
+    }
+
+    state.currentSkipVoters = [];
+    state.autoplayTimeoutHandle = undefined;
   },
 });

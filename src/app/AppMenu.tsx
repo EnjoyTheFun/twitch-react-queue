@@ -89,10 +89,10 @@ const AppMenu = () => {
       { /* Mobile-only */ }
       <Menu.Item
         icon={<IconCrown size={14} />}
-        onClick={() => navigate('/leaderboard')}
+        onClick={() => navigate('/stats')}
         sx={{ '@media (min-width: 800px)': { display: 'none' } }}
       >
-        Leaderboard
+        Stats
       </Menu.Item>
       <Menu.Item icon={<IconSettings size={14} />} onClick={() => openSettingsModal()}>
         Settings

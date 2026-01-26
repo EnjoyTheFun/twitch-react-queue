@@ -1,9 +1,11 @@
-import { Container, Stack, Title, Group, Card, Text, Table, Box, useMantineTheme, Button } from '@mantine/core';
+import { useState } from 'react';
+import { Container, Stack, Title, Group, Card, Text, Table, Box, useMantineTheme, Button, Modal } from '@mantine/core';
 import { IconRefresh, IconBug } from '@tabler/icons-react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { selectTopNSubmitters, selectWatchedCount, selectWatchedCounts, resetWatchedCounts, setWatchedCounts, selectTotalMediaWatched } from '../clipQueueSlice';
 
 function LeaderboardPage() {
+  const [showResetModal, setShowResetModal] = useState(false);
   const dispatch = useAppDispatch();
   const theme = useMantineTheme();
   const totalWatched = useAppSelector(selectWatchedCount);
@@ -30,9 +32,12 @@ function LeaderboardPage() {
   };
 
   const handleReset = () => {
-    if (window.confirm('Are you sure you want to reset all watched counts?')) {
-      dispatch(resetWatchedCounts());
-    }
+    setShowResetModal(true);
+  };
+
+  const confirmReset = () => {
+    dispatch(resetWatchedCounts());
+    setShowResetModal(false);
   };
 
   return (
@@ -40,10 +45,7 @@ function LeaderboardPage() {
       <Stack spacing="lg">
         <Group position="apart" align="flex-start">
           <div>
-            <Title order={1}>Submitter Leaderboard</Title>
-            <Text color="dimmed" mt="xs">
-              Top submitters ranked by number of submitted media watched
-            </Text>
+            <Title order={1}>React Queue Stats</Title>
           </div>
           <Group spacing="xs">
             <Button
@@ -111,7 +113,7 @@ function LeaderboardPage() {
                     <tr>
                       <th style={{ width: '80px' }}>Rank</th>
                       <th>Submitter</th>
-                      <th style={{ textAlign: 'right', width: '100px' }}>Watched</th>
+                      <th style={{ textAlign: 'right', width: '100px' }}># watched</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -149,6 +151,33 @@ function LeaderboardPage() {
           </Card>
         )}
       </Stack>
+
+      <Modal
+        opened={showResetModal}
+        onClose={() => setShowResetModal(false)}
+        title="Reset Stats"
+        centered
+      >
+        <Stack spacing="lg">
+          <Text>
+            Are you sure you want to reset all stats? This action cannot be undone.
+          </Text>
+          <Group position="right" spacing="sm">
+            <Button
+              variant="default"
+              onClick={() => setShowResetModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              color="red"
+              onClick={confirmReset}
+            >
+              Reset Stats
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Container>
   );
 }

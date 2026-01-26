@@ -2,11 +2,14 @@ import { Box, Group, Text, Transition } from '@mantine/core';
 import { IconX } from '@tabler/icons-react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { selectPollActive, selectPollCounts, pollVoteRecorded, pollToggled } from './pollSlice';
+import { selectVoteYeaKeyword, selectVoteNayKeyword } from '../settings/settingsSlice';
 
 const PollBar = () => {
   const dispatch = useAppDispatch();
   const active = useAppSelector(selectPollActive);
   const { yea, nay } = useAppSelector(selectPollCounts);
+  const voteYeaKeyword = useAppSelector(selectVoteYeaKeyword);
+  const voteNayKeyword = useAppSelector(selectVoteNayKeyword);
   const total = yea + nay;
   const yeaPct = total > 0 ? Math.round((yea / total) * 100) : 0;
   const nayPct = total > 0 ? 100 - yeaPct : 0;
@@ -117,7 +120,7 @@ const PollBar = () => {
               <Group spacing="lg" position="apart" align="stretch">
                 <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 56 }}>
                   <Text weight={700} size="sm" color="green">
-                    Yea
+                    {voteYeaKeyword}
                   </Text>
                   <Text size="xs" color="dimmed">
                     {yea} vote{yea === 1 ? '' : 's'}
@@ -125,7 +128,7 @@ const PollBar = () => {
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 56, alignItems: 'flex-end' }}>
                   <Text weight={700} size="sm" color="red">
-                    Nay
+                    {voteNayKeyword}
                   </Text>
                   <Text size="xs" color="dimmed">
                     {nay} vote{nay === 1 ? '' : 's'}
@@ -139,7 +142,6 @@ const PollBar = () => {
                 left: '50%',
                 bottom: -1,
                 transform: 'translateX(-50%)',
-                width: 200,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -147,7 +149,7 @@ const PollBar = () => {
               })}
             >
               <Text size="xs" color="dimmed" weight={800} sx={{ whiteSpace: 'nowrap', textAlign: 'center', width: '100%' }}>
-                {total > 0 ? `Total votes: ${total}` : 'Type VoteYea / VoteNay to vote'}
+                {total > 0 ? `Total ${total}` : `Type '${voteYeaKeyword}' or '${voteNayKeyword}' in chat to vote`}
               </Text>
               <Box
                 role="button"

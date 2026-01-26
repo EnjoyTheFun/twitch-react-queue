@@ -9,7 +9,7 @@ import AppLayout from './AppLayout';
 const HomePage = lazy(() => import('../features/home/HomePage'));
 const QueuePage = lazy(() => import('../features/clips/queue/QueuePage'));
 const HistoryPage = lazy(() => import('../features/clips/history/HistoryPage'));
-const LeaderboardPage = lazy(() => import('../features/clips/leaderboard/LeaderboardPage'));
+const StatsPage = lazy(() => import('../features/clips/leaderboard/LeaderboardPage'));
 
 const PageLoader = () => (
   <LoadingOverlay visible loaderProps={{ size: 'xl' }} />
@@ -54,10 +54,10 @@ function Router() {
             }
           />
           <Route
-            path="leaderboard"
+            path="stats"
             element={
               <RequireAuth>
-                <LeaderboardPage />
+                <StatsPage />
               </RequireAuth>
             }
           />

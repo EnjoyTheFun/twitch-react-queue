@@ -156,6 +156,7 @@ export const {
   skipVotingToggled,
   providersChanged,
   providersSet,
+  loadClipFromHistory,
 } = clipQueueSlice.actions;
 
 const clipQueueReducer = persistReducer(

@@ -1,6 +1,6 @@
 import { ActionIcon, AspectRatio, Image, Box, Group, Skeleton, Stack, Text, useMantineTheme } from '@mantine/core';
 import { MouseEventHandler, useEffect, useRef } from 'react';
-import { IconTrash, IconStarFilled } from '@tabler/icons-react';
+import { IconTrash, IconStarFilled, IconExternalLink } from '@tabler/icons-react';
 import { useAppSelector } from '../../app/hooks';
 import { selectClipById, selectTopNSubmitters, selectHighlightedClipId } from './clipQueueSlice';
 import { getProviderKeysForPlatform, type PlatformType } from '../../common/utils';
@@ -14,13 +14,14 @@ interface ClipProps {
 
   onClick?: MouseEventHandler<HTMLDivElement>;
   onCrossClick?: MouseEventHandler<HTMLButtonElement>;
+  onOpenClick?: MouseEventHandler<HTMLButtonElement>;
 
   className?: string;
   card?: boolean;
   queueIndex?: number;
 }
 
-const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueIndex }: ClipProps) => {
+const Clip = ({ clipId, onClick, onCrossClick, onOpenClick, className, card, platform, queueIndex }: ClipProps) => {
   const clip = useAppSelector(selectClipById(clipId));
   const { title, thumbnailUrl, author, submitters, duration, views } = clip || {};
 
@@ -262,6 +263,17 @@ const Clip = ({ clipId, onClick, onCrossClick, className, card, platform, queueI
           onClick={onCrossClick}
         >
           <IconTrash size={12} />
+        </ActionIcon>
+      )}
+      {onOpenClick && (
+        <ActionIcon
+          className="clip--action-icon"
+          color="gray"
+          variant="filled"
+          sx={{ position: 'absolute', right: 0, top: 0, opacity: 0.8, zIndex: 100 }}
+          onClick={onOpenClick}
+        >
+          <IconExternalLink size={12} />
         </ActionIcon>
       )}
     </Box>

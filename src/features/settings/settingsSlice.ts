@@ -23,6 +23,8 @@ interface SettingsState {
   reorderOnDuplicate?: boolean;
   autoplayDelay?: number;
   playerPercentDefault?: number;
+  voteYeaKeyword?: string;
+  voteNayKeyword?: string;
 }
 
 const initialState: SettingsState = {
@@ -41,6 +43,8 @@ const initialState: SettingsState = {
   reorderOnDuplicate: true,
   autoplayDelay: 5,
   playerPercentDefault: 79,
+  voteYeaKeyword: 'VoteYea',
+  voteNayKeyword: 'VoteNay',
 };
 
 const settingsSlice = createSlice({
@@ -98,6 +102,12 @@ const settingsSlice = createSlice({
       }
       if (payload.playerPercentDefault !== undefined) {
         state.playerPercentDefault = Math.max(30, Math.min(85, payload.playerPercentDefault));
+      }
+      if (payload.voteYeaKeyword !== undefined) {
+        state.voteYeaKeyword = payload.voteYeaKeyword.trim() || 'VoteYea';
+      }
+      if (payload.voteNayKeyword !== undefined) {
+        state.voteNayKeyword = payload.voteNayKeyword.trim() || 'VoteNay';
       }
     },
     toggleShowTopSubmitters: (state) => {
@@ -172,6 +182,8 @@ export const selectClipMemoryRetentionDays = (state: RootState) => state.setting
 export const selectReorderOnDuplicate = (state: RootState) => state.settings.reorderOnDuplicate !== false;
 export const selectAutoplayDelay = (state: RootState) => state.settings.autoplayDelay ?? 5;
 export const selectPlayerPercentDefault = (state: RootState) => state.settings.playerPercentDefault ?? 79;
+export const selectVoteYeaKeyword = (state: RootState) => state.settings.voteYeaKeyword || 'VoteYea';
+export const selectVoteNayKeyword = (state: RootState) => state.settings.voteNayKeyword || 'VoteNay';
 
 export const { colorSchemeToggled, channelChanged, settingsChanged, toggleShowTopSubmitters, setShowTopSubmitters, addBlockedSubmitter, removeBlockedSubmitter, addBlockedCreator, removeBlockedCreator, addFavoriteSubmitter, removeFavoriteSubmitter, setVolume } = settingsSlice.actions;
 

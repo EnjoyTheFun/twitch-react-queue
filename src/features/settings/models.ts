@@ -23,4 +23,6 @@ export interface AllSettings {
   reorderOnDuplicate?: boolean;
   autoplayDelay?: number;
   playerPercentDefault?: number;
+  voteYeaKeyword?: string;
+  voteNayKeyword?: string;
 }
