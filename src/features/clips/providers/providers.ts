@@ -37,6 +37,19 @@ class CombinedClipProvider implements ClipProvider {
   enabledProviders: string[] = [];
   allowRedditNsfw: boolean = false;
   private resolvedRedditMap: Record<string, string> = {};
+  private redditPermalinkMap: Record<string, string> = {};
+
+  private getRedditFallbackTitle(permalink: string, idPart: string): string {
+    const slugMatch = permalink.match(/\/comments\/[a-z0-9]+\/([^/?#]+)/i);
+    if (!slugMatch?.[1]) return `Reddit post ${idPart}`;
+
+    const title = decodeURIComponent(slugMatch[1])
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    return title || `Reddit post ${idPart}`;
+  }
 
   getIdFromUrl(url: string): string | undefined {
     try {
@@ -44,7 +57,9 @@ class CombinedClipProvider implements ClipProvider {
       if (uri.hostname.includes('reddit.com') && uri.pathname.includes('/comments/')) {
         const postIdMatch = uri.pathname.match(/\/comments\/([a-z0-9]+)/i);
         if (postIdMatch?.[1]) {
-          return `reddit:${postIdMatch[1]}`;
+          const redditId = `reddit:${postIdMatch[1]}`;
+          this.redditPermalinkMap[redditId] = `${uri.origin}${uri.pathname}${uri.search}`;
+          return redditId;
         }
       }
     } catch {
@@ -66,31 +81,31 @@ class CombinedClipProvider implements ClipProvider {
     const [provider, idPart] = this.getProviderAndId(id);
 
     if (provider?.name === 'reddit') {
-      const clip = await provider.getClipById(idPart);
-      if (clip) {
-        clip.id = id;
-        return clip;
+      const permalink = this.redditPermalinkMap[id] || `https://www.reddit.com/comments/${idPart}`;
+      const clipInfo = await redditApi.getClipFromPermalink(permalink, this.allowRedditNsfw);
+
+      if (clipInfo) {
+        return {
+          id,
+          title: clipInfo.title,
+          author: clipInfo.author,
+          thumbnailUrl: clipInfo.thumbnailUrl,
+          submitters: [],
+          Platform: 'Reddit',
+          url: clipInfo.videoUrl,
+          createdAt: clipInfo.createdAt,
+          duration: clipInfo.duration,
+        };
       }
 
-      const actualUrl = await redditApi.getPostUrl(idPart, this.allowRedditNsfw);
-      if (actualUrl) {
-        for (const providerName of this.enabledProviders) {
-          const otherProvider = this.providers[providerName];
-          if (otherProvider && otherProvider.name !== 'reddit') {
-            const otherId = otherProvider.getIdFromUrl(actualUrl);
-            if (otherId) {
-              const otherClip = await otherProvider.getClipById(otherId);
-              if (otherClip) {
-                this.resolvedRedditMap[id] = `${otherProvider.name}:${otherId}`;
-                otherClip.id = id;
-                return otherClip;
-              }
-            }
-          }
-        }
-      }
-
-      return undefined;
+      return {
+        id,
+        title: this.getRedditFallbackTitle(permalink, idPart),
+        author: 'reddit',
+        submitters: [],
+        Platform: 'Reddit',
+        url: permalink,
+      };
     }
 
     const clip = await provider?.getClipById(idPart);
@@ -103,6 +118,10 @@ class CombinedClipProvider implements ClipProvider {
   }
 
   getUrl(id: string): string | undefined {
+    if (id.startsWith('reddit:')) {
+      return this.redditPermalinkMap[id] || `https://www.reddit.com/comments/${id.split(':')[1]}`;
+    }
+
     const resolved = this.resolveReddit(id);
     if (resolved) {
       const [realProvider, realId] = resolved;
@@ -113,6 +132,19 @@ class CombinedClipProvider implements ClipProvider {
   }
 
   getEmbedUrl(id: string): string | undefined {
+    if (id.startsWith('reddit:')) {
+      const permalink = this.getUrl(id);
+      if (!permalink) return undefined;
+
+      try {
+        const uri = new URL(permalink);
+        const query = uri.search ? `${uri.search}&` : '?';
+        return `https://www.redditmedia.com${uri.pathname}${query}ref_source=embed&ref=share&embed=true`;
+      } catch {
+        return undefined;
+      }
+    }
+
     const resolved = this.resolveReddit(id);
     if (resolved) {
       const [realProvider, realId] = resolved;
@@ -149,6 +181,14 @@ class CombinedClipProvider implements ClipProvider {
       for (const [id, clip] of Object.entries(clipsById)) {
         if (!id.startsWith('reddit:')) continue;
         if (!clip || !clip.url) continue;
+
+        try {
+          const uri = new URL(clip.url);
+          if (uri.hostname.includes('reddit.com') && uri.pathname.includes('/comments/')) {
+            this.redditPermalinkMap[id] = `${uri.origin}${uri.pathname}${uri.search}`;
+          }
+        } catch (e) { }
+
         // If the clip was actually from another platform, try to detect it
         // by asking each enabled provider to extract an id from the stored url
         for (const providerName of this.enabledProviders) {

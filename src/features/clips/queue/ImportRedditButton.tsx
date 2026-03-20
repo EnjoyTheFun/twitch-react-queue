@@ -43,35 +43,59 @@ function ImportRedditButton() {
           continue;
         }
 
-        const { url, username: redditUsername, title } = entry;
+        const { url, username: redditUsername, title, mediaUrl, thumbnailUrl, duration, createdAt } = entry;
         const id = clipProvider.getIdFromUrl(url);
+        const isRedditPermalink = /^https?:\/\/(?:www\.|old\.)?reddit\.com\//i.test(url);
 
-        if (id) {
-          try {
-            const clip = await clipProvider.getClipById(id);
-            if (clip) {
-              dispatch(clipStubReceived({
-                ...clip,
-                submitters: [`${redditUsername} (r/LSF)`],
-                url: clip.url || url,
-                title: title || clip.title
-              }));
-              successCount++;
-            } else {
-              dispatch(clipStubReceived({
-                id,
-                submitters: [`${redditUsername} (r/LSF)`],
-                url,
-                title
-              }));
-              successCount++;
-            }
-          } catch (error) {
-            console.error('Failed to process clip:', url, error);
-            failureCount++;
-          }
-        } else {
+        if (!id) {
           console.warn('Unsupported link format:', url);
+          failureCount++;
+          continue;
+        }
+
+        if (mediaUrl) {
+          dispatch(clipStubReceived({
+            id,
+            title,
+            submitters: [`${redditUsername} (r/LSF)`],
+            url: mediaUrl,
+            thumbnailUrl,
+            duration,
+            createdAt,
+            Platform: 'Reddit',
+            author: redditUsername,
+          }));
+          successCount++;
+          continue;
+        }
+
+        if (isRedditPermalink) {
+          console.warn('Skipping Reddit post without extractable media URL from listing JSON:', url);
+          failureCount++;
+          continue;
+        }
+
+        try {
+          const clip = await clipProvider.getClipById(id);
+          if (clip) {
+            dispatch(clipStubReceived({
+              ...clip,
+              submitters: [`${redditUsername} (r/LSF)`],
+              url: clip.url || url,
+              title: title || clip.title
+            }));
+            successCount++;
+          } else {
+            dispatch(clipStubReceived({
+              id,
+              submitters: [`${redditUsername} (r/LSF)`],
+              url,
+              title
+            }));
+            successCount++;
+          }
+        } catch (error) {
+          console.error('Failed to process clip:', url, error);
           failureCount++;
         }
       }

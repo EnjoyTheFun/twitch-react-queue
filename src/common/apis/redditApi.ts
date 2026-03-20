@@ -6,77 +6,76 @@ const redditApiClient = axios.create({
   timeout: 10000,
 });
 
-const getClip = async (id: string, allowNsfw: boolean = true): Promise<RedditClipInfo | undefined> => {
+const REDDIT_FALLBACK_THUMBNAIL = 'https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-57x57.png';
+
+const getRedditPostIdFromPermalink = (permalink: string): string | undefined => {
+  const idMatch = permalink.match(/\/comments\/([a-z0-9]+)/i);
+  return idMatch?.[1];
+};
+
+const getRedditTitleFromPermalink = (permalink: string): string | undefined => {
+  const slugMatch = permalink.match(/\/comments\/[a-z0-9]+\/([^/?#]+)/i);
+  if (!slugMatch?.[1]) return undefined;
+
+  return decodeURIComponent(slugMatch[1])
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+const getRedditAuthorFromOembedHtml = (html?: string): string | undefined => {
+  if (!html) return undefined;
+  const authorMatch = html.match(/\/user\/([^/"?]+)/i);
+  return authorMatch?.[1];
+};
+
+interface RedditOembedLikeResponse {
+  title?: string;
+  author_name?: string;
+  thumbnail_url?: string;
+  html?: string;
+}
+
+const getRedditMetadataFromRedditOembed = async (permalink: string): Promise<RedditOembedLikeResponse | undefined> => {
   try {
-    const { data } = await redditApiClient.get<RedditResponse>(`/comments/${id}.json`);
-
-    if (!data || !Array.isArray(data) || data.length === 0) {
-      return undefined;
-    }
-
-    const postData = data[0]?.data?.children?.[0]?.data;
-    if (!postData) return undefined;
-    if (!allowNsfw && postData.over_18 === true) return undefined;
-
-    const videoInfo = postData.secure_media?.reddit_video || postData.media?.reddit_video;
-
-    const isImagePost = postData.post_hint === 'image' ||
-      (postData.url && /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(postData.url));
-
-    if (!videoInfo?.fallback_url && !isImagePost) {
-      return undefined;
-    }
-
-    let thumbnailUrl = postData.thumbnail;
-    if (thumbnailUrl === 'default' || thumbnailUrl === 'self' || !thumbnailUrl?.startsWith('http')) {
-      thumbnailUrl = postData.preview?.images?.[0]?.source?.url;
-    }
-    if (thumbnailUrl) {
-      thumbnailUrl = thumbnailUrl.replace(/&amp;/g, '&');
-    }
-
-    let videoUrl: string | undefined;
-
-    if (isImagePost) {
-      videoUrl = postData.url_overridden_by_dest || postData.url;
-      if (videoUrl) {
-        videoUrl = videoUrl.replace(/&amp;/g, '&');
-      }
-      if (!videoUrl || (!videoUrl.includes('i.redd.it') && !videoUrl.includes('i.imgur.com') && !videoUrl.includes('preview.redd.it'))) {
-        const previewUrl = postData.preview?.images?.[0]?.source?.url;
-        if (previewUrl) {
-          videoUrl = previewUrl.replace(/&amp;/g, '&');
-        }
-      }
-    } else if (videoInfo) {
-      videoUrl = videoInfo.fallback_url;
-      if (videoInfo.has_audio && videoInfo.hls_url) {
-        videoUrl = videoInfo.hls_url.replace(/&amp;/g, '&');
-      }
-    }
-
-    return {
-      id,
-      title: postData.title || (isImagePost ? `Reddit image ${id}` : `Reddit video ${id}`),
-      author: postData.author || 'Unknown',
-      thumbnailUrl,
-      videoUrl,
-      duration: isImagePost ? undefined : videoInfo?.duration,
-      createdAt: postData.created_utc ? new Date(postData.created_utc * 1000).toISOString() : undefined,
-      permalink: postData.permalink,
-    };
-  } catch (error) {
-    console.error('Failed to fetch Reddit video:', id, error);
+    const { data } = await redditApiClient.get<RedditOembedLikeResponse>(`/oembed?url=${encodeURIComponent(permalink)}&raw_json=1`);
+    if (!data || typeof data !== 'object') return undefined;
+    return data;
+  } catch {
     return undefined;
   }
 };
+
+const getRedditMetadataFromNoembed = async (permalink: string): Promise<RedditOembedLikeResponse | undefined> => {
+  try {
+    const { data } = await axios.get<RedditOembedLikeResponse>(
+      `https://noembed.com/embed?url=${encodeURIComponent(permalink)}`,
+      { timeout: 10000 }
+    );
+    if (!data || typeof data !== 'object') return undefined;
+    return data;
+  } catch {
+    return undefined;
+  }
+};
+
+export interface RedditPostEntry {
+  url: string;
+  username: string;
+  title: string;
+  postId: string;
+  mediaUrl?: string;
+  thumbnailUrl?: string;
+  duration?: number;
+  createdAt?: string;
+}
 
 const getSubredditPosts = async (
   subreddit: string,
   sort: RedditSort = 'top',
   limit: number = 100,
   timeframe: string = 'day'
-): Promise<Array<{ url: string; username: string; title: string; postId: string }>> => {
+): Promise<RedditPostEntry[]> => {
   try {
     const url = `/r/${subreddit}/${sort}.json?limit=${limit}&t=${timeframe}`;
     const { data } = await redditApiClient.get<RedditResponse>(url);
@@ -86,7 +85,7 @@ const getSubredditPosts = async (
       return [];
     }
 
-    const posts: Array<{ url: string; username: string; title: string; postId: string }> = [];
+    const posts: RedditPostEntry[] = [];
 
     for (const post of data.data.children) {
       const postData = post.data;
@@ -115,17 +114,66 @@ const getSubredditPosts = async (
 
       if (isVideoPost || isImagePost) {
         if (domain.includes('v.redd.it')) {
-          const hasMedia = postData.secure_media?.reddit_video || postData.media?.reddit_video;
-          if (!hasMedia) {
+          const videoInfo = postData.secure_media?.reddit_video || postData.media?.reddit_video;
+          if (!videoInfo) {
             continue;
           }
           if (postData.permalink) {
             url = `https://www.reddit.com${postData.permalink}`;
           }
+
+          let mediaUrl: string | undefined;
+          if (videoInfo.has_audio && videoInfo.hls_url) {
+            mediaUrl = videoInfo.hls_url.replace(/&amp;/g, '&');
+          } else if (videoInfo.fallback_url) {
+            mediaUrl = videoInfo.fallback_url.replace(/&amp;/g, '&');
+          }
+
+          let thumbnailUrl = postData.thumbnail;
+          if (!thumbnailUrl?.startsWith('http')) {
+            thumbnailUrl = postData.preview?.images?.[0]?.source?.url;
+          }
+          if (thumbnailUrl) {
+            thumbnailUrl = thumbnailUrl.replace(/&amp;/g, '&');
+          }
+
+          posts.push({
+            url,
+            username: postData.author || 'reddit',
+            title: postData.title || '',
+            postId: postData.id || '',
+            mediaUrl,
+            thumbnailUrl,
+            duration: videoInfo.duration,
+            createdAt: postData.created_utc ? new Date(postData.created_utc * 1000).toISOString() : undefined,
+          });
+          continue;
         }
 
-        if (isImagePost && !isVideoPost && domain.includes('i.redd.it') && postData.permalink) {
-          url = `https://www.reddit.com${postData.permalink}`;
+        if (isImagePost && !isVideoPost && domain.includes('i.redd.it')) {
+          const mediaUrl = (postData.url_overridden_by_dest || postData.url || postData.preview?.images?.[0]?.source?.url)?.replace(/&amp;/g, '&');
+          let thumbnailUrl = postData.thumbnail;
+          if (!thumbnailUrl?.startsWith('http')) {
+            thumbnailUrl = postData.preview?.images?.[0]?.source?.url;
+          }
+          if (thumbnailUrl) {
+            thumbnailUrl = thumbnailUrl.replace(/&amp;/g, '&');
+          }
+
+          if (postData.permalink) {
+            url = `https://www.reddit.com${postData.permalink}`;
+          }
+
+          posts.push({
+            url,
+            username: postData.author || 'reddit',
+            title: postData.title || '',
+            postId: postData.id || '',
+            mediaUrl,
+            thumbnailUrl,
+            createdAt: postData.created_utc ? new Date(postData.created_utc * 1000).toISOString() : undefined,
+          });
+          continue;
         }
 
         posts.push({
@@ -145,23 +193,41 @@ const getSubredditPosts = async (
 };
 
 const redditApi = {
-  getClip,
   getSubredditPosts,
-  getPostUrl: async (postId: string, allowNsfw: boolean = true): Promise<string | undefined> => {
-    try {
-      const { data } = await redditApiClient.get<RedditResponse>(`/comments/${postId}.json`);
-      if (!data || !Array.isArray(data) || data.length === 0) {
-        return undefined;
-      }
-      const postData = data[0]?.data?.children?.[0]?.data;
+  getClipFromPermalink: async (permalink: string, allowNsfw: boolean = true): Promise<RedditClipInfo | undefined> => {
+    const normalizedPermalink = permalink.replace(/^https?:\/\/old\.reddit\.com/i, 'https://www.reddit.com');
+    const id = getRedditPostIdFromPermalink(normalizedPermalink) || normalizedPermalink;
+    const titleFromSlug = getRedditTitleFromPermalink(normalizedPermalink);
 
-      if (!allowNsfw && postData?.over_18 === true) return undefined;
-
-      return postData?.url_overridden_by_dest || postData?.url;
-    } catch (error) {
-      console.error('Failed to fetch Reddit post URL:', postId, error);
+    if (!allowNsfw && /\/nsfw\//i.test(normalizedPermalink)) {
       return undefined;
     }
+
+    const redditOembed = await getRedditMetadataFromRedditOembed(normalizedPermalink);
+    const noembed = await getRedditMetadataFromNoembed(normalizedPermalink);
+    const metadata = redditOembed || noembed;
+
+    if (!metadata) {
+      console.error('Failed to fetch Reddit permalink metadata:', permalink);
+      return {
+        id,
+        title: titleFromSlug || `Reddit post ${id}`,
+        author: 'reddit',
+        thumbnailUrl: REDDIT_FALLBACK_THUMBNAIL,
+        videoUrl: normalizedPermalink,
+      };
+    }
+
+    const authorFromHtml = getRedditAuthorFromOembedHtml(metadata.html);
+    const author = metadata.author_name || authorFromHtml || 'reddit';
+
+    return {
+      id,
+      title: metadata.title || titleFromSlug || `Reddit post ${id}`,
+      author,
+      thumbnailUrl: metadata.thumbnail_url || REDDIT_FALLBACK_THUMBNAIL,
+      videoUrl: normalizedPermalink,
+    };
   },
 };
 

@@ -1,4 +1,3 @@
-import redditApi from '../../../../common/apis/redditApi';
 import type { Clip } from '../../clipQueueSlice';
 import type { ClipProvider } from '../providers';
 
@@ -30,22 +29,8 @@ class RedditProvider implements ClipProvider {
   }
 
   async getClipById(id: string): Promise<Clip | undefined> {
-    const clipInfo = await redditApi.getClip(id, this.allowNsfw);
-
-    if (clipInfo) {
-      return {
-        id,
-        title: clipInfo.title,
-        author: clipInfo.author,
-        thumbnailUrl: clipInfo.thumbnailUrl,
-        submitters: [],
-        Platform: 'Reddit',
-        url: clipInfo.videoUrl,
-        createdAt: clipInfo.createdAt,
-        duration: clipInfo.duration,
-      };
-    }
-
+    // Intentionally disabled: browser-side Reddit comments API is blocked by CORS
+    // Combined provider resolves Reddit clips via permalink metadata instead
     return undefined;
   }
 
@@ -58,8 +43,7 @@ class RedditProvider implements ClipProvider {
   }
 
   async getAutoplayUrl(id: string): Promise<string | undefined> {
-    const clip = await this.getClipById(id);
-    return clip?.url;
+    return undefined;
   }
 }
 

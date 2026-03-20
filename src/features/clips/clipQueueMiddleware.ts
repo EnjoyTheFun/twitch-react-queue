@@ -62,10 +62,13 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
         const id = clipProvider.getIdFromUrl(url);
         if (id) {
           const clip: Clip | undefined = storeAPI.getState().clipQueue.byId[id];
+          const shouldRefreshExistingRedditClip =
+            id.startsWith('reddit:') &&
+            (!!clip && (!clip.thumbnailUrl || !clip.author || clip.author === 'reddit' || !clip.title || /^Reddit post\s+/i.test(clip.title)));
 
-          storeAPI.dispatch(clipStubReceived({ id, submitters: [sender], timestamp: formatISO(new Date()) }));
+          storeAPI.dispatch(clipStubReceived({ id, submitters: [sender], url, timestamp: formatISO(new Date()) }));
 
-          if (!clip) {
+          if (!clip || shouldRefreshExistingRedditClip) {
             clipProvider
               .getClipById(id)
               .then((clip) => {
@@ -104,10 +107,13 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
         const id = clipProvider.getIdFromUrl(url);
         if (id) {
           const clip: Clip | undefined = storeAPI.getState().clipQueue.byId[id];
+          const shouldRefreshExistingRedditClip =
+            id.startsWith('reddit:') &&
+            (!!clip && (!clip.thumbnailUrl || !clip.author || clip.author === 'reddit' || !clip.title || /^Reddit post\s+/i.test(clip.title)));
 
-          storeAPI.dispatch(clipStubReceived({ id, submitters: [sender], timestamp: formatISO(new Date()) }));
+          storeAPI.dispatch(clipStubReceived({ id, submitters: [sender], url, timestamp: formatISO(new Date()) }));
 
-          if (!clip) {
+          if (!clip || shouldRefreshExistingRedditClip) {
             clipProvider
               .getClipById(id)
               .then((clip) => {
@@ -172,11 +178,13 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
         const { autoplay, queueIds } = storeAPI.getState().clipQueue;
         const nextId = queueIds[0];
         if (autoplay && nextId) {
+          const nextClipUrl = storeAPI.getState().clipQueue.byId[nextId]?.url;
           clipProvider
             .getAutoplayUrl(nextId)
             .then((url) => {
-              if (url) {
-                storeAPI.dispatch(autoplayUrlReceived(url));
+              const resolvedUrl = url || nextClipUrl;
+              if (resolvedUrl) {
+                storeAPI.dispatch(autoplayUrlReceived(resolvedUrl));
               } else {
                 storeAPI.dispatch(autoplayUrlFailed());
               }

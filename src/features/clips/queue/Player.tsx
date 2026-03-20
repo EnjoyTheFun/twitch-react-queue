@@ -9,6 +9,7 @@ import {
   selectAutoplayTimeoutHandle,
   selectCurrentClip,
   selectNextId,
+  selectNextClip,
   selectSkipVoteCount,
   clearSkipVotes,
 } from '../clipQueueSlice';
@@ -94,6 +95,7 @@ const getPlayerComponent = (
         videoSrc.includes('preview.redd.it') ||
         videoSrc.includes('i.redd.it')
       );
+      const isRedditPermalink = !!videoSrc && /^https?:\/\/(?:www\.|old\.)?reddit\.com\//i.test(videoSrc);
 
       if (isRedditImage) {
         return (
@@ -106,6 +108,21 @@ const getPlayerComponent = (
           />
         );
       }
+
+      if (isRedditPermalink) {
+        return (
+          <iframe
+            key={`${id}-${autoplayEnabled}`}
+            src={clipProvider.getEmbedUrl(id) || videoSrc}
+            title={title}
+            style={{ height: '100%', width: '100%' }}
+            frameBorder="0"
+            allow="autoplay"
+            allowFullScreen
+          />
+        );
+      }
+
       return <VideoPlayer key={`${currentClip.id}-${videoSrc}-${autoplayEnabled}`} src={videoSrc} onEnded={handleEnded} />;
     case 'Instagram':
       return (
@@ -171,6 +188,7 @@ function Player({ className }: PlayerProps) {
   const dispatch = useAppDispatch();
   const currentClip = useAppSelector(selectCurrentClip);
   const nextClipId = useAppSelector(selectNextId);
+  const nextClip = useAppSelector(selectNextClip);
   const autoplayEnabled = useAppSelector(selectAutoplayEnabled);
   const autoplayTimeoutHandle = useAppSelector(selectAutoplayTimeoutHandle);
   const [videoSrc, setVideoSrc] = useState<string | undefined>(undefined);
@@ -217,7 +235,9 @@ function Player({ className }: PlayerProps) {
 
     const fetchVideoUrl = async () => {
       try {
-        const url = await clipProvider.getAutoplayUrl(currentClip.id);
+        const url = currentClip.id?.startsWith('reddit:')
+          ? currentClip.url
+          : (await clipProvider.getAutoplayUrl(currentClip.id)) || currentClip.url;
         if (Flag) {
           setVideoSrc(url);
           setError(null);
@@ -279,7 +299,9 @@ function Player({ className }: PlayerProps) {
 
     (async () => {
       try {
-        const url = await clipProvider.getAutoplayUrl(nextClipId);
+        const url = nextClipId?.startsWith('reddit:')
+          ? nextClip?.url
+          : (await clipProvider.getAutoplayUrl(nextClipId)) || nextClip?.url;
         if (!url) return;
 
         let handle: PreloadHandle | null = null;

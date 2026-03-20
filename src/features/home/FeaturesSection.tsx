@@ -57,9 +57,9 @@ function FeaturesSection() {
         </List.Item>
 
         <List.Item>
-          <strong>Submitter leaderboard</strong>
+          <strong>Submitter Stats</strong>
           <br />
-          Optional leaderboard showing top submitters with animated username colors.
+          Section showing top submitters and general statistics.
         </List.Item>
 
         <List.Item>
