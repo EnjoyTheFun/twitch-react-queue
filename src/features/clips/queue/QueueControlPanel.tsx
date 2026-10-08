@@ -9,8 +9,9 @@ import {
 } from '../clipQueueSlice';
 import {
   selectShowTopSubmitters, toggleShowTopSubmitters,
-  selectSubOnlyMode, settingsChanged
+  selectSubOnlyMode, settingsChanged, selectAllowChannelPointsRedemptionUrls, selectChannelPointsRewardId
 } from '../../settings/settingsSlice';
+import { showNotification } from '@mantine/notifications';
 import QueueQuickMenu from './QueueQuickMenu';
 import TopSubmittersMarquee from './TopSubmittersMarquee';
 import { useQueueSearchModal } from './QueueSearch';
@@ -24,7 +25,9 @@ import {
   IconUsers,
   IconListDetails,
   IconSearch,
-  IconChartBar
+  IconChartBar,
+  IconWashTumbleDry,
+  IconWashTumbleOff
 } from '@tabler/icons-react';
 
 interface QueueControlPanelProps {
@@ -39,6 +42,8 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
 
   const skipVotingEnabled = useAppSelector(selectSkipVotingEnabled);
   const subOnlyMode = useAppSelector(selectSubOnlyMode);
+  const allowChannelPointsRedemptionUrls = useAppSelector(selectAllowChannelPointsRedemptionUrls);
+  const channelPointsRewardId = useAppSelector(selectChannelPointsRewardId);
   const clipLimit = useAppSelector(selectClipLimit);
   const totalClips = useAppSelector(selectTotalQueueLength);
   const clipsLeft = useAppSelector(selectQueueIds).length;
@@ -57,6 +62,22 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
 
   const handlePollToggle = () => {
     dispatch(pollToggled());
+  };
+
+  const handleChannelPointsRedemptionsToggle = () => {
+    if (!allowChannelPointsRedemptionUrls && !channelPointsRewardId) {
+      showNotification({
+        id: 'channel-points-reward-id-required',
+        title: 'Channel points reward ID required',
+        message: 'Set the reward ID in Settings > Moderation > Channel points reward ID before enabling channel points redemptions.',
+        color: 'yellow',
+        autoClose: true,
+        style: { marginBottom: 82 },
+      });
+      return;
+    }
+
+    dispatch(settingsChanged({ allowChannelPointsRedemptionUrls: !allowChannelPointsRedemptionUrls }));
   };
 
   const queueCount = `${clipsLeft}/${totalClips}${clipLimit ? `/${clipLimit}` : ''}`;
@@ -90,6 +111,21 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
             aria-label="Toggle poll"
           >
             <IconChartBar size={18} />
+          </ActionIcon>
+
+          <ActionIcon
+            size="sm"
+            variant={allowChannelPointsRedemptionUrls ? 'filled' : 'light'}
+            color={allowChannelPointsRedemptionUrls ? 'violet' : undefined}
+            onClick={handleChannelPointsRedemptionsToggle}
+            title={
+              allowChannelPointsRedemptionUrls
+                ? 'Disable channel points redemption URL submissions'
+                : 'Enable channel points redemption URL submissions'
+            }
+            aria-label="Toggle channel points redemption URL submissions"
+          >
+            {allowChannelPointsRedemptionUrls ? <IconWashTumbleDry size={18} /> : <IconWashTumbleOff size={18} />}
           </ActionIcon>
 
           <ActionIcon

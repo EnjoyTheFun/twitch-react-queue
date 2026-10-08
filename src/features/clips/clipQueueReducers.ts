@@ -8,6 +8,7 @@ const calculateTotalQueueLength = (watchedCount: number, queueIds: string[]) => 
 export const addClipToQueue = (state: ClipQueueState, clip: Clip) => {
   const id = clip.id;
   const submitter = clip.submitters[0];
+  const normalizedSubmitter = (submitter || '').toLowerCase();
 
   if ((!state.currentId || state.currentId === undefined) && state.queueIds.length === 0) {
     state.nextSeq = 1;
@@ -16,10 +17,13 @@ export const addClipToQueue = (state: ClipQueueState, clip: Clip) => {
   if (state.byId[id]) {
     let rememberedClip = state.byId[id];
     if (state.queueIds.includes(id)) {
-      if (!rememberedClip.submitters.includes(submitter)) {
+      const hasSubmitterAlready = rememberedClip.submitters.some((name) => name.toLowerCase() === normalizedSubmitter);
+      const mergedNotes = clip.notes ? { ...rememberedClip.notes, ...clip.notes } : rememberedClip.notes;
+      if (!hasSubmitterAlready) {
         rememberedClip = {
           ...rememberedClip,
           submitters: [...rememberedClip.submitters, submitter],
+          notes: mergedNotes,
         };
         state.byId[id] = rememberedClip;
         if (state.reorderOnDuplicate !== false) {
@@ -35,6 +39,8 @@ export const addClipToQueue = (state: ClipQueueState, clip: Clip) => {
             state.queueIds.push(id);
           }
         }
+      } else if (mergedNotes !== rememberedClip.notes) {
+        state.byId[id] = { ...rememberedClip, notes: mergedNotes };
       }
 
       return;
@@ -234,9 +240,11 @@ export const createReducers = () => ({
   clipDetailsReceived: (state: ClipQueueState, { payload: clip }: PayloadAction<Clip>) => {
     if (state.byId[clip.id]) {
       const submitters = state.byId[clip.id].submitters;
+      const notes = state.byId[clip.id].notes;
       updateClip(state, clip.id, {
         ...clip,
         submitters,
+        notes,
       });
     }
   },

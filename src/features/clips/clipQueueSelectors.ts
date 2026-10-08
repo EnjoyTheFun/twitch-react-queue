@@ -97,6 +97,8 @@ export const selectTopNSubmitters = (n: number) =>
     return arr.slice(0, n);
   });
 
+export const selectTop3Submitters = selectTopNSubmitters(3);
+
 export const selectQueueClips = createSelector(
   [selectByIds, selectQueueIds],
   (byIds, queueIds) => queueIds.map((id) => byIds[id]).filter((clip) => clip !== undefined)

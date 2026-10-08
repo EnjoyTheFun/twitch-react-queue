@@ -1,14 +1,21 @@
+import packageJson from '../../package.json';
+
+export const APP_VERSION = packageJson.version;
+
 export type PlatformType = 'Twitch' | 'Kick' | 'YouTube' | 'Streamable' | 'TikTok' | 'Twitter' | 'Instagram' | 'Reddit' | undefined;
 
 export const getUrlFromMessage = (message: string) => {
-  const urlStart = message.indexOf('http');
-  if (urlStart >= 0) {
-    const urlEnd = message.indexOf(' ', urlStart);
-    const url = message.slice(urlStart, urlEnd > 0 ? urlEnd : undefined);
-    return url;
+  const match = message.match(/https?:\/\/[^\s<>()"']+/i);
+  if (!match) {
+    return undefined;
   }
 
-  return undefined;
+  return match[0].replace(/[.,!?;:]+$/g, '');
+};
+
+export const getNoteFromMessage = (message: string, url: string): string | undefined => {
+  const note = message.replace(url, '').trim();
+  return note.length ? note : undefined;
 };
 
 export type ProviderMeta = {

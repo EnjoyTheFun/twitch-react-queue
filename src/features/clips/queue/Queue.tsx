@@ -6,7 +6,7 @@ import type { Clip as ClipType } from '../clipQueueSlice';
 
 interface QueueProps {
   card?: boolean;
-  wrapper?: (props: PropsWithChildren<{}>) => ReactElement;
+  wrapper?: (props: PropsWithChildren<object>) => ReactElement;
   filteredClips?: ClipType[];
 }
 

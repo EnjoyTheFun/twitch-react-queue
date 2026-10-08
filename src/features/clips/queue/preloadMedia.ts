@@ -8,7 +8,7 @@ export function preloadImage(url: string): PreloadHandle {
     cleanup: () => {
       try {
         img.src = '';
-      } catch { }
+      } catch { /* ignore */ }
     },
   };
 }
@@ -25,13 +25,13 @@ export function preloadVideo(url: string): PreloadHandle {
     cleanup: () => {
       try {
         video.pause();
-      } catch { }
+      } catch { /* ignore */ }
       try {
         video.removeAttribute('src');
-      } catch { }
+      } catch { /* ignore */ }
       try {
         video.load();
-      } catch { }
+      } catch { /* ignore */ }
     },
   };
 }
@@ -52,7 +52,7 @@ export async function preloadHlsManifest(url: string, signal?: AbortSignal): Pro
     cleanup: () => {
       try {
         controller.abort();
-      } catch { }
+      } catch { /* ignore */ }
       if (aborted) return;
     },
   };
@@ -64,13 +64,13 @@ export async function preloadGenericHead(url: string, signal?: AbortSignal): Pro
 
   try {
     await fetch(url, { method: 'HEAD', mode: 'cors', signal: mergedSignal, cache: 'force-cache' });
-  } catch { }
+  } catch { /* ignore */ }
 
   return {
     cleanup: () => {
       try {
         controller.abort();
-      } catch { }
+      } catch { /* ignore */ }
     },
   };
 }

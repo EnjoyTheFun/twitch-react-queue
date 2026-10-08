@@ -38,6 +38,7 @@ export {
   selectSkipVoteCount,
   selectTopSubmitter,
   selectTopNSubmitters,
+  selectTop3Submitters,
   selectQueueClips,
   selectQueueClipsForAutoplay,
   makeSelectHistoryPageClips,

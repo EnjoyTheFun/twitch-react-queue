@@ -89,7 +89,7 @@ const getPlayerComponent = (
       />);
     case 'Kick':
       return <VideoPlayer key={`${currentClip.id}-${videoSrc}-${autoplayEnabled}`} src={embedUrl} onEnded={handleEnded} />;
-    case 'Reddit':
+    case 'Reddit': {
       const isRedditImage = videoSrc && (
         /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(videoSrc) ||
         videoSrc.includes('preview.redd.it') ||
@@ -124,6 +124,7 @@ const getPlayerComponent = (
       }
 
       return <VideoPlayer key={`${currentClip.id}-${videoSrc}-${autoplayEnabled}`} src={videoSrc} onEnded={handleEnded} />;
+    }
     case 'Instagram':
       return (
         <InstagramEmbedWithTimeout
@@ -222,7 +223,7 @@ function Player({ className }: PlayerProps) {
     setIsLoading(true);
     setShowLoader(false);
     if (loaderTimerRef.current) {
-      clearTimeout(loaderTimerRef.current as any);
+      clearTimeout(loaderTimerRef.current);
       loaderTimerRef.current = null;
     }
     let Flag = true;
@@ -243,18 +244,18 @@ function Player({ className }: PlayerProps) {
           setError(null);
           setIsLoading(false);
           if (loaderTimerRef.current) {
-            clearTimeout(loaderTimerRef.current as any);
+            clearTimeout(loaderTimerRef.current);
             loaderTimerRef.current = null;
           }
           setShowLoader(false);
         }
-      } catch (err) {
+      } catch {
         if (Flag) {
           setError('Failed to load video');
           setVideoSrc(undefined);
           setIsLoading(false);
           if (loaderTimerRef.current) {
-            clearTimeout(loaderTimerRef.current as any);
+            clearTimeout(loaderTimerRef.current);
             loaderTimerRef.current = null;
           }
           setShowLoader(false);
@@ -267,12 +268,12 @@ function Player({ className }: PlayerProps) {
     return () => {
       Flag = false;
       if (loaderTimerRef.current) {
-        clearTimeout(loaderTimerRef.current as any);
+        clearTimeout(loaderTimerRef.current);
         loaderTimerRef.current = null;
       }
       setShowLoader(false);
     };
-  }, [currentClip, autoplayEnabled, dispatch]);
+  }, [currentClip, autoplayEnabled, dispatch, nextClipId]);
 
   const preloadRef = useRef<PreloadHandle | null>(null);
   const preloadAbortRef = useRef<AbortController | null>(null);
@@ -282,14 +283,14 @@ function Player({ className }: PlayerProps) {
     preloadRef.current = null;
     try {
       preloadAbortRef.current?.abort();
-    } catch { }
+    } catch { /* ignore */ }
     preloadAbortRef.current = null;
 
     if (!currentClip || !nextClipId) return;
 
     if (!autoplayEnabled) return;
 
-    const nav = (navigator as any);
+    const nav = navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } };
     if (nav?.connection?.saveData) return;
     const effectiveType = nav?.connection?.effectiveType;
     if (effectiveType && /2g/.test(effectiveType)) return;
@@ -316,15 +317,16 @@ function Player({ className }: PlayerProps) {
         }
 
         preloadRef.current = handle;
-      } catch (err) { }
+      } catch { /* ignore */ }
     })();
 
     return () => {
       preloadRef.current?.cleanup();
       preloadRef.current = null;
-      try { preloadAbortRef.current?.abort(); } catch { }
+      try { preloadAbortRef.current?.abort(); } catch { /* ignore */ }
       preloadAbortRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentClip?.id, nextClipId, autoplayEnabled]);
 
   const player = getPlayerComponent(currentClip, videoSrc, autoplayEnabled, nextClipId, autoplayTimeoutHandle, dispatch);

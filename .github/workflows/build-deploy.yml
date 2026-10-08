@@ -22,8 +22,6 @@ jobs:
       VITE_TWITCH_REDIRECT_URI: https://enjoythefun.github.io/twitch-react-queue/auth
       VITE_BASEPATH: /twitch-react-queue/
       VITE_LOG_LEVEL: warn
-      VITE_DC_LINKS_API_URL: ${{ secrets.VITE_DC_LINKS_API_URL }}
-      VITE_IMPORT_WHITELIST: ${{ secrets.VITE_IMPORT_WHITELIST }}
 
     steps:
     - name: Checkout code

@@ -17,7 +17,7 @@ const PageLoader = () => (
 
 function Router() {
   return (
-    <BrowserRouter basename={import.meta.env.VITE_BASEPATH}>
+    <BrowserRouter basename={import.meta.env.VITE_BASEPATH} useTransitions={false}>
       <Routes>
         <Route
           path="auth"

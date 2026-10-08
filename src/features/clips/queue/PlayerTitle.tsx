@@ -2,7 +2,7 @@ import { Box, Text, useMantineTheme } from '@mantine/core';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { IconStarFilled } from '@tabler/icons-react';
 import { useAppSelector } from '../../../app/hooks';
-import { selectCurrentClip, selectTopNSubmitters } from '../clipQueueSlice';
+import { selectCurrentClip, selectTop3Submitters } from '../clipQueueSlice';
 import Platform from '../../../common/components/BrandPlatforms';
 import { selectFavoriteSubmitters } from '../../settings/settingsSlice';
 
@@ -17,7 +17,7 @@ function PlayerTitle({ className }: PlayerTitleProps) {
   const theme = useMantineTheme();
   const submitter = currentClip?.submitters?.[0];
   const chatUser = useAppSelector((s) => (submitter ? s.chatUsers[submitter.toLowerCase()] : undefined));
-  const topN = useAppSelector(selectTopNSubmitters(3));
+  const topN = useAppSelector(selectTop3Submitters);
   const topIndex = submitter ? topN.findIndex((t) => t.username === submitter.toLowerCase()) : -1;
   const topClass = topIndex >= 0 ? `chip-anim-${topIndex}` : undefined;
   const colored = useAppSelector((s) => s.clipQueue.coloredSubmitterNames !== false);

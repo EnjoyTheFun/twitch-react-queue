@@ -2,7 +2,7 @@ import { ActionIcon, AspectRatio, Image, Box, Group, Skeleton, Stack, Text, useM
 import { MouseEventHandler, useEffect, useRef } from 'react';
 import { IconTrash, IconStarFilled, IconExternalLink } from '@tabler/icons-react';
 import { useAppSelector } from '../../app/hooks';
-import { selectClipById, selectTopNSubmitters, selectHighlightedClipId } from './clipQueueSlice';
+import { selectClipById, selectTop3Submitters, selectHighlightedClipId } from './clipQueueSlice';
 import { getProviderKeysForPlatform, type PlatformType } from '../../common/utils';
 import Platform from '../../common/components/BrandPlatforms';
 import StatBadge from './components/StatBadge';
@@ -30,7 +30,7 @@ const Clip = ({ clipId, onClick, onCrossClick, onOpenClick, className, card, pla
   const clipRef = useRef<HTMLDivElement>(null);
   const chatUser = useAppSelector((s) => (submitters?.[0] ? s.chatUsers[submitters[0].toLowerCase()] : undefined));
   const blurredProviders = useAppSelector((s) => s.settings.blurredProviders || []);
-  const topN = useAppSelector(selectTopNSubmitters(3));
+  const topN = useAppSelector(selectTop3Submitters);
   const colored = useAppSelector((s) => s.clipQueue.coloredSubmitterNames !== false);
   const favoriteSubmitters = useAppSelector(selectFavoriteSubmitters);
 
@@ -101,6 +101,11 @@ const Clip = ({ clipId, onClick, onCrossClick, onOpenClick, className, card, pla
     overflow: 'hidden',
     zIndex: 2,
     transition: 'border 0.3s, box-shadow 0.3s, transform 0.25s, background 0.12s ease-in-out',
+    ...(isHighlighted && {
+      border: `3px solid ${theme.colors.cyan[4]}`,
+      boxShadow: `0 0 0 2px ${theme.colors.cyan[4]}33, 0 0 18px ${theme.colors.cyan[4]}88`,
+      background: theme.colorScheme === 'dark' ? 'rgba(34, 211, 238, 0.10)' : 'rgba(8, 145, 178, 0.08)',
+    }),
     '& .clip--action-icon': { display: 'none' },
     '& .clip--duration-badge': { display: 'none' },
     '& .clip--queue-index': { display: 'block' },
@@ -109,44 +114,6 @@ const Clip = ({ clipId, onClick, onCrossClick, onOpenClick, className, card, pla
     '&:hover .clip--queue-index': { display: 'none' },
     '&:hover .clip--title': { color: onClick ? theme.colors.indigo[5] : undefined },
     '&:hover': { background: theme.colorScheme === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' },
-    ...(isHighlighted && {
-      '&::after': {
-        content: '""',
-        position: 'absolute' as const,
-        inset: 6,
-        borderRadius: 8,
-        background: 'linear-gradient(270deg, #00f2fe, #4facfe, #00f2fe)',
-        backgroundSize: '400% 400%',
-        filter: 'blur(12px)',
-        opacity: 0.30,
-        pointerEvents: 'none' as const,
-        zIndex: 0,
-        transition: 'opacity 0.20s',
-        animation: 'gradient-border 2s ease infinite',
-      },
-      '&::before': {
-        content: '""',
-        position: 'absolute' as const,
-        inset: 0,
-        borderRadius: 8,
-        padding: '2px',
-        background: 'linear-gradient(270deg, #00f2fe, #4facfe, #00f2fe)',
-        backgroundSize: '400% 400%',
-        animation: 'gradient-border 2s ease infinite',
-        WebkitMask:
-          'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-        WebkitMaskComposite: 'xor',
-        filter: 'blur(6px)',
-        opacity: 0.95,
-        pointerEvents: 'none' as const,
-        zIndex: 3,
-      },
-      '@keyframes gradient-border': {
-        '0%': { backgroundPosition: '0% 50%' },
-        '50%': { backgroundPosition: '100% 50%' },
-        '100%': { backgroundPosition: '0% 50%' },
-      },
-    }),
   });
 
   const aspectRatioSx = {

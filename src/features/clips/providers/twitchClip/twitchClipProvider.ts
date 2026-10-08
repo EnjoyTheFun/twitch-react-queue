@@ -42,7 +42,7 @@ class TwitchClipProvider implements ClipProvider {
         const game = await twitchApi.getGame(clipInfo.game_id);
         gameName = game?.name;
       }
-    } catch { }
+    } catch { /* ignore */ }
 
     return {
       id,

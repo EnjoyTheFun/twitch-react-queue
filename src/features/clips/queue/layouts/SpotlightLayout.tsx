@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Container, useMantineTheme, Switch } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight, IconChevronUp, IconChevronDown } from '@tabler/icons-react';
 import { useAppDispatch, useAppSelector } from '../../../../app/hooks';
@@ -7,7 +7,7 @@ import {
   autoplayChanged,
   autoplayTimeoutHandleChanged,
   previousClipWatched,
-  currentClipWatched
+  currentClipWatched,
 } from '../../clipQueueSlice';
 import Queue from '../Queue';
 import QueueControlPanel from '../QueueControlPanel';
@@ -20,16 +20,48 @@ function SpotlightLayout() {
   const [queueOpen, setQueueOpen] = useState(false);
   const autoplayEnabled = useAppSelector(selectAutoplayEnabled);
   const [headerHeight, setHeaderHeight] = useState<number>(60);
-  const [leftHoverIntensity, setLeftHoverIntensity] = useState(0);
-  const [rightHoverIntensity, setRightHoverIntensity] = useState(0);
+  const layoutRef = useRef<HTMLDivElement>(null);
   const theme = useMantineTheme();
 
   const playerDesiredHeight = `calc(100vh - ${headerHeight}px - 48px)`;
 
+  const clearHoverIntensity = () => {
+    const layout = layoutRef.current;
+    if (!layout) return;
+    layout.style.setProperty('--left-hover-intensity', '0');
+    layout.style.setProperty('--right-hover-intensity', '0');
+    layout.style.setProperty('--left-hover-bg-strong', '0');
+    layout.style.setProperty('--left-hover-bg-soft', '0');
+    layout.style.setProperty('--right-hover-bg-strong', '0');
+    layout.style.setProperty('--right-hover-bg-soft', '0');
+    layout.style.setProperty('--left-hover-offset', '-10px');
+    layout.style.setProperty('--right-hover-offset', '10px');
+  };
+
+  const handlePreviousClip = () => {
+    dispatch(autoplayTimeoutHandleChanged({ set: false }));
+    dispatch(previousClipWatched());
+  };
+
+  const handleNextClip = () => {
+    dispatch(autoplayTimeoutHandleChanged({ set: false }));
+    dispatch(currentClipWatched());
+  };
+
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (e.target instanceof Element && e.target.closest('.autoplay-toggle')) {
+        clearHoverIntensity();
+        return;
+      }
+
       const screenWidth = window.innerWidth;
       const mouseX = e.clientX;
+      const header = document.querySelector('.mantine-Header-root');
+      if (header && e.clientY < header.getBoundingClientRect().bottom) {
+        clearHoverIntensity();
+        return;
+      }
 
       const playerBox = document.querySelector('.player-box') as HTMLElement | null;
       if (playerBox) {
@@ -42,8 +74,7 @@ function SpotlightLayout() {
         );
 
         if (isOverPlayer) {
-          setLeftHoverIntensity(0);
-          setRightHoverIntensity(0);
+          clearHoverIntensity();
           return;
         }
       }
@@ -51,12 +82,20 @@ function SpotlightLayout() {
       const leftDistance = mouseX;
       const leftMaxDistance = 300;
       const leftIntensity = Math.max(0, Math.min(1, 1 - leftDistance / leftMaxDistance));
-      setLeftHoverIntensity(leftIntensity);
 
       const rightDistance = screenWidth - mouseX;
       const rightMaxDistance = 300;
       const rightIntensity = Math.max(0, Math.min(1, 1 - rightDistance / rightMaxDistance));
-      setRightHoverIntensity(rightIntensity);
+      const layout = layoutRef.current;
+      if (!layout) return;
+      layout.style.setProperty('--left-hover-intensity', String(leftIntensity));
+      layout.style.setProperty('--right-hover-intensity', String(rightIntensity));
+      layout.style.setProperty('--left-hover-bg-strong', String(0.6 * leftIntensity));
+      layout.style.setProperty('--left-hover-bg-soft', String(0.35 * leftIntensity));
+      layout.style.setProperty('--right-hover-bg-strong', String(0.6 * rightIntensity));
+      layout.style.setProperty('--right-hover-bg-soft', String(0.35 * rightIntensity));
+      layout.style.setProperty('--left-hover-offset', `${-10 + leftIntensity * 10}px`);
+      layout.style.setProperty('--right-hover-offset', `${10 - rightIntensity * 10}px`);
     };
 
     window.addEventListener('mousemove', handleGlobalMouseMove);
@@ -68,7 +107,7 @@ function SpotlightLayout() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const headerEl = document.querySelector('header') as HTMLElement | null;
+    const headerEl = document.querySelector('.mantine-Header-root') as HTMLElement | null;
     if (!headerEl) return;
 
     let raf = 0;
@@ -114,58 +153,46 @@ function SpotlightLayout() {
     setQueueOpen(prev => !prev);
   };
 
-  const handlePreviousClip = () => {
-    dispatch(autoplayTimeoutHandleChanged({ set: false }));
-    dispatch(previousClipWatched());
-  };
-
-  const handleNextClip = () => {
-    dispatch(autoplayTimeoutHandleChanged({ set: false }));
-    dispatch(currentClipWatched());
-  };
-
   const handleAutoplayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(autoplayTimeoutHandleChanged({ set: false }));
     dispatch(autoplayChanged(e.currentTarget.checked));
   };
 
   return (
-    <Container fluid pt="md" className="spotlight-layout">
+    <Container fluid pt="md" className="spotlight-layout" ref={layoutRef}>
       <div className="content-container">
         <div className="stage">
           {/* Left edge zone */}
           <div
             className="spotlight-edge-zone left"
-            onClick={handlePreviousClip}
-            style={{
-              background: `linear-gradient(to right,
-                rgba(0, 0, 0, ${0.6 * leftHoverIntensity}) 0%,
-                rgba(0, 0, 0, ${0.35 * leftHoverIntensity}) 40%,
-                transparent 100%)`,
-            }}
+            style={{ top: headerHeight }}
           >
-            <div className="spotlight-edge-icon" style={{ opacity: leftHoverIntensity, transform: `translateX(${-10 + leftHoverIntensity * 10}px)` }}>
+            <button
+              type="button"
+              className="spotlight-edge-icon left-icon"
+              aria-label="Previous clip"
+              onClick={handlePreviousClip}
+            >
               <IconChevronLeft size={64} stroke={2.5} />
-            </div>
+            </button>
           </div>
 
           {/* Right edge zone */}
           <div
             className="spotlight-edge-zone right"
-            onClick={handleNextClip}
-            style={{
-              background: `linear-gradient(to left,
-                rgba(0, 0, 0, ${0.6 * rightHoverIntensity}) 0%,
-                rgba(0, 0, 0, ${0.35 * rightHoverIntensity}) 40%,
-                transparent 100%)`,
-            }}
+            style={{ top: headerHeight }}
           >
-            <div className="spotlight-edge-icon" style={{ opacity: rightHoverIntensity, transform: `translateX(${10 - rightHoverIntensity * 10}px)` }}>
+            <button
+              type="button"
+              className="spotlight-edge-icon right-icon"
+              aria-label="Next clip"
+              onClick={handleNextClip}
+            >
               <IconChevronRight size={64} stroke={2.5} />
-            </div>
+            </button>
           </div>
 
-          <div className="player-box" style={{ height: playerDesiredHeight }}>
+          <div className="player-box" onPointerOver={clearHoverIntensity} style={{ height: playerDesiredHeight }}>
             <Player />
           </div>
 

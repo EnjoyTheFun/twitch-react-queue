@@ -37,3 +37,32 @@
 .video-js.vjs-user-active .vjs-control-bar {
   transform: translateY(0) !important;
 }
+
+.video-player-container {
+  position: relative;
+}
+
+.video-player-progress {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 100ms ease 100ms;
+}
+
+.video-player-progress:not(.is-visible) {
+  transition-delay: 0s;
+}
+
+.video-player-progress.is-visible {
+  opacity: 1;
+}
+
+.video-player-progress-fill {
+  height: 100%;
+  background-color: #364fc7;
+}

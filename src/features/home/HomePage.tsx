@@ -1,4 +1,5 @@
 import { Box, Container, Text, Title } from '@mantine/core';
+import { APP_VERSION } from '../../common/utils';
 import MyCredits from '../../common/components/MyCredits';
 import FeaturesSection from './FeaturesSection';
 import QuickstartSection from './QuickstartSection';
@@ -41,7 +42,7 @@ function HomePage() {
             </Text>
           </Box>
           <Text size="xs" color="dimmed" sx={{ whiteSpace: 'nowrap' }}>
-            v{process.env.npm_package_version || '1.1.6'}
+            v{APP_VERSION}
           </Text>
         </Box>
       </Box>

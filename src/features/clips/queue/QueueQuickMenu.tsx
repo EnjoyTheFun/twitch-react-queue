@@ -2,7 +2,7 @@ import { Menu, Badge, NumberInput, Button, Stack, Switch } from '@mantine/core';
 import { useModals } from '@mantine/modals';
 import { FormEvent, useState } from 'react';
 import { IconTrashX, IconTallymarks, IconReorder, IconPalette, IconPaletteOff, IconBulb } from '@tabler/icons-react';
-import ImportLinksModal from './ImportLinksModal';
+import ExportQueueModal from './ExportQueueModal';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { settingsChanged, selectReorderOnDuplicate } from '../../settings/settingsSlice';
 import { queueCleared, selectClipLimit, selectColoredSubmitterNames, submitterColorsToggled } from '../clipQueueSlice';
@@ -57,10 +57,10 @@ function QueueQuickMenu() {
     });
   };
 
-  const openImportLinksModal = () => {
-    const id = modals.openModal({
-      title: 'Import links',
-      children: <ImportLinksModal />,
+  const openExportQueueModal = () => {
+    modals.openModal({
+      title: 'Export queue',
+      children: <ExportQueueModal />,
       size: 'lg',
     });
   };
@@ -81,8 +81,8 @@ function QueueQuickMenu() {
         >
           Set queue limit
         </Menu.Item>
-        <Menu.Item icon={<IconBulb size={14} />} onClick={() => openImportLinksModal()}>
-          Import links
+        <Menu.Item icon={<IconBulb size={14} />} onClick={() => openExportQueueModal()}>
+          Export queue
         </Menu.Item>
         <Menu.Item icon={coloredSubmitters ? <IconPalette size={14} /> : <IconPaletteOff size={14} />} rightSection={<Switch size="sm" checked={coloredSubmitters} onChange={() => dispatch(submitterColorsToggled())} />}>
           Submitter colors

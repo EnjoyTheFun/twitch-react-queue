@@ -1,4 +1,12 @@
 .spotlight-layout {
+  --left-hover-intensity: 0;
+  --right-hover-intensity: 0;
+  --left-hover-bg-strong: 0;
+  --left-hover-bg-soft: 0;
+  --right-hover-bg-strong: 0;
+  --right-hover-bg-soft: 0;
+  --left-hover-offset: -10px;
+  --right-hover-offset: 10px;
   position: relative;
   user-select: none;
 
@@ -15,8 +23,7 @@
     top: 0;
     bottom: 0;
     width: 25vw;
-    z-index: 85;
-    cursor: pointer;
+    pointer-events: none;
     transition: background 0.15s ease-out;
     display: flex;
     align-items: center;
@@ -26,20 +33,44 @@
       left: 0;
       justify-content: flex-start;
       padding-left: 50px;
+      background: linear-gradient(to right,
+        rgba(0, 0, 0, var(--left-hover-bg-strong)) 0%,
+        rgba(0, 0, 0, var(--left-hover-bg-soft)) 40%,
+        transparent 100%);
     }
 
     &.right {
       right: 0;
       justify-content: flex-end;
       padding-right: 50px;
+      background: linear-gradient(to left,
+        rgba(0, 0, 0, var(--right-hover-bg-strong)) 0%,
+        rgba(0, 0, 0, var(--right-hover-bg-soft)) 40%,
+        transparent 100%);
     }
   }
 
   .spotlight-edge-icon {
+    position: fixed;
+    z-index: 101;
+    padding: 0;
+    border: 0;
+    background: transparent;
     transition: opacity 0.2s ease-out, transform 0.25s ease-out;
     color: rgba(255, 255, 255, 0.9);
     filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .spotlight-edge-icon.left-icon {
+    opacity: var(--left-hover-intensity);
+    transform: translateX(var(--left-hover-offset));
+  }
+
+  .spotlight-edge-icon.right-icon {
+    opacity: var(--right-hover-intensity);
+    transform: translateX(var(--right-hover-offset));
   }
 
   .player-box {
@@ -131,7 +162,7 @@
     position: fixed;
     right: 20px;
     bottom: 5px;
-    z-index: 2000;
+    z-index: 2200;
   }
 
   .info-toggle {

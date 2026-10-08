@@ -63,6 +63,7 @@ class CombinedClipProvider implements ClipProvider {
         }
       }
     } catch {
+      // not a reddit URL or unparsable
     }
 
     for (const providerName of this.enabledProviders) {
@@ -187,7 +188,7 @@ class CombinedClipProvider implements ClipProvider {
           if (uri.hostname.includes('reddit.com') && uri.pathname.includes('/comments/')) {
             this.redditPermalinkMap[id] = `${uri.origin}${uri.pathname}${uri.search}`;
           }
-        } catch (e) { }
+        } catch { /* not a parsable URL skip */ }
 
         // If the clip was actually from another platform, try to detect it
         // by asking each enabled provider to extract an id from the stored url
@@ -200,10 +201,10 @@ class CombinedClipProvider implements ClipProvider {
               this.resolvedRedditMap[id] = `${provider.name}:${otherId}`;
               break;
             }
-          } catch (e) { }
+          } catch { /* provider could not parse this url */ }
         }
       }
-    } catch (e) { }
+    } catch { /* ignore */ }
   }
 
   private getProviderAndId(id: string): [ClipProvider | undefined, string] {

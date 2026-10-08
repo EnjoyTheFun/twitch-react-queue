@@ -7,9 +7,11 @@ const getClip = async (id: string): Promise<TikTokOEmbedResponse | undefined> =>
 
     if (id.startsWith('l|')) {
       const realId = id.split('|')[1];
+      if (!realId) return undefined;
       url = `https://www.tiktok.com/oembed?url=https://www.tiktok.com/@_/video/${realId}`;
     } else if (id.startsWith('s|')) {
       const realId = id.split('|')[1];
+      if (!realId) return undefined;
       url = `https://www.tiktok.com/oembed?url=https://vm.tiktok.com/${realId}`;
     } else {
       url = `https://www.tiktok.com/oembed?url=https://www.tiktok.com/@_/video/${id}`;

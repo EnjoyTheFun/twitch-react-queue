@@ -13,7 +13,7 @@ function ImportLinksModal() {
   const close = () => modals.closeAll();
 
   const onConfirm = () => {
-    let items: Array<{ url: string; submitter?: string }> = [];
+    const items: Array<{ url: string; submitter?: string }> = [];
     try {
       const parsed = JSON.parse(value);
       if (Array.isArray(parsed)) {
@@ -26,7 +26,7 @@ function ImportLinksModal() {
       } else if (parsed && typeof parsed.url === 'string') {
         items.push({ url: parsed.url, submitter: parsed.submitter });
       }
-    } catch (e) {
+    } catch {
       const parts = value.split(/[,\n\r]+/).map((s) => s.trim()).filter(Boolean);
       for (const p of parts) {
         items.push({ url: p });
@@ -43,6 +43,7 @@ function ImportLinksModal() {
       dispatch(urlEnqueue({ url: item.url, userstate: user }));
     }
 
+    console.log(`Import completed: ${items.length} link(s) queued`);
     close();
   };
 

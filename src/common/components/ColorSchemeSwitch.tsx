@@ -1,5 +1,5 @@
 import { ActionIcon, PolymorphicComponentProps, useMantineColorScheme } from '@mantine/core';
-import { PropsWithChildren } from 'react';
+import { ElementType, PropsWithChildren } from 'react';
 import { IconSun, IconMoonStars } from '@tabler/icons-react';
 
 const LightModeIcon = IconSun;
@@ -9,7 +9,7 @@ const ColorSchemeSwitch = ({
   component = ActionIcon,
   children,
   ...props
-}: PropsWithChildren<PolymorphicComponentProps<any>>) => {
+}: PropsWithChildren<PolymorphicComponentProps<ElementType>>) => {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
   const isDark = colorScheme === 'dark';

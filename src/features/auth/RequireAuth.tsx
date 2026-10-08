@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { login, selectAuthState } from './authSlice';
 
-function RequireAuth({ children }: PropsWithChildren<{}>) {
+function RequireAuth({ children }: PropsWithChildren<object>) {
   const location = useLocation();
   const dispatch = useAppDispatch();
   const authState = useAppSelector(selectAuthState);

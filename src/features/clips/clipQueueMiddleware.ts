@@ -25,7 +25,7 @@ import clipProvider from './providers/providers';
 
 const logger = createLogger('ClipQueueMiddleware');
 
-const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
+const createClipQueueMiddleware = (): Middleware<object, RootState> => {
   return (storeAPI: AppMiddlewareAPI) => {
     return (next) => (action: any) => {
       if (action.type === REHYDRATE && action.key === 'clipQueue' && action.payload) {
@@ -37,8 +37,29 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
           clipProvider.setAllowRedditNsfw(action.payload.allowRedditNsfw);
         }
       } else if (urlReceived.match(action)) {
-        const { url, userstate } = action.payload;
+        const { url, userstate, fromRedemption, sourceType, note } = action.payload;
         const sender = userstate.username;
+
+        const settings = storeAPI.getState().settings;
+        const allowStandardMessageUrls = settings.allowStandardMessageUrls !== undefined
+          ? settings.allowStandardMessageUrls === true
+          : settings.channelPointsLinksOnly !== true;
+        const allowChannelPointsRedemptionUrls = settings.allowChannelPointsRedemptionUrls !== undefined
+          ? settings.allowChannelPointsRedemptionUrls === true
+          : true;
+        const allowPowerUpRedemptionUrls = settings.allowPowerUpRedemptionUrls !== undefined
+          ? settings.allowPowerUpRedemptionUrls === true
+          : settings.powerUpRedemptionsEnabled === true;
+
+        const resolvedSourceType = sourceType || (fromRedemption ? 'channelPoints' : 'standard');
+        const isDisallowedBySource =
+          (resolvedSourceType === 'standard' && !allowStandardMessageUrls) ||
+          (resolvedSourceType === 'channelPoints' && !allowChannelPointsRedemptionUrls) ||
+          (resolvedSourceType === 'powerUp' && !allowPowerUpRedemptionUrls);
+
+        if (isDisallowedBySource) {
+          return next(action);
+        }
 
         if (!storeAPI.getState().clipQueue.isOpen) {
           return next(action);
@@ -66,7 +87,13 @@ const createClipQueueMiddleware = (): Middleware<{}, RootState> => {
             id.startsWith('reddit:') &&
             (!!clip && (!clip.thumbnailUrl || !clip.author || clip.author === 'reddit' || !clip.title || /^Reddit post\s+/i.test(clip.title)));
 
-          storeAPI.dispatch(clipStubReceived({ id, submitters: [sender], url, timestamp: formatISO(new Date()) }));
+          storeAPI.dispatch(clipStubReceived({
+            id,
+            submitters: [sender],
+            url,
+            timestamp: formatISO(new Date()),
+            notes: note ? { [sender.toLowerCase()]: note } : undefined,
+          }));
 
           if (!clip || shouldRefreshExistingRedditClip) {
             clipProvider

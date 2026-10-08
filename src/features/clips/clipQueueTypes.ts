@@ -20,6 +20,8 @@ export interface Clip {
   thumbnailUrl?: string;
   duration?: number;
   views?: number;
+
+  notes?: Record<string, string>;
 }
 
 export interface ClipQueueState {

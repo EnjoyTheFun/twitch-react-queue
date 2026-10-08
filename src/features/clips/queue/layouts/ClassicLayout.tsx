@@ -15,17 +15,17 @@ function ClassicLayout() {
   const rectRef = useRef({ left: 0, width: 0 });
   const dispatch = useAppDispatch();
   const defaultPlayerPercent = useAppSelector(selectPlayerPercentDefault);
+  const pendingPercentRef = useRef(defaultPlayerPercent);
+  const rafIdRef = useRef(0);
   const [playerPercent, setPlayerPercent] = useState(defaultPlayerPercent);
 
   const MIN_PLAYER = 30;
   const MAX_PLAYER = 85;
 
   useEffect(() => {
-    const pendingRef = { pct: playerPercent } as { pct: number };
-    const rafId = { id: 0 } as { id: number };
     const flush = () => {
-      rafId.id = 0;
-      setPlayerPercent((_) => pendingRef.pct);
+      rafIdRef.current = 0;
+      setPlayerPercent(pendingPercentRef.current);
     };
 
     const onPointerMove = (ev: PointerEvent) => {
@@ -34,17 +34,17 @@ function ClassicLayout() {
       const clientX = ev.clientX;
       const x = clientX - rectRef.current.left;
       const pct = Math.max(MIN_PLAYER, Math.min(MAX_PLAYER, Math.round((x / rectRef.current.width) * 100)));
-      pendingRef.pct = pct;
-      if (!rafId.id) rafId.id = requestAnimationFrame(flush);
+      pendingPercentRef.current = pct;
+      if (!rafIdRef.current) rafIdRef.current = requestAnimationFrame(flush);
     };
 
     const onPointerUp = () => {
       draggingRef.current = false;
-      if (rafId.id) {
-        cancelAnimationFrame(rafId.id);
-        rafId.id = 0;
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = 0;
       }
-      dispatch(settingsChanged({ playerPercentDefault: pendingRef.pct }));
+      dispatch(settingsChanged({ playerPercentDefault: pendingPercentRef.current }));
     };
 
     window.addEventListener('pointermove', onPointerMove as any);
@@ -53,12 +53,13 @@ function ClassicLayout() {
     return () => {
       window.removeEventListener('pointermove', onPointerMove as any);
       window.removeEventListener('pointerup', onPointerUp);
-      if (rafId.id) cancelAnimationFrame(rafId.id);
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
     };
-  }, [MIN_PLAYER, MAX_PLAYER, playerPercent]);
+  }, [dispatch, MIN_PLAYER, MAX_PLAYER]);
 
   useEffect(() => {
     if (draggingRef.current) return;
+    pendingPercentRef.current = defaultPlayerPercent;
     setPlayerPercent(defaultPlayerPercent);
   }, [defaultPlayerPercent]);
 
@@ -66,8 +67,9 @@ function ClassicLayout() {
     const target = e.currentTarget as Element;
     try {
       (target as any).setPointerCapture?.(e.pointerId);
-    } catch { }
+    } catch { /* pointer capture not supported */ }
     draggingRef.current = true;
+    pendingPercentRef.current = playerPercent;
     if (containerRef.current) {
       const r = containerRef.current.getBoundingClientRect();
       rectRef.current.left = r.left;

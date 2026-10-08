@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Container, Stack, Title, Group, Card, Text, Table, Box, useMantineTheme, Button, Modal } from '@mantine/core';
-import { IconRefresh, IconBug } from '@tabler/icons-react';
+import { IconRefresh } from '@tabler/icons-react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { selectTopNSubmitters, selectWatchedCount, selectWatchedCounts, resetWatchedCounts, setWatchedCounts, selectTotalMediaWatched } from '../clipQueueSlice';
+import { selectTopNSubmitters, selectWatchedCount, selectWatchedCounts, resetWatchedCounts, selectTotalMediaWatched } from '../clipQueueSlice';
 
 function LeaderboardPage() {
   const [showResetModal, setShowResetModal] = useState(false);

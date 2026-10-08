@@ -24,7 +24,7 @@ const getClip = async (id: string): Promise<StreamableClipInfo | undefined> => {
       width: mp4File.width,
       height: mp4File.height,
     };
-  } catch (error) {
+  } catch {
     return undefined;
   }
 };

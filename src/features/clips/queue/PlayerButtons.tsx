@@ -16,6 +16,7 @@ import {
 } from '../clipQueueSlice';
 import clipProvider from '../providers/providers';
 import FavoriteButton from './FavoriteButton';
+import SubmitterNote from './SubmitterNote';
 
 function PlayerButtons({ className }: { className?: string }) {
   const dispatch = useAppDispatch();
@@ -34,6 +35,7 @@ function PlayerButtons({ className }: { className?: string }) {
             dispatch(autoplayChanged(event.currentTarget.checked));
           }} />
         </Box>
+        <SubmitterNote />
         <FavoriteButton />
         {currentClip && (
           <Button

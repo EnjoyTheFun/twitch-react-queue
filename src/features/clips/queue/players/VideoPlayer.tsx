@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { setVolume } from '../../../settings/settingsSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../../app/store';
@@ -15,10 +15,14 @@ interface VideoPlayerProps {
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<VideoJSPlayer | null>(null);
   const disposeTimeoutRef = useRef<number | null>(null);
+  const [showMiniProgress, setShowMiniProgress] = useState(false);
+  const [progress, setProgress] = useState(0);
   const dispatch = useDispatch();
   const volume = useSelector((state: RootState) => state.settings.volume);
+  const showPlayerProgressBar = useSelector((state: RootState) => state.settings.showPlayerProgressBar !== false);
 
   useEffect(() => {
     if (!videoRef.current || !src) return;
@@ -44,6 +48,27 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
     if (player) {
       player.fill(true);
       player.volume(volume);
+
+      const updateProgress = () => {
+        const duration = player.duration();
+        const currentTime = player.currentTime();
+        if (duration && currentTime !== undefined && Number.isFinite(duration)) {
+          setProgress((currentTime / duration) * 100);
+        }
+      };
+      player.on('timeupdate', updateProgress);
+      player.on('durationchange', updateProgress);
+      player.on('seeking', updateProgress);
+      player.on('pause', () => setShowMiniProgress(false));
+      const updateMiniProgress = () => {
+        setShowMiniProgress(
+          !player.paused() &&
+          !containerRef.current?.matches(':hover')
+        );
+      };
+      player.on('playing', updateMiniProgress);
+      player.on('userinactive', updateMiniProgress);
+      player.on('useractive', () => setShowMiniProgress(false));
 
       player.on('volumechange', () => {
         const currentVolume = player.volume();
@@ -82,7 +107,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
 
           disposeTimeoutRef.current = window.setTimeout(() => {
             try {
-              playerRef.current && !playerRef.current.isDisposed() && playerRef.current.dispose();
+              if (playerRef.current && !playerRef.current.isDisposed()) {
+                playerRef.current.dispose();
+              }
             } catch (e) {
               console.warn('Error during Video.js dispose:', e);
             }
@@ -106,8 +133,26 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
   if (!src) return null;
 
   return (
-    <div data-vjs-player>
+    <div
+      data-vjs-player
+      className="video-player-container"
+      ref={containerRef}
+      onMouseEnter={() => setShowMiniProgress(false)}
+      onMouseLeave={() => setShowMiniProgress(
+        !!playerRef.current && !playerRef.current.paused()
+      )}
+    >
       <video ref={videoRef} className="video-js vjs-default-skin" />
+      <div
+        className={`video-player-progress${showPlayerProgressBar && showMiniProgress ? ' is-visible' : ''}`}
+        role="progressbar"
+        aria-label="Video progress"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(progress)}
+      >
+        <div className="video-player-progress-fill" style={{ width: `${progress}%` }} />
+      </div>
     </div>
   );
 };

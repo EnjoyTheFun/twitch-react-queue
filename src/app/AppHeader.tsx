@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { ActionIcon, ActionIconProps, Button, Group, Header, Space, Text, ThemeIcon, Box, SegmentedControl } from '@mantine/core';
-import { IconHome, IconList, IconHistory, IconCrown } from '@tabler/icons-react';
+import { ActionIcon, ActionIconProps, Button, Group, Header, Space, Text, ThemeIcon, Box, SegmentedControl, Tooltip, Sx } from '@mantine/core';
+import { IconHome, IconList, IconHistory, IconCrown, IconPlugConnectedX } from '@tabler/icons-react';
 import { PropsWithChildren } from 'react';
 import { NavLinkProps, useLocation } from 'react-router-dom';
 import ColorSchemeSwitch from '../common/components/ColorSchemeSwitch';
@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from './hooks';
 import { login } from '../features/auth/authSlice';
 import AppMenu from './AppMenu';
 import { isOpenChanged, selectIsOpen } from '../features/clips/clipQueueSlice';
+import { selectChatConnectionStatus } from '../features/twitchChat/chatConnectionSlice';
 
 const TitleIcon = () => {
   const favicon = `${import.meta.env.BASE_URL || ''}favicon.svg`;
@@ -29,13 +30,13 @@ const TitleText = () => (
   </Group>
 );
 
-const NavBarIcon = ({ children, ...props }: PropsWithChildren<ActionIconProps<any>>) => (
+const NavBarIcon = ({ children, ...props }: PropsWithChildren<ActionIconProps<'button'>>) => (
   <ActionIcon variant="hover" size="lg" {...props}>
     {children}
   </ActionIcon>
 );
 
-const NavBarButton = ({ children, type, className, style, icon, sx, ...props }: PropsWithChildren<NavLinkProps & { icon?: React.ReactNode; sx?: any }>) => {
+const NavBarButton = ({ children, type: _type, className: _className, style: _style, icon, sx, ...props }: PropsWithChildren<NavLinkProps & { icon?: React.ReactNode; sx?: Sx }>) => {
   const label = typeof children === 'string' ? children : undefined;
   return (
     <Button
@@ -60,6 +61,7 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const isOpen = useAppSelector(selectIsOpen);
+  const chatConnectionStatus = useAppSelector(selectChatConnectionStatus);
 
   const handleLogin = () => {
     dispatch(login(location.pathname));
@@ -124,7 +126,7 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
                 spacing={6}
                 align="center"
                 className="status-group"
-                sx={(theme) => ({
+                sx={() => ({
                   padding: '8px 8px',
                   borderRadius: 4,
                   flexShrink: 0,
@@ -176,6 +178,20 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
                 />
               </Group>
 
+              {chatConnectionStatus === 'disconnected' && (
+                <Tooltip label="Chat disconnected">
+                  <ThemeIcon
+                    variant="light"
+                    color="red"
+                    size="lg"
+                    radius="xl"
+                    sx={{ flexShrink: 0 }}
+                  >
+                    <IconPlugConnectedX size={18} />
+                  </ThemeIcon>
+                </Tooltip>
+              )}
+
               <Box sx={{ flexShrink: 0, marginLeft: '8px' }}>
                 <AppMenu />
               </Box>
@@ -222,7 +238,7 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
           },
         })}
       >
-        <Text size="xs" sx={(t) => ({ lineHeight: 1, transition: 'transform 140ms', transform: collapsed ? 'translateY(0)' : 'translateY(-2px)', })}>
+        <Text size="xs" sx={() => ({ lineHeight: 1, transition: 'transform 140ms', transform: collapsed ? 'translateY(0)' : 'translateY(-2px)', })}>
           {collapsed ? '▾' : '▴'}
         </Text>
       </Box>

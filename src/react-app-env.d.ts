@@ -7,8 +7,6 @@ interface ImportMetaEnv {
   readonly VITE_LOG_LEVEL: string;
   readonly VITE_UMAMI_WEBSITE_ID: string;
   readonly VITE_UMAMI_SRC: string;
-  readonly VITE_DC_LINKS_API_URL: string;
-  readonly VITE_IMPORT_WHITELIST: string;
 }
 
 interface ImportMeta {

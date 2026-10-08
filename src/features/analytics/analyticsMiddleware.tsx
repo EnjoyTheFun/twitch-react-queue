@@ -12,8 +12,8 @@ import {
 } from '../clips/clipQueueSlice';
 import { settingsChanged } from '../settings/settingsSlice';
 
-const createAnalyticsMiddleware = (): Middleware<{}, RootState> => {
-  return (storeApi: AppMiddlewareAPI) => {
+const createAnalyticsMiddleware = (): Middleware<object, RootState> => {
+  return (_storeApi: AppMiddlewareAPI) => {
     return (next) => (action) => {
       if (
         isAnyOf(

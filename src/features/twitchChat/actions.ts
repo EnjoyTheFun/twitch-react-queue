@@ -8,7 +8,16 @@ export interface Userstate {
   vip?: boolean;
 }
 
-export const urlReceived = createAction<{ url: string; userstate: Userstate }>('twitchChat/urlReceived');
+export type UrlSourceType = 'standard' | 'channelPoints' | 'powerUp';
+
+export const urlReceived = createAction<{
+  url: string;
+  userstate: Userstate;
+  fromRedemption?: boolean;
+  rewardId?: string;
+  sourceType?: UrlSourceType;
+  note?: string;
+}>('twitchChat/urlReceived');
 export const urlDeleted = createAction<string>('twitchChat/urlDeleted');
 export const userTimedOut = createAction<string>('twitchChat/userTimedOut');
 export const urlEnqueue = createAction<{ url: string; userstate: Userstate }>('twitchChat/urlEnqueue');

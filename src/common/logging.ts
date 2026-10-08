@@ -7,7 +7,7 @@ enum LogLevel {
 
 type LogLevels = keyof typeof LogLevel;
 
-type LoggingFunction = (message: any, ...data: any[]) => void;
+type LoggingFunction = (message: unknown, ...data: unknown[]) => void;
 interface Logger {
   debug: LoggingFunction;
   info: LoggingFunction;
@@ -22,23 +22,23 @@ const setLogLevel = (level: LogLevels) => globalLogLevel = LogLevel[level] ?? Lo
 class ConsoleLogger implements Logger {
   constructor(private name: string) { }
 
-  public debug(message: any, ...data: any[]): void {
+  public debug(message: unknown, ...data: unknown[]): void {
     this.log(LogLevel.debug, message, ...data);
   }
 
-  public info(message: any, ...data: any[]): void {
+  public info(message: unknown, ...data: unknown[]): void {
     this.log(LogLevel.info, message, ...data);
   }
 
-  public warn(message: any, ...data: any[]): void {
+  public warn(message: unknown, ...data: unknown[]): void {
     this.log(LogLevel.warn, message, ...data);
   }
 
-  public error(message: any, ...data: any[]): void {
+  public error(message: unknown, ...data: unknown[]): void {
     this.log(LogLevel.error, message, ...data);
   }
 
-  protected log(level: LogLevel, message: any, ...data: any[]): void {
+  protected log(level: LogLevel, message: unknown, ...data: unknown[]): void {
     if (level < globalLogLevel) {
       return;
     }
@@ -47,9 +47,11 @@ class ConsoleLogger implements Logger {
 
     switch (level) {
       case LogLevel.debug:
+        // eslint-disable-next-line no-console
         console.debug(messageWithName, ...data);
         break;
       case LogLevel.info:
+        // eslint-disable-next-line no-console
         console.info(messageWithName, ...data);
         break;
       case LogLevel.warn:
@@ -63,7 +65,7 @@ class ConsoleLogger implements Logger {
 }
 
 setLogLevel((import.meta.env.VITE_LOG_LEVEL) as LogLevels);
-(window as any).__setLogLevel = setLogLevel;
+(window as unknown as { __setLogLevel: typeof setLogLevel }).__setLogLevel = setLogLevel;
 
 export function createLogger(name: string): Logger {
   return new ConsoleLogger(name);

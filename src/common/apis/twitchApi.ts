@@ -79,14 +79,14 @@ const getDirectUrl = async (id: string): Promise<string | undefined> => {
     )}`;
 
     return url;
-  } catch (e: any) {
-    console.warn('getDirectUrl failed for Twitch clip', id, e?.message || e);
+  } catch (e) {
+    console.warn('getDirectUrl failed for Twitch clip', id, e instanceof Error ? e.message : e);
     return undefined;
   }
 };
 
 twitchApiClient.interceptors.request.use((request) => {
-  const { token } = store?.getState().auth;
+  const token = store?.getState()?.auth?.token;
   if (token) {
     request.headers.set('Authorization', `Bearer ${token}`);
   }
@@ -94,16 +94,16 @@ twitchApiClient.interceptors.request.use((request) => {
   return request;
 });
 
-const getClip = async (id: string): Promise<TwitchClip> => {
+const getClip = async (id: string): Promise<TwitchClip | undefined> => {
   const { data } = await twitchApiClient.get<{ data: TwitchClip[] }>(`clips?id=${id}`);
 
-  return data.data[0];
+  return data.data?.[0];
 };
 
-const getVideo = async (id: string): Promise<TwitchVideo> => {
+const getVideo = async (id: string): Promise<TwitchVideo | undefined> => {
   const { data } = await twitchApiClient.get<{ data: TwitchVideo[] }>(`videos?id=${id}`);
 
-  return data.data[0];
+  return data.data?.[0];
 };
 
 const getGame = async (id: string): Promise<TwitchGame | undefined> => {

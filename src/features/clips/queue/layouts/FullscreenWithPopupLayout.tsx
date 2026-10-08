@@ -31,7 +31,7 @@ function copyStyles(sourceDoc: Document, targetDoc: Document) {
   });
 }
 
-function Popup({ children }: PropsWithChildren<{}>) {
+function Popup({ children }: PropsWithChildren<object>) {
   const containerEl = document.createElement('div');
 
   useEffect(() => {

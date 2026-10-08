@@ -31,10 +31,25 @@ class QueueSearchFilter {
       return clips;
     }
 
-    return clips.filter((clip) => {
+    const matches = clips.filter((clip) => {
       const searchText = this.getClipSearchText(clip);
       return searchText.includes(normalizedQuery);
     });
+
+    if (!/^\d+$/.test(normalizedQuery)) {
+      return matches;
+    }
+
+    const queueNumber = Number(normalizedQuery);
+    const prioritizedClip = clips.find((clip) => clip.seq === queueNumber);
+    if (!prioritizedClip) {
+      return matches;
+    }
+
+    return [
+      prioritizedClip,
+      ...matches.filter((clip) => clip.id !== prioritizedClip.id),
+    ];
   }
 }
 
@@ -58,7 +73,7 @@ function QueueSearchModal({ closeModal }: { closeModal: () => void }) {
   return (
     <Stack spacing="md" sx={{ maxHeight: '80vh' }}>
       <TextInput
-        placeholder="Search queue by title, author, or submitter..."
+        placeholder="Search queue by number, title, author, or submitter..."
         icon={<IconSearch size={16} />}
         value={query}
         onChange={(e) => setQuery(e.currentTarget.value)}
