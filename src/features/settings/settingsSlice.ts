@@ -17,6 +17,8 @@ interface SettingsState {
   blurredProviders: string[];
   allowRedditNsfw: boolean;
   showTopSubmitters?: boolean;
+  showQueueAdditionFeed?: boolean;
+  queueAdditionFeedDurationSeconds?: number;
   subOnlyMode?: boolean;
   channelPointsLinksOnly?: boolean;
   showSubmitterNotes?: boolean;
@@ -34,6 +36,8 @@ interface SettingsState {
   autoplayDelay?: number;
   playerPercentDefault?: number;
   showPlayerProgressBar?: boolean;
+  showQueueDragHints?: boolean;
+  highlightRedemptionSubmissions?: boolean;
   voteYeaKeyword?: string;
   voteNayKeyword?: string;
   observedChannelPointsRedemptions: ObservedChannelPointsRedemption[];
@@ -49,6 +53,8 @@ const initialState: SettingsState = {
   blurredProviders: [],
   allowRedditNsfw: false,
   showTopSubmitters: false,
+  showQueueAdditionFeed: false,
+  queueAdditionFeedDurationSeconds: 5,
   subOnlyMode: false,
   channelPointsLinksOnly: false,
   showSubmitterNotes: true,
@@ -66,6 +72,8 @@ const initialState: SettingsState = {
   autoplayDelay: 5,
   playerPercentDefault: 79,
   showPlayerProgressBar: true,
+  showQueueDragHints: true,
+  highlightRedemptionSubmissions: true,
   voteYeaKeyword: 'VoteYea',
   voteNayKeyword: 'VoteNay',
   observedChannelPointsRedemptions: [],
@@ -108,6 +116,12 @@ const settingsSlice = createSlice({
       }
       if (payload.showTopSubmitters !== undefined) {
         state.showTopSubmitters = payload.showTopSubmitters;
+      }
+      if (payload.showQueueAdditionFeed !== undefined) {
+        state.showQueueAdditionFeed = payload.showQueueAdditionFeed;
+      }
+      if (payload.queueAdditionFeedDurationSeconds !== undefined) {
+        state.queueAdditionFeedDurationSeconds = Math.max(1, Math.min(30, payload.queueAdditionFeedDurationSeconds));
       }
       if (payload.subOnlyMode !== undefined) {
         state.subOnlyMode = payload.subOnlyMode;
@@ -162,10 +176,16 @@ const settingsSlice = createSlice({
         state.autoplayDelay = Math.max(0, Math.min(5, payload.autoplayDelay));
       }
       if (payload.playerPercentDefault !== undefined) {
-        state.playerPercentDefault = Math.max(30, Math.min(85, payload.playerPercentDefault));
+        state.playerPercentDefault = Math.max(1, Math.min(99, payload.playerPercentDefault));
       }
       if (payload.showPlayerProgressBar !== undefined) {
         state.showPlayerProgressBar = payload.showPlayerProgressBar;
+      }
+      if (payload.showQueueDragHints !== undefined) {
+        state.showQueueDragHints = payload.showQueueDragHints;
+      }
+      if (payload.highlightRedemptionSubmissions !== undefined) {
+        state.highlightRedemptionSubmissions = payload.highlightRedemptionSubmissions;
       }
       if (payload.voteYeaKeyword !== undefined) {
         state.voteYeaKeyword = payload.voteYeaKeyword.trim() || 'VoteYea';
@@ -179,6 +199,12 @@ const settingsSlice = createSlice({
     },
     setShowTopSubmitters: (state, { payload }: PayloadAction<boolean>) => {
       state.showTopSubmitters = payload;
+    },
+    toggleShowQueueAdditionFeed: (state) => {
+      state.showQueueAdditionFeed = !state.showQueueAdditionFeed;
+    },
+    setShowQueueAdditionFeed: (state, { payload }: PayloadAction<boolean>) => {
+      state.showQueueAdditionFeed = payload;
     },
     setVolume: (state, action) => {
       state.volume = action.payload;
@@ -286,6 +312,9 @@ export const selectColorScheme = createSelector(
 );
 
 export const selectShowTopSubmitters = (state: RootState) => state.settings.showTopSubmitters !== false;
+export const selectShowQueueAdditionFeed = (state: RootState) => state.settings.showQueueAdditionFeed === true;
+export const selectQueueAdditionFeedDurationSeconds = (state: RootState) =>
+  Math.max(1, Math.min(30, state.settings.queueAdditionFeedDurationSeconds ?? 5));
 export const selectSubOnlyMode = (state: RootState) => state.settings.subOnlyMode === true;
 export const selectShowSubmitterNotes = (state: RootState) => state.settings.showSubmitterNotes !== false;
 export const selectChannelPointsLinksOnly = (state: RootState) => state.settings.channelPointsLinksOnly === true;
@@ -322,6 +351,8 @@ export const selectReorderOnDuplicate = (state: RootState) => state.settings.reo
 export const selectAutoplayDelay = (state: RootState) => state.settings.autoplayDelay ?? 5;
 export const selectPlayerPercentDefault = (state: RootState) => state.settings.playerPercentDefault ?? 79;
 export const selectShowPlayerProgressBar = (state: RootState) => state.settings.showPlayerProgressBar !== false;
+export const selectShowQueueDragHints = (state: RootState) => state.settings.showQueueDragHints !== false;
+export const selectHighlightRedemptionSubmissions = (state: RootState) => state.settings.highlightRedemptionSubmissions !== false;
 export const selectVoteYeaKeyword = (state: RootState) => state.settings.voteYeaKeyword || 'VoteYea';
 export const selectVoteNayKeyword = (state: RootState) => state.settings.voteNayKeyword || 'VoteNay';
 export const selectObservedChannelPointsRedemptions = (state: RootState) => state.settings.observedChannelPointsRedemptions || [];
@@ -332,6 +363,8 @@ export const {
   settingsChanged,
   toggleShowTopSubmitters,
   setShowTopSubmitters,
+  toggleShowQueueAdditionFeed,
+  setShowQueueAdditionFeed,
   addBlockedSubmitter,
   removeBlockedSubmitter,
   addBlockedCreator,

@@ -1,4 +1,4 @@
-import { Group, Text, Stack, ActionIcon } from '@mantine/core';
+import { Group, Text, Stack, ActionIcon, useMantineTheme } from '@mantine/core';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import {
   selectClipLimit,
@@ -9,14 +9,18 @@ import {
 } from '../clipQueueSlice';
 import {
   selectShowTopSubmitters, toggleShowTopSubmitters,
+  selectShowQueueAdditionFeed, toggleShowQueueAdditionFeed,
   selectSubOnlyMode, settingsChanged, selectAllowChannelPointsRedemptionUrls, selectChannelPointsRewardId
 } from '../../settings/settingsSlice';
 import { showNotification } from '@mantine/notifications';
 import QueueQuickMenu from './QueueQuickMenu';
 import TopSubmittersMarquee from './TopSubmittersMarquee';
-import { useQueueSearchModal } from './QueueSearch';
+import { useQueueSearchModal } from './useQueueSearchModal';
 import { pollToggled, selectPollActive } from '../../twitchChat/pollSlice';
+import QueueAdditionFeed from './QueueAdditionFeed';
 import {
+  IconBellOff,
+  IconBellRinging,
   IconCrown,
   IconCrownOff,
   IconThumbDown,
@@ -35,9 +39,11 @@ interface QueueControlPanelProps {
 }
 
 const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
+  const theme = useMantineTheme();
   const dispatch = useAppDispatch();
   const { openQueueSearchModal } = useQueueSearchModal();
   const showMarquee = useAppSelector(selectShowTopSubmitters);
+  const showQueueAdditionFeed = useAppSelector(selectShowQueueAdditionFeed);
   const pollActive = useAppSelector(selectPollActive);
 
   const skipVotingEnabled = useAppSelector(selectSkipVotingEnabled);
@@ -56,6 +62,10 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
     dispatch(toggleShowTopSubmitters());
   };
 
+  const handleQueueAdditionFeedToggle = () => {
+    dispatch(toggleShowQueueAdditionFeed());
+  };
+
   const handleSubOnlyModeToggle = () => {
     dispatch(settingsChanged({ subOnlyMode: !subOnlyMode }));
   };
@@ -69,7 +79,7 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
       showNotification({
         id: 'channel-points-reward-id-required',
         title: 'Channel points reward ID required',
-        message: 'Set the reward ID in Settings > Moderation > Channel points reward ID before enabling channel points redemptions.',
+        message: 'Set the reward ID in Settings > Chat Intake > Channel points & power-ups before enabling channel points redemptions.',
         color: 'yellow',
         autoClose: true,
         style: { marginBottom: 82 },
@@ -83,7 +93,11 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
   const queueCount = `${clipsLeft}/${totalClips}${clipLimit ? `/${clipLimit}` : ''}`;
 
   return (
-    <Stack spacing={0} className={className} sx={{ marginTop: '-0.5rem' }}>
+    <Stack
+      spacing={0}
+      className={`queue-control-panel${theme.colorScheme === 'light' ? ' queue-control-panel-light' : ''}${className ? ` ${className}` : ''}`}
+      sx={{ marginTop: '-0.5rem' }}
+    >
       <Group position="apart" align="center" sx={{ width: '100%' }} mt={0}>
         <Group spacing={6} align="center" sx={{ flex: 1, margin: 0, padding: 0 }}>
           <Text size="md" weight={700} sx={{ margin: 0, padding: 0 }}>
@@ -93,6 +107,7 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
         </Group>
         <Group spacing={6} align="center" sx={{ alignItems: 'center', margin: 4 }}>
           <ActionIcon
+            className="queue-quick-action"
             size="sm"
             variant="light"
             onClick={openQueueSearchModal}
@@ -103,9 +118,9 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
           </ActionIcon>
 
           <ActionIcon
+            className={`queue-quick-action${pollActive ? ' queue-quick-action-poll-active' : ''}`}
             size="sm"
             variant={pollActive ? 'filled' : 'light'}
-            color={pollActive ? 'green' : undefined}
             onClick={handlePollToggle}
             title={pollActive ? 'Disable poll' : 'Enable poll'}
             aria-label="Toggle poll"
@@ -114,9 +129,9 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
           </ActionIcon>
 
           <ActionIcon
+            className={`queue-quick-action${allowChannelPointsRedemptionUrls ? ' queue-quick-action-redemption-active' : ''}`}
             size="sm"
             variant={allowChannelPointsRedemptionUrls ? 'filled' : 'light'}
-            color={allowChannelPointsRedemptionUrls ? 'violet' : undefined}
             onClick={handleChannelPointsRedemptionsToggle}
             title={
               allowChannelPointsRedemptionUrls
@@ -129,6 +144,18 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
           </ActionIcon>
 
           <ActionIcon
+            className="queue-quick-action"
+            size="sm"
+            variant={showQueueAdditionFeed ? 'filled' : 'light'}
+            onClick={handleQueueAdditionFeedToggle}
+            title={showQueueAdditionFeed ? 'Hide new media feed' : 'Show new media feed'}
+            aria-label={showQueueAdditionFeed ? 'Hide new media feed' : 'Show new media feed'}
+          >
+            {showQueueAdditionFeed ? <IconBellRinging size={18} /> : <IconBellOff size={18} />}
+          </ActionIcon>
+
+          <ActionIcon
+            className="queue-quick-action"
             size="sm"
             variant="light"
             onClick={handleSkipVotingToggle}
@@ -139,6 +166,7 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
           </ActionIcon>
 
           <ActionIcon
+            className="queue-quick-action"
             size="sm"
             variant="light"
             onClick={handleSubOnlyModeToggle}
@@ -149,6 +177,7 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
           </ActionIcon>
 
           <ActionIcon
+            className="queue-quick-action"
             size="sm"
             variant="light"
             onClick={handleTopSubmittersToggle}
@@ -161,6 +190,7 @@ const QueueControlPanel = ({ className }: QueueControlPanelProps) => {
       </Group>
 
       {showMarquee && <TopSubmittersMarquee count={3} />}
+      <QueueAdditionFeed enabled={showQueueAdditionFeed} />
     </Stack>
   );
 };

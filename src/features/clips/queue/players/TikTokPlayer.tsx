@@ -24,7 +24,6 @@ const TikTokPlayer: React.FC<TikTokPlayerProps> = ({
         typeof event.data !== 'object'
       ) return;
 
-      // eslint-disable-next-line no-useless-computed-key
       const { type, value, ['x-tiktok-player']: isTikTokPlayer } = event.data;
 
       if (!isTikTokPlayer) return;

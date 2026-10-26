@@ -13,6 +13,7 @@ export interface SettingsFormValues {
   skipThreshold?: number;
   clipMemoryRetentionDays?: number | null;
   autoplayDelay?: number;
+  queueAdditionFeedDurationSeconds?: number;
   subOnlyMode?: boolean;
   allowStandardMessageUrls?: boolean;
   allowChannelPointsRedemptionUrls?: boolean;
@@ -22,6 +23,8 @@ export interface SettingsFormValues {
   highlightRedemptionId?: string;
   playerPercentDefault?: number;
   showPlayerProgressBar?: boolean;
+  showQueueDragHints?: boolean;
+  highlightRedemptionSubmissions?: boolean;
   voteYeaKeyword?: string;
   voteNayKeyword?: string;
   showSubmitterNotes?: boolean;

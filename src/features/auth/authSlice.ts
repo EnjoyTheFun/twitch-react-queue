@@ -64,7 +64,7 @@ const authSlice = createSlice({
   },
 });
 
-export const login = createAsyncThunk('auth/login', async (returnUrl: string | undefined, thunkApi) => {
+export const login = createAsyncThunk('auth/login', async (returnUrl: string | undefined) => {
   twitchAuthApi.redirectToLogin(returnUrl);
 });
 

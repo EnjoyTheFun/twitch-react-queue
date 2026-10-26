@@ -28,7 +28,7 @@ class RedditProvider implements ClipProvider {
     return undefined;
   }
 
-  async getClipById(id: string): Promise<Clip | undefined> {
+  async getClipById(_id: string): Promise<Clip | undefined> {
     // Intentionally disabled: browser-side Reddit comments API is blocked by CORS
     // Combined provider resolves Reddit clips via permalink metadata instead
     return undefined;
@@ -38,11 +38,11 @@ class RedditProvider implements ClipProvider {
     return `https://www.reddit.com/comments/${id}`;
   }
 
-  getEmbedUrl(id: string): string | undefined {
+  getEmbedUrl(_id: string): string | undefined {
     return undefined;
   }
 
-  async getAutoplayUrl(id: string): Promise<string | undefined> {
+  async getAutoplayUrl(_id: string): Promise<string | undefined> {
     return undefined;
   }
 }

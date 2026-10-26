@@ -1,7 +1,6 @@
 import { Box, Button, Group, Stack, Text, UnstyledButton, useMantineTheme } from '@mantine/core';
 import React from 'react';
 import { useForm } from '@mantine/hooks';
-import { useModals } from '@mantine/modals';
 import {
   IconHistory,
   IconSettings,
@@ -23,6 +22,8 @@ import {
   selectSubOnlyMode,
   selectPlayerPercentDefault,
   selectShowPlayerProgressBar,
+  selectShowQueueDragHints,
+  selectHighlightRedemptionSubmissions,
   selectAllowRedditNsfw,
   selectVoteYeaKeyword,
   selectVoteNayKeyword,
@@ -33,6 +34,7 @@ import {
   selectPowerUpRedemptionTypeId,
   selectShowSubmitterNotes,
   selectHighlightRedemptionId,
+  selectQueueAdditionFeedDurationSeconds,
 } from './settingsSlice';
 import type { SettingsFormValues } from './tabs/types';
 import GeneralTab from './tabs/GeneralTab';
@@ -54,7 +56,7 @@ const CATEGORIES = [
   { key: 'about', label: 'About', icon: IconInfoCircle, Component: AboutTab },
 ] as const;
 
-function SettingsModal({ closeModal }: { closeModal: () => void }) {
+export function SettingsModal({ closeModal }: { closeModal: () => void }) {
   const dispatch = useAppDispatch();
   const channel = useAppSelector(selectChannel);
   const commandPrefix = useAppSelector(selectCommandPrefix);
@@ -69,6 +71,7 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
   const existingSkipThreshold = useAppSelector(selectSkipThreshold);
   const existingClipMemoryRetentionDays = useAppSelector(selectClipMemoryRetentionDays);
   const existingAutoplayDelay = useAppSelector(selectAutoplayDelay);
+  const existingQueueAdditionFeedDurationSeconds = useAppSelector(selectQueueAdditionFeedDurationSeconds);
   const existingSubOnlyMode = useAppSelector(selectSubOnlyMode);
   const existingAllowStandardMessageUrls = useAppSelector(selectAllowStandardMessageUrls);
   const existingAllowChannelPointsRedemptionUrls = useAppSelector(selectAllowChannelPointsRedemptionUrls);
@@ -81,6 +84,8 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
   const existingShowSubmitterNotes = useAppSelector(selectShowSubmitterNotes);
   const existingPlayerPercentDefault = useAppSelector(selectPlayerPercentDefault);
   const existingShowPlayerProgressBar = useAppSelector(selectShowPlayerProgressBar);
+  const existingShowQueueDragHints = useAppSelector(selectShowQueueDragHints);
+  const existingHighlightRedemptionSubmissions = useAppSelector(selectHighlightRedemptionSubmissions);
 
   const [activeCategory, setActiveCategory] = React.useState<(typeof CATEGORIES)[number]['key']>('general');
   const theme = useMantineTheme();
@@ -99,6 +104,7 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
       skipThreshold: existingSkipThreshold,
       clipMemoryRetentionDays: existingClipMemoryRetentionDays,
       autoplayDelay: existingAutoplayDelay,
+      queueAdditionFeedDurationSeconds: existingQueueAdditionFeedDurationSeconds,
       subOnlyMode: existingSubOnlyMode,
       allowStandardMessageUrls: existingAllowStandardMessageUrls,
       allowChannelPointsRedemptionUrls: existingAllowChannelPointsRedemptionUrls,
@@ -108,6 +114,8 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
       highlightRedemptionId: existingHighlightRedemptionId,
       playerPercentDefault: existingPlayerPercentDefault,
       showPlayerProgressBar: existingShowPlayerProgressBar,
+      showQueueDragHints: existingShowQueueDragHints,
+      highlightRedemptionSubmissions: existingHighlightRedemptionSubmissions,
       voteYeaKeyword: existingVoteYea,
       voteNayKeyword: existingVoteNay,
       showSubmitterNotes: existingShowSubmitterNotes,
@@ -118,6 +126,7 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
 
   return (
     <form
+      className="settings-form"
       onSubmit={form.onSubmit((settings) => {
         const blockedSubmittersArr = (settings.blockedSubmitters || '')
           .split('\n')
@@ -155,10 +164,13 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
                     background: isActive
                       ? theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1]
                       : 'transparent',
-                    color: isActive ? theme.colors[theme.primaryColor][theme.colorScheme === 'dark' ? 4 : 6] : undefined,
+                    color: isActive
+                      ? theme.colorScheme === 'dark' ? theme.colors.gray[0] : theme.colors.dark[7]
+                      : undefined,
                     fontWeight: isActive ? 600 : 400,
                     '&:hover': {
                       background: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+                      color: theme.colors[theme.primaryColor][theme.colorScheme === 'dark' ? 4 : 6],
                     },
                   }}
                 >
@@ -173,29 +185,12 @@ function SettingsModal({ closeModal }: { closeModal: () => void }) {
           </Box>
         </Box>
         <Group position="right" mt="md">
-          <Button onClick={() => closeModal()} variant="outline">
+          <Button className="settings-cancel-button" onClick={() => closeModal()} variant="outline">
             Cancel
           </Button>
-          <Button type="submit">Save</Button>
+          <Button className="settings-save-button" type="submit">Save</Button>
         </Group>
       </Stack>
     </form>
   );
 }
-
-const useSettingsModal = () => {
-  const modals = useModals();
-  const openSettingsModal = () => {
-    const id = modals.openModal({
-      title: <Text size="xl" weight={800}>Settings</Text>,
-      children: <SettingsModal closeModal={() => modals.closeModal(id)} />,
-      closeOnClickOutside: false,
-      closeOnEscape: false,
-      size: 900,
-    });
-  };
-
-  return { openSettingsModal };
-};
-
-export default useSettingsModal;

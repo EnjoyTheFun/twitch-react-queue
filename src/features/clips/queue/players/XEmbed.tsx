@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { XEmbed } from 'react-social-media-embed';
+import { XEmbed, type XEmbedProps } from 'react-social-media-embed';
 import { useAppDispatch } from '../../../../app/hooks';
 import { autoplayTimeoutHandleChanged } from '../../clipQueueSlice';
 
@@ -14,8 +14,7 @@ export default function XEmbedWithTimeout({
   autoplayEnabled: boolean;
   dispatch: ReturnType<typeof useAppDispatch>;
   timeout?: number;
-  [key: string]: any;
-}) {
+} & Omit<XEmbedProps, 'url'>) {
   useEffect(() => {
     if (autoplayEnabled) {
       const timer = setTimeout(() => {

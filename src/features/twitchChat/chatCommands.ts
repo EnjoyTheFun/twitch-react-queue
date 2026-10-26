@@ -8,18 +8,15 @@ import {
   queueCleared,
   queueClipRemoveByIndex,
   highlightClipByIndex,
+  highlightClipByUrl,
   bumpClipByIndex,
+  bumpClipByUrl,
   addSkipVote,
   checkSkipVotes,
   selectSkipVotingEnabled,
-  clipStubReceived,
-  clipDetailsFailed,
   clipUpvoted,
-  currentClipForceReplaced,
   setProviders,
 } from '../clips/clipQueueSlice';
-import type { Clip } from '../clips/clipQueueSlice';
-import clipProvider from '../clips/providers/providers';
 import { settingsChanged, addBlockedSubmitter, removeBlockedSubmitter, addBlockedCreator, removeBlockedCreator } from '../settings/settingsSlice';
 import { createLogger } from '../../common/logging';
 import { urlDeleted, Userstate, urlEnqueue } from './actions';
@@ -38,7 +35,7 @@ type CommmandFunction = (dispatch: Dispatch, args: string[], userstate?: Usersta
 
 export const voteskipCommand = (username?: string) => (dispatch: Dispatch, getState: AppMiddlewareAPI['getState']) => {
   if (!username) return;
-  const enabled = selectSkipVotingEnabled(getState() as any);
+  const enabled = selectSkipVotingEnabled(getState());
   if (!enabled) return;
   dispatch(addSkipVote(username));
   dispatch(checkSkipVotes());
@@ -72,14 +69,20 @@ const commands: Record<string, CommmandFunction> = {
     if (!url) return;
     dispatch(urlEnqueue({ url, userstate: userstate as Userstate }));
   },
-  bump: (dispatch, [idxStr]) => {
-    if (idxStr) {
-      dispatch(bumpClipByIndex(idxStr));
+  bump: (dispatch, [target]) => {
+    if (!target) return;
+    if (/^https?:\/\//i.test(target)) {
+      dispatch(bumpClipByUrl(target));
+    } else {
+      dispatch(bumpClipByIndex(target));
     }
   },
-  ht: (dispatch, [idxStr]) => {
-    if (idxStr) {
-      dispatch(highlightClipByIndex(idxStr));
+  ht: (dispatch, [target]) => {
+    if (!target) return;
+    if (/^https?:\/\//i.test(target)) {
+      dispatch(highlightClipByUrl(target));
+    } else {
+      dispatch(highlightClipByIndex(target));
     }
   },
   clear: (dispatch) => dispatch(queueCleared()),
@@ -110,35 +113,11 @@ const commands: Record<string, CommmandFunction> = {
     const url = args && args[0];
     if (!url) return;
 
-    const sender = userstate?.username || 'mods';
-
-    const id = clipProvider.getIdFromUrl(url);
-    if (!id) return;
-
-    dispatch(clipStubReceived({ id, submitters: [sender], timestamp: new Date().toISOString() } as any));
-
-    (async () => {
-      const TIMEOUT_MS = 5000;
-      const fetchPromise = clipProvider.getClipById(id) as Promise<Clip | undefined>;
-      let timer: ReturnType<typeof setTimeout> | undefined;
-      const timeoutPromise = new Promise<undefined>((resolve) => {
-        timer = setTimeout(() => resolve(undefined), TIMEOUT_MS);
-      });
-
-      try {
-        const clip = (await Promise.race([fetchPromise, timeoutPromise])) as Clip | undefined;
-        if (timer) clearTimeout(timer);
-        if (clip) {
-          clip.submitters = [sender];
-          dispatch(currentClipForceReplaced(clip as any));
-        } else {
-          dispatch(clipDetailsFailed(id));
-        }
-      } catch (err) {
-        if (timer) clearTimeout(timer);
-        dispatch(clipDetailsFailed(id));
-      }
-    })();
+    dispatch(urlEnqueue({
+      url,
+      userstate: userstate || { username: 'mods' },
+      replaceAfterEnqueue: true,
+    }));
   },
   providers: (dispatch, args) => {
     if (!args || args.length === 0) return;

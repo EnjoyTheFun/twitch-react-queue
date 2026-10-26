@@ -13,8 +13,8 @@ function QueueTab({ form }: SettingsTabProps) {
         label="Queue layout"
         data={[
           { value: 'classic', label: 'Classic' },
-          { value: 'spotlight', label: 'Spotlight (Updated)' },
-          { value: 'fullscreen', label: 'Fullscreen with popup (Experimental)' },
+          { value: 'spotlight', label: 'Spotlight' },
+          { value: 'fullscreen', label: 'Fullscreen player with popup controls' },
         ]}
         {...form.getInputProps('layout')}
       />
@@ -104,6 +104,25 @@ function QueueTab({ form }: SettingsTabProps) {
         value={form.values.autoplayDelay}
         onChange={(v) => form.setFieldValue('autoplayDelay', v ?? 5)}
       />
+      <NumberInput
+        label="New media feed duration"
+        description="Seconds each update stays visible. Changes apply to future submissions only."
+        min={1}
+        max={30}
+        step={1}
+        value={form.values.queueAdditionFeedDurationSeconds ?? 5}
+        onChange={(v) => form.setFieldValue('queueAdditionFeedDurationSeconds', v ?? 5)}
+      />
+      <Stack spacing={4}>
+        <Switch
+          label="Show drag-and-drop hints"
+          checked={form.values.showQueueDragHints !== false}
+          onChange={(event) => form.setFieldValue('showQueueDragHints', event.currentTarget.checked)}
+        />
+        <Text size="xs" color="dimmed">
+          Show the player and remove drop zones while dragging a queue item. Drag-and-drop actions still work when hidden.
+        </Text>
+      </Stack>
     </Stack>
   );
 }

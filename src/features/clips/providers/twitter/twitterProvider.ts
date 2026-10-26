@@ -23,7 +23,7 @@ class TwitterProvider implements ClipProvider {
   async getClipById(id: string): Promise<Clip | undefined> {
     try {
       return await getClipFromTweet(id);
-    } catch (error) {
+    } catch {
       return undefined;
     }
   }
@@ -44,7 +44,7 @@ class TwitterProvider implements ClipProvider {
       }
 
       return directUrl ?? `https://c.vxtwitter.com/i/status/${id}`;
-    } catch (error) {
+    } catch {
       return `https://c.vxtwitter.com/i/status/${id}`;
     }
   }

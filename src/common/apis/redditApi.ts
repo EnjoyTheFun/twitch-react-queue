@@ -6,8 +6,6 @@ const redditApiClient = axios.create({
   timeout: 10000,
 });
 
-const REDDIT_FALLBACK_THUMBNAIL = 'https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-57x57.png';
-
 const getRedditPostIdFromPermalink = (permalink: string): string | undefined => {
   const idMatch = permalink.match(/\/comments\/([a-z0-9]+)/i);
   return idMatch?.[1];
@@ -79,7 +77,6 @@ const redditApi = {
         id,
         title: titleFromSlug || `Reddit post ${id}`,
         author: 'reddit',
-        thumbnailUrl: REDDIT_FALLBACK_THUMBNAIL,
         videoUrl: normalizedPermalink,
       };
     }
@@ -91,7 +88,7 @@ const redditApi = {
       id,
       title: metadata.title || titleFromSlug || `Reddit post ${id}`,
       author,
-      thumbnailUrl: metadata.thumbnail_url || REDDIT_FALLBACK_THUMBNAIL,
+      thumbnailUrl: metadata.thumbnail_url,
       videoUrl: normalizedPermalink,
     };
   },

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useLayoutEffect, useState } from 'react';
 import { Container, Grid, Group, Stack, ScrollArea, Box } from '@mantine/core';
 import { useAppDispatch, useAppSelector } from '../../../../app/hooks';
 import { selectPlayerPercentDefault } from '../../../settings/settingsSlice';
@@ -8,19 +8,42 @@ import PlayerTitle from '../PlayerTitle';
 import Queue from '../Queue';
 import QueueControlPanel from '../QueueControlPanel';
 import Player from '../Player';
+import { selectQueueIds } from '../../clipQueueSlice';
 
 function ClassicLayout() {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const queueViewportRef = useRef<HTMLDivElement | null>(null);
+  const queueScrollTopRef = useRef(0);
   const draggingRef = useRef(false);
   const rectRef = useRef({ left: 0, width: 0 });
   const dispatch = useAppDispatch();
+  const queueIds = useAppSelector(selectQueueIds);
   const defaultPlayerPercent = useAppSelector(selectPlayerPercentDefault);
   const pendingPercentRef = useRef(defaultPlayerPercent);
   const rafIdRef = useRef(0);
   const [playerPercent, setPlayerPercent] = useState(defaultPlayerPercent);
 
-  const MIN_PLAYER = 30;
-  const MAX_PLAYER = 85;
+  useEffect(() => {
+    const viewport = queueViewportRef.current;
+    if (!viewport) return;
+
+    const handleScroll = () => {
+      queueScrollTopRef.current = viewport.scrollTop;
+    };
+
+    viewport.addEventListener('scroll', handleScroll, { passive: true });
+    return () => viewport.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useLayoutEffect(() => {
+    const viewport = queueViewportRef.current;
+    if (viewport) {
+      viewport.scrollTop = queueScrollTopRef.current;
+    }
+  }, [queueIds]);
+
+  const MIN_PLAYER = 1;
+  const MAX_PLAYER = 99;
 
   useEffect(() => {
     const flush = () => {
@@ -47,11 +70,11 @@ function ClassicLayout() {
       dispatch(settingsChanged({ playerPercentDefault: pendingPercentRef.current }));
     };
 
-    window.addEventListener('pointermove', onPointerMove as any);
+    window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
 
     return () => {
-      window.removeEventListener('pointermove', onPointerMove as any);
+      window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
     };
@@ -64,9 +87,8 @@ function ClassicLayout() {
   }, [defaultPlayerPercent]);
 
   const onHandlePointerDown = (e: React.PointerEvent) => {
-    const target = e.currentTarget as Element;
     try {
-      (target as any).setPointerCapture?.(e.pointerId);
+      e.currentTarget.setPointerCapture(e.pointerId);
     } catch { /* pointer capture not supported */ }
     draggingRef.current = true;
     pendingPercentRef.current = playerPercent;
@@ -101,6 +123,7 @@ function ClassicLayout() {
               <Stack justify="flex-start" sx={{ height: '100%', maxHeight: '100%', gap: 3 }}>
                 <QueueControlPanel />
                 <ScrollArea
+                  viewportRef={queueViewportRef}
                   sx={{
                     '.mantine-ScrollArea-viewport > div': { display: 'block !important' },
                     '.mantine-ScrollArea-viewport': { paddingRight: '9px' },

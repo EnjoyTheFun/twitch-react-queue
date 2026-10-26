@@ -1,7 +1,7 @@
-import { Box, Group, Text, Transition } from '@mantine/core';
+import { ActionIcon, Box, Group, Text, Transition } from '@mantine/core';
 import { IconX } from '@tabler/icons-react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { selectPollActive, selectPollCounts, pollVoteRecorded, pollToggled } from './pollSlice';
+import { selectPollActive, selectPollCounts, pollToggled } from './pollSlice';
 import { selectVoteYeaKeyword, selectVoteNayKeyword } from '../settings/settingsSlice';
 
 const PollBar = () => {
@@ -23,7 +23,7 @@ const PollBar = () => {
       {(styles) => (
         <Box
           style={styles}
-          sx={(theme) => ({
+          sx={(_theme) => ({
             position: 'fixed',
             left: 0,
             right: 0,
@@ -137,7 +137,7 @@ const PollBar = () => {
               </Group>
             </Box>
             <Box
-              sx={(theme) => ({
+              sx={(_theme) => ({
                 position: 'absolute',
                 left: '50%',
                 bottom: -1,
@@ -151,38 +151,35 @@ const PollBar = () => {
               <Text size="xs" color="dimmed" weight={800} sx={{ whiteSpace: 'nowrap', textAlign: 'center', width: '100%' }}>
                 {total > 0 ? `Total ${total}` : `Type '${voteYeaKeyword}' or '${voteNayKeyword}' in chat to vote`}
               </Text>
-              <Box
-                role="button"
+              <ActionIcon
+                className="poll-bar-close"
+                variant="default"
+                size="xs"
                 aria-label="Close poll"
                 onClick={handleClose}
                 sx={(theme) => ({
                   marginTop: 6,
                   width: 36,
                   height: 18,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'transparent',
-                  border: 'none',
                   borderTopLeftRadius: 999,
                   borderTopRightRadius: 999,
                   borderBottomLeftRadius: 0,
                   borderBottomRightRadius: 0,
-                  boxShadow: 'none',
                   color: theme.colorScheme === 'dark' ? theme.colors.gray[3] : theme.colors.dark[6],
-                  cursor: 'pointer',
+                  background: 'linear-gradient(115deg, rgba(54, 79, 199, 0.14), rgba(145, 110, 230, 0.08))',
+                  borderColor: 'rgba(54, 79, 199, 0.34)',
                   pointerEvents: 'auto',
-                  transition: 'background 120ms ease, box-shadow 120ms ease, border 120ms ease',
+                  transition: 'background-color 120ms ease, box-shadow 120ms ease, border-color 120ms ease',
                   '&:hover': {
-                    background: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.white,
-                    border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,
-                    boxShadow: theme.shadows.xs,
+                    background: 'linear-gradient(115deg, rgba(54, 79, 199, 0.22), rgba(145, 110, 230, 0.13))',
+                    borderColor: 'rgba(54, 79, 199, 0.55)',
+                    boxShadow: '0 2px 8px rgba(54, 79, 199, 0.14)',
                     color: theme.colorScheme === 'dark' ? theme.white : theme.colors.dark[7],
                   },
                 })}
               >
                 <IconX size={10} stroke={2.2} />
-              </Box>
+              </ActionIcon>
             </Box>
           </Box>
         </Box>

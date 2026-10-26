@@ -14,6 +14,8 @@ function FloatingImportMenu() {
       title: 'Import links',
       children: <ImportLinksModal />,
       size: 'lg',
+      closeOnClickOutside: true,
+      closeOnEscape: true,
     });
   };
 
@@ -30,17 +32,21 @@ function FloatingImportMenu() {
         aria-label="Import links"
         onClick={openBulkImportModal}
         sx={{
-          transition: 'transform 220ms ease',
+          '& .fab-plus': {
+            transition: 'transform 220ms ease',
+          },
           '&:hover': {
             transform: 'scale(1.08)',
           },
+          '&:hover .fab-plus, &:focus-visible .fab-plus, &:active .fab-plus': {
+            transform: 'rotate(90deg)',
+          },
         }}
       >
-        <IconPlus size={24} />
+        <IconPlus className="fab-plus" size={24} />
       </ActionIcon>
     </Box>
   );
 }
 
 export default FloatingImportMenu;
-

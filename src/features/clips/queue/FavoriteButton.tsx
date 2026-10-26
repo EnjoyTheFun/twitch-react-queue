@@ -28,6 +28,7 @@ function FavoriteButton() {
 
   return (
     <Button
+      className="player-info-icon-button"
       size="xs"
       variant="default"
       px={8}

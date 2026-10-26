@@ -1,6 +1,5 @@
 import type { Clip } from '../../clipQueueSlice';
 import type { ClipProvider } from '../providers';
-import instagramLogo from './instagram-logo.svg';
 
 const INSTAGRAM_HOSTS = ['instagram.com', 'www.instagram.com'];
 
@@ -27,7 +26,6 @@ class InstagramProvider implements ClipProvider {
       author: 'Instagram',
       title: `https://www.instagram.com/reel/${id}/`,
       submitters: [],
-      thumbnailUrl: instagramLogo,
       createdAt: '',
       Platform: 'Instagram',
       url: this.getUrl(id),

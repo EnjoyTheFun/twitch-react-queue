@@ -118,13 +118,13 @@ function SpotlightLayout() {
       try {
         const h = headerEl.offsetHeight || 0;
         setHeaderHeight(Math.round(h));
-      } catch (err) {
+      } catch {
         // ignore errors
       }
     };
 
     const scheduleUpdate = () => {
-      try { cancelAnimationFrame(raf); } catch (e) { /* ignore */ }
+      try { cancelAnimationFrame(raf); } catch { /* ignore */ }
       raf = requestAnimationFrame(updateHeader);
     };
 
@@ -136,16 +136,16 @@ function SpotlightLayout() {
     try {
       mo = new MutationObserver(() => scheduleUpdate());
       mo.observe(headerEl, { attributes: true, attributeFilter: ['class', 'style'], childList: true, subtree: false });
-    } catch (err) {
+    } catch {
       mo = null;
     }
 
     return () => {
       mounted = false;
-      try { cancelAnimationFrame(raf); } catch (e) { /* ignore */ }
-      try { window.removeEventListener('resize', scheduleUpdate); } catch (e) { /* ignore */ }
-      try { window.removeEventListener('orientationchange', scheduleUpdate); } catch (e) { /* ignore */ }
-      try { mo?.disconnect(); } catch (e) { /* ignore */ }
+      try { cancelAnimationFrame(raf); } catch { /* ignore */ }
+      try { window.removeEventListener('resize', scheduleUpdate); } catch { /* ignore */ }
+      try { window.removeEventListener('orientationchange', scheduleUpdate); } catch { /* ignore */ }
+      try { mo?.disconnect(); } catch { /* ignore */ }
     };
   }, []);
 
@@ -224,7 +224,7 @@ function SpotlightLayout() {
             </div>
             <div className="panel-section">
               <div className="spotlight-queue-grid" role="list">
-                <Queue card wrapper={({ children }) => <div className="spotlight-queue-item" role="listitem">{children}</div>} />
+                <Queue reorderable={false} card wrapper={({ children }) => <div className="spotlight-queue-item" role="listitem">{children}</div>} />
               </div>
             </div>
           </div>

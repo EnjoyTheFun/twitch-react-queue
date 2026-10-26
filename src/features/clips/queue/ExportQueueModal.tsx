@@ -29,7 +29,7 @@ function ExportQueueModal() {
         onFocus={(event) => event.currentTarget.select()}
       />
       <Group position="right">
-        <Button onClick={() => modals.closeAll()}>Close</Button>
+        <Button className="modal-cancel-button" onClick={() => modals.closeAll()}>Close</Button>
       </Group>
     </Stack>
   );

@@ -98,10 +98,10 @@ function FeaturesSection() {
               <Code>!q removeidx &lt;index&gt;</Code> - remove media item with <Code>index</Code>
             </List.Item>
             <List.Item>
-              <Code>!q bump &lt;index&gt;</Code> - bump the media item with <Code>index</Code> to the top and highlight it
+              <Code>!q bump &lt;index|url&gt;</Code> - bump the media item with <Code>index</Code> or <Code>url</Code> to the top and highlight it
             </List.Item>
             <List.Item>
-              <Code>!q ht &lt;index&gt;</Code> - highlight the media item with <Code>index</Code>
+              <Code>!q ht &lt;index|url&gt;</Code> - highlight a media item by its queue index or URL
             </List.Item>
             <List.Item>
               <Code>!q providers [&lt;list&gt;|all|none]</Code> - set enabled media providers to <Code>[providers]</Code> or all/none

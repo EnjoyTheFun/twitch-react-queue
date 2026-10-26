@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { InstagramEmbed } from 'react-social-media-embed';
+import { InstagramEmbed, type InstagramEmbedProps } from 'react-social-media-embed';
 import { useAppDispatch } from '../../../../app/hooks';
 import {
   autoplayTimeoutHandleChanged,
@@ -16,8 +16,7 @@ export default function InstagramEmbedWithTimeout({
   autoplayEnabled: boolean;
   dispatch: ReturnType<typeof useAppDispatch>;
   timeout?: number;
-  [key: string]: any;
-}) {
+} & Omit<InstagramEmbedProps, 'url'>) {
   useEffect(() => {
     if (autoplayEnabled) {
       const timer = setTimeout(() => {

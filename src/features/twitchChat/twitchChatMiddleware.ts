@@ -249,6 +249,13 @@ const isPowerUpRedemption = (tags: Record<string, unknown> = {}): boolean => {
 };
 
 const createClient = ({ token, username }: { token: string; username: string }) => {
+  const clientLogger = {
+    debug: logger.debug.bind(logger),
+    error: logger.error.bind(logger),
+    info: logger.info.bind(logger),
+    warn: logger.warn.bind(logger),
+  };
+
   const client = new Client({
     options: {
       debug: import.meta.env.VITE_LOG_LEVEL === 'debug',
@@ -256,12 +263,7 @@ const createClient = ({ token, username }: { token: string; username: string }) 
       skipUpdatingEmotesets: true,
       skipMembership: true,
     },
-    logger: {
-      debug: logger.debug.bind(logger),
-      error: logger.error.bind(logger),
-      info: logger.info.bind(logger),
-      warn: logger.warn.bind(logger),
-    } as any,
+    logger: clientLogger,
     identity: {
       username: username,
       password: `oauth:${token}`,
@@ -276,7 +278,7 @@ const createClient = ({ token, username }: { token: string; username: string }) 
 };
 
 const handleMessage =
-  (storeApi: AppMiddlewareAPI) => (channel: string, chatUserstate: ChatUserstate, message: string, self: boolean) => {
+  (storeApi: AppMiddlewareAPI) => (channel: string, chatUserstate: ChatUserstate, message: string, _self: boolean) => {
     const tags = chatUserstate as unknown as Record<string, unknown>;
     const { commandPrefix } = storeApi.getState().settings;
     const blockedSubmitters = storeApi.getState().settings.blockedSubmitters || [];
@@ -298,7 +300,7 @@ const handleMessage =
 
     try {
       storeApi.dispatch({ type: 'chatUsers/chatUserUpdated', payload: { username: userstate.username, flags: { mod: userstate.mod, vip: userstate.vip, broadcaster: userstate.broadcaster } } });
-    } catch (e) {
+    } catch {
       // ignore
     }
 
@@ -331,7 +333,6 @@ const handleMessage =
     const configuredRewardId = ((configuredTags.__configuredRewardId as string | undefined) || '').trim().toLowerCase();
     const powerUpObservedId = getPowerUpTypeIdentifier(configuredTags);
     const configuredPowerUpType = ((configuredTags.__configuredPowerUpTypeId as string | undefined) || '').trim().toLowerCase();
-    const powerUpIdentifiers = getPowerUpIdentifiers(configuredTags);
     const powerUpRedemptionsEnabled = storeApi.getState().settings.allowPowerUpRedemptionUrls === true;
     const looksLikePowerUpMessage = isPowerUpMessage(configuredTags);
     const matchedPowerUpRedemption = powerUpRedemptionsEnabled && isPowerUpRedemption(configuredTags);
@@ -400,8 +401,8 @@ const handleMessage =
 
 const handleRawMessage =
   (storeApi: AppMiddlewareAPI) =>
-  (...args: any[]) => {
-    const raw = (args[1] || args[0]) as { command?: string; tags?: Record<string, unknown> } | undefined;
+  (messageCloned: Record<string, unknown>, message: Record<string, unknown>) => {
+    const raw = message || messageCloned;
     if (!raw || typeof raw !== 'object') {
       return;
     }
@@ -422,7 +423,7 @@ const handleRawMessage =
   };
 
 const handleMessageDeleted =
-  (storeApi: AppMiddlewareAPI) => (channel: string, username: string, message: string, userstate: DeleteUserstate) => {
+  (storeApi: AppMiddlewareAPI) => (channel: string, username: string, message: string, _userstate: DeleteUserstate) => {
     const url = getUrlFromMessage(message);
     if (url) {
       storeApi.dispatch(urlDeleted(url));
@@ -581,8 +582,8 @@ const createTwitchChatMiddleware = (): Middleware<object, RootState> => {
             }
           });
           client.on('message', handleMessage(storeApi));
-          client.on('raw_message', handleRawMessage(storeApi) as any);
-          client.on('redeem', handleRedeem(storeApi) as any);
+          client.on('raw_message', handleRawMessage(storeApi));
+          client.on('redeem', handleRedeem(storeApi));
           client.on('messagedeleted', handleMessageDeleted(storeApi));
 
           const timeoutHandler = handleTimeout(storeApi);

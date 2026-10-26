@@ -45,8 +45,8 @@ class TiktokProvider implements ClipProvider {
       const actualId = id.split('|')[1] || id;
       return {
         id: data.embed_product_id || actualId,
-        author: data.author_name,
-        title: data.title,
+        author: data.author_name || 'TikTok',
+        title: data.title || 'TikTok video',
         submitters: [],
         thumbnailUrl: data.thumbnail_url,
         Platform: 'TikTok',
@@ -69,8 +69,10 @@ class TiktokProvider implements ClipProvider {
   }
 
   async getAutoplayUrl(id: string): Promise<string | undefined> {
-    const clip = await this.getClipById(id);
-    const actualId = clip?.id || id.split('|')[1];
+    // Only short links need oEmbed to resolve the video id; skip otherwise.
+    const actualId = id.startsWith('s|')
+      ? (await tiktokApi.getOEmbed(id))?.embed_product_id || id.split('|')[1]
+      : id.split('|')[1] || id;
     return buildTiktokPlayerUrl(actualId);
   }
 }

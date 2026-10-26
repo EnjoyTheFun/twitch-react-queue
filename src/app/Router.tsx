@@ -9,10 +9,14 @@ import AppLayout from './AppLayout';
 const HomePage = lazy(() => import('../features/home/HomePage'));
 const QueuePage = lazy(() => import('../features/clips/queue/QueuePage'));
 const HistoryPage = lazy(() => import('../features/clips/history/HistoryPage'));
-const StatsPage = lazy(() => import('../features/clips/leaderboard/LeaderboardPage'));
+const StatsPage = lazy(() => import('../features/clips/stats/StatsPage'));
 
 const PageLoader = () => (
-  <LoadingOverlay visible loaderProps={{ size: 'xl' }} />
+  <LoadingOverlay
+    visible
+    loaderProps={{ size: 'xl', variant: 'oval', color: 'indigo' }}
+    overlayOpacity={0.18}
+  />
 );
 
 function Router() {

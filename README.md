@@ -43,12 +43,4 @@ Contributions are welcome! Open an issue or PR if you have ideas, improvements, 
 ### Notes
 *The name "Clip Queue" didn't make sense anymore since the app now supports many media types beyond clips. Because most creators use it for reaction content, "React Queue" felt more fitting. It also distinguishes this custom build from the original project. If you are looking for the clip-only version of Clip Queue, visit the original creator's [repository](https://github.com/jakemiki/twitch-clip-queue).*
 
-### Troubleshooting
-Some browser tracker/privacy extensions (for example, Privacy Badger) may block third-party requests used to fetch metadata for TikTok and Streamable submissions. If media from these platforms does not queue or appear without thumbnail/title, try one of the following:
-
-- Whitelist these hosts in your tracker/privacy extension: `tiktok.com`, `vm.tiktok.com`, `vt.tiktok.com`, `streamable.com`.
-- Or disable the extension on the app page
-
-Make sure you've enabled these providers in the app settings first!
-
-*Tested and working on **Firefox** and **Chrome** with default tracking protection (no advanced tracking extensions)!*
+*Tested and working on **Firefox** and **Chromium** browsers!*

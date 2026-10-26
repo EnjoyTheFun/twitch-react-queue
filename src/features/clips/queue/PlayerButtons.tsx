@@ -27,10 +27,10 @@ function PlayerButtons({ className }: { className?: string }) {
   const hasPrevious = useAppSelector(selectHasPrevious);
   const currentClip = useAppSelector(selectCurrentClip);
   return (
-    <Group align="center" className={className} sx={{ flexShrink: 0, marginLeft: 'auto' }}>
-      <Group align="center" spacing={4}>
+    <Group align="center" className={className}>
+      <Group align="center" spacing={4} className="player-action-buttons">
         <Box className="autoplay-toggle-inline" sx={{ display: 'flex', alignItems: 'center' }}>
-          <Switch size="xs" label="Autoplay" checked={autoplayEnabled} onChange={(event) => {
+          <Switch size="xs" radius={6} label="Autoplay" checked={autoplayEnabled} onChange={(event) => {
             dispatch(autoplayTimeoutHandleChanged({ set: false }));
             dispatch(autoplayChanged(event.currentTarget.checked));
           }} />
@@ -39,6 +39,7 @@ function PlayerButtons({ className }: { className?: string }) {
         <FavoriteButton />
         {currentClip && (
           <Button
+            className="player-info-icon-button"
             size="xs"
             variant="default"
             px={8}
@@ -65,26 +66,29 @@ function PlayerButtons({ className }: { className?: string }) {
           </Button>
         )}
       </Group>
-      <Button
-        size="xs"
-        leftIcon={<IconPlayerTrackPrev />}
-        onClick={() => {
-          dispatch(autoplayTimeoutHandleChanged({ set: false }));
-          dispatch(previousClipWatched());
-        }}
-        disabled={!hasPrevious}
-      >
-        Prev
-      </Button>
-      <Button size="xs"
-        rightIcon={<IconPlayerTrackNext />}
-        onClick={() => {
-          dispatch(autoplayTimeoutHandleChanged({ set: false }));
-          dispatch(currentClipWatched());
-        }}
-        disabled={!currentClipId && !nextClipId}>
-        Next
-      </Button>
+      <Group align="center" spacing={4} className="player-navigation-buttons">
+        <Button
+          className="player-navigation-button"
+          size="xs"
+          leftIcon={<IconPlayerTrackPrev />}
+          onClick={() => {
+            dispatch(autoplayTimeoutHandleChanged({ set: false }));
+            dispatch(previousClipWatched());
+          }}
+          disabled={!hasPrevious}
+        >
+          Prev
+        </Button>
+        <Button className="player-navigation-button" size="xs"
+          rightIcon={<IconPlayerTrackNext />}
+          onClick={() => {
+            dispatch(autoplayTimeoutHandleChanged({ set: false }));
+            dispatch(currentClipWatched());
+          }}
+          disabled={!currentClipId && !nextClipId}>
+          Next
+        </Button>
+      </Group>
     </Group>
   );
 }

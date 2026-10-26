@@ -23,7 +23,7 @@ const QueuePage = () => {
             return <ClassicLayout />;
         }
       })()}
-      <FloatingImportMenu />
+      {layout !== 'fullscreen' && <FloatingImportMenu />}
       <PollBar />
     </>
   );

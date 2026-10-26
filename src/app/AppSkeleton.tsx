@@ -52,7 +52,11 @@ function AppSkeleton() {
             }}
           ></Box>
         </AppShell>
-        <LoadingOverlay loaderProps={{ size: 'xl' }} visible />
+        <LoadingOverlay
+          loaderProps={{ size: 'xl', variant: 'oval', color: 'indigo' }}
+          overlayOpacity={0.18}
+          visible
+        />
       </MantineProvider>
     </ColorSchemeProvider>
   );

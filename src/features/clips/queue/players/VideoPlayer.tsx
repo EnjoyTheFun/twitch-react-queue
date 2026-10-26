@@ -20,9 +20,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
   const disposeTimeoutRef = useRef<number | null>(null);
   const [showMiniProgress, setShowMiniProgress] = useState(false);
   const [progress, setProgress] = useState(0);
+  const onEndedRef = useRef(onEnded);
   const dispatch = useDispatch();
   const volume = useSelector((state: RootState) => state.settings.volume);
   const showPlayerProgressBar = useSelector((state: RootState) => state.settings.showPlayerProgressBar !== false);
+
+  onEndedRef.current = onEnded;
 
   useEffect(() => {
     if (!videoRef.current || !src) return;
@@ -75,7 +78,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
         dispatch(setVolume(currentVolume));
       });
 
-      player.on('error', (e: any) => {
+      player.on('error', (e: unknown) => {
         console.error('Video player error:', e);
       });
 
@@ -86,9 +89,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
         });
       });
 
-      if (onEnded) {
-        player.on('ended', onEnded);
-      }
+      player.on('ended', () => onEndedRef.current?.());
     }
 
     return () => {
@@ -101,7 +102,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
         try {
           try {
             playerRef.current.pause();
-          } catch (err) {
+          } catch {
             // ignore
           }
 
@@ -120,7 +121,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
           console.warn('Error during Video.js dispose scheduling:', e);
           try {
             playerRef.current.dispose();
-          } catch (err) {
+          } catch {
             // ignore
           }
           playerRef.current = null;
@@ -151,7 +152,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, onEnded }) => {
         aria-valuemax={100}
         aria-valuenow={Math.round(progress)}
       >
-        <div className="video-player-progress-fill" style={{ width: `${progress}%` }} />
+        <div
+          className="video-player-progress-fill"
+          style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+        />
       </div>
     </div>
   );

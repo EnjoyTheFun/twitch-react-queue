@@ -1,6 +1,6 @@
-import { ActionIcon, AspectRatio, Image, Box, Group, Skeleton, Stack, Text, useMantineTheme } from '@mantine/core';
-import { MouseEventHandler, useEffect, useRef } from 'react';
-import { IconTrash, IconStarFilled, IconExternalLink } from '@tabler/icons-react';
+import { ActionIcon, AspectRatio, Badge, Image, Box, Group, Skeleton, Stack, Text, useMantineTheme } from '@mantine/core';
+import { MouseEventHandler, useEffect, useRef, useState } from 'react';
+import { IconTrash, IconStarFilled, IconExternalLink, IconPhotoOff } from '@tabler/icons-react';
 import { useAppSelector } from '../../app/hooks';
 import { selectClipById, selectTop3Submitters, selectHighlightedClipId } from './clipQueueSlice';
 import { getProviderKeysForPlatform, type PlatformType } from '../../common/utils';
@@ -18,15 +18,25 @@ interface ClipProps {
 
   className?: string;
   card?: boolean;
+  isCurrent?: boolean;
+  showHistoryBadges?: boolean;
   queueIndex?: number;
+  draggable?: boolean;
+  onDragStart?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDrop?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDragEnd?: () => void;
 }
 
-const Clip = ({ clipId, onClick, onCrossClick, onOpenClick, className, card, platform, queueIndex }: ClipProps) => {
+const Clip = ({ clipId, onClick, onCrossClick, onOpenClick, className, card, isCurrent, showHistoryBadges, platform, queueIndex, draggable, onDragStart, onDragOver, onDrop, onDragEnd }: ClipProps) => {
   const clip = useAppSelector(selectClipById(clipId));
   const { title, thumbnailUrl, author, submitters, duration, views } = clip || {};
+  const [failedThumbnailUrl, setFailedThumbnailUrl] = useState<string>();
+  const thumbnailFailed = !!thumbnailUrl && failedThumbnailUrl === thumbnailUrl;
 
   const highlightedClipId = useAppSelector(selectHighlightedClipId);
   const theme = useMantineTheme();
+  const metadataColor = theme.colorScheme === 'dark' ? theme.colors.dark[1] : theme.colors.gray[7];
   const clipRef = useRef<HTMLDivElement>(null);
   const chatUser = useAppSelector((s) => (submitters?.[0] ? s.chatUsers[submitters[0].toLowerCase()] : undefined));
   const blurredProviders = useAppSelector((s) => s.settings.blurredProviders || []);
@@ -91,7 +101,7 @@ const Clip = ({ clipId, onClick, onCrossClick, onOpenClick, className, card, pla
   const providers = getProviderKeysForPlatform(platform);
   const shouldBlur = providers.some((k) => blurredProviders.includes(k));
 
-  const boxSx = (theme: any) => ({
+  const boxSx = (theme: ReturnType<typeof useMantineTheme>) => ({
     position: 'relative' as const,
     border: '3px solid transparent',
     borderRadius: 8,
@@ -134,13 +144,50 @@ const Clip = ({ clipId, onClick, onCrossClick, onOpenClick, className, card, pla
 
   if (!clip) return null;
 
+  const historyStatus = showHistoryBadges
+    ? isCurrent
+      ? { label: 'Currently playing', color: 'blue' as const, background: 'rgba(34, 139, 230, 0.72)' }
+      : clip.status === 'removed'
+        ? { label: 'Removed', color: 'red' as const, background: 'rgba(250, 82, 82, 0.72)' }
+        : undefined
+    : undefined;
+
   return (
     <Box
       ref={clipRef}
+      data-queue-clip={draggable ? clipId : undefined}
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onDragEnd={onDragEnd}
+      className={className}
       sx={(theme) => ({
         ...boxSx(theme),
+        ...(draggable && { cursor: 'grab', '&:active': { cursor: 'grabbing' } }),
       })}
     >
+      {historyStatus && (
+        <Badge
+          size="xs"
+          color={historyStatus.color}
+          sx={{
+            position: 'absolute',
+            top: 7,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            maxWidth: 'calc(100% - 14px)',
+            zIndex: 3,
+            pointerEvents: 'none',
+            whiteSpace: 'nowrap',
+            backgroundColor: historyStatus.background,
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+          }}
+        >
+          {historyStatus.label}
+        </Badge>
+      )}
       {queueIndex && (
         <Box
           className="clip--queue-index"
@@ -167,21 +214,38 @@ const Clip = ({ clipId, onClick, onCrossClick, onOpenClick, className, card, pla
         spacing="xs"
         direction={card ? 'column' : 'row'}
         noWrap
-        className={className}
         sx={groupSx}
         onClick={onClick}
       >
         <AspectRatio ratio={16 / 9} sx={{ ...aspectRatioSx }}>
           <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
-            <Skeleton visible={!thumbnailUrl}>
-              <Image
-                src={thumbnailUrl || undefined}
-                sx={{
-                  backgroundColor: '#373A40',
-                  borderRadius: 4,
-                  filter: shouldBlur ? 'blur(6px)' : undefined,
-                }}
-              />
+            <Skeleton visible={!thumbnailUrl} height={thumbnailFailed ? '100%' : undefined}>
+              {thumbnailFailed ? (
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#373A40',
+                    borderRadius: 4,
+                    color: theme.colors.gray[6],
+                  }}
+                >
+                  <IconPhotoOff size={32} stroke={1.5} />
+                </Box>
+              ) : (
+                <Image
+                  src={thumbnailUrl || undefined}
+                  imageProps={{ loading: 'lazy', decoding: 'async', onError: () => setFailedThumbnailUrl(thumbnailUrl) }}
+                  sx={{
+                    backgroundColor: '#373A40',
+                    borderRadius: 4,
+                    filter: shouldBlur ? 'blur(6px)' : undefined,
+                  }}
+                />
+              )}
             </Skeleton>
             {(duration && duration > 0) || (views && views > 0) ? (
               <Box className="clip--duration-badge" sx={{ position: 'absolute', bottom: 0, left: 0 }}>
@@ -201,7 +265,7 @@ const Clip = ({ clipId, onClick, onCrossClick, onOpenClick, className, card, pla
               sx={{ display: 'flex', alignItems: 'center', gap: '.25rem' }}
               size="xs"
               weight="700"
-              color="dimmed"
+              color={metadataColor}
               lineClamp={1}
               title={author}
             >
@@ -210,7 +274,7 @@ const Clip = ({ clipId, onClick, onCrossClick, onOpenClick, className, card, pla
             </Text>
           </Skeleton>
           {submitters?.[0] && (
-            <Text size="xs" color="dimmed" lineClamp={1} title={submitters.join('\n')}>
+            <Text size="xs" color={metadataColor} lineClamp={1} title={submitters.join('\n')}>
               Submitted by{' '}
               <strong className={submitterClass} style={submitterStyle}>
                 {isFavorite && <IconStarFilled size={11} style={{ display: 'inline', marginRight: 2 }} />}

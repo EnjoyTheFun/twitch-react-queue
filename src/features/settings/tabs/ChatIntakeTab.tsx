@@ -96,6 +96,17 @@ function ChatIntakeTab({ form }: SettingsTabProps) {
 
       <Divider label="Channel points & power-ups" labelPosition="center" mt="xs" />
 
+      <Stack spacing={4}>
+        <Switch
+          label="Highlight channel points and power-up submissions in queue"
+          checked={form.values.highlightRedemptionSubmissions !== false}
+          onChange={(event) => form.setFieldValue('highlightRedemptionSubmissions', event.currentTarget.checked)}
+        />
+        <Text size="xs" color="dimmed">
+          Gently animate the queue item tint to distinguish submissions from these sources.
+        </Text>
+      </Stack>
+
       <TextInput
         label="Channel points reward ID"
         description="Only this reward ID is treated as a valid channel points URL redemption"
@@ -121,6 +132,7 @@ function ChatIntakeTab({ form }: SettingsTabProps) {
           <Text size="sm" weight={500}>Observed redemptions from chat</Text>
           <Group spacing="xs">
             <Button
+              className={listenForChannelPointsRewardIds ? 'settings-danger-button' : 'settings-save-button'}
               size="xs"
               variant={listenForChannelPointsRewardIds ? 'outline' : 'filled'}
               color={listenForChannelPointsRewardIds ? 'gray' : 'blue'}
@@ -130,6 +142,7 @@ function ChatIntakeTab({ form }: SettingsTabProps) {
             </Button>
             {observedRedemptions.length > 0 && (
               <Button
+                className="settings-danger-button"
                 size="xs"
                 variant="subtle"
                 color="red"
@@ -175,6 +188,7 @@ function ChatIntakeTab({ form }: SettingsTabProps) {
                       </Text>
                     </Stack>
                     <Button
+                      className="settings-save-button"
                       size="xs"
                       disabled={!reward.id && !reward.title}
                       onClick={() => {

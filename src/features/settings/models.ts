@@ -20,6 +20,8 @@ export interface AllSettings {
   allowRedditNsfw?: boolean;
 
   showTopSubmitters?: boolean;
+  showQueueAdditionFeed?: boolean;
+  queueAdditionFeedDurationSeconds?: number;
   subOnlyMode?: boolean;
   channelPointsLinksOnly?: boolean;
   showSubmitterNotes?: boolean;
@@ -40,6 +42,8 @@ export interface AllSettings {
   autoplayDelay?: number;
   playerPercentDefault?: number;
   showPlayerProgressBar?: boolean;
+  showQueueDragHints?: boolean;
+  highlightRedemptionSubmissions?: boolean;
   voteYeaKeyword?: string;
   voteNayKeyword?: string;
 }

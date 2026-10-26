@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { ActionIcon } from '@mantine/core';
+import { ActionIcon, type ActionIconProps } from '@mantine/core';
 
 type Props = {
   children: React.ReactNode;
   onClick?: () => void;
   title?: string;
-  size?: any;
-  color?: string;
-  variant?: any;
+  size?: ActionIconProps<'button'>['size'];
+  color?: ActionIconProps<'button'>['color'];
+  variant?: ActionIconProps<'button'>['variant'];
   className?: string;
   style?: React.CSSProperties;
   clearWhenIdle?: boolean;
@@ -39,7 +39,7 @@ export default function CircularButton({ children, onClick, title, size = 'lg', 
     <ActionIcon
       size={size}
       variant={variant}
-      color={color as any}
+      color={color}
       title={title}
       onClick={onClick}
       style={baseStyle}

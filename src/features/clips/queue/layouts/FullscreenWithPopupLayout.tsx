@@ -1,7 +1,6 @@
-import { Button, Container, Grid, Group, Portal, Stack } from '@mantine/core';
-import { randomId } from '@mantine/hooks';
-import { PropsWithChildren, useEffect, useState, Fragment } from 'react';
-import AppLayout from '../../../../app/AppLayout';
+import { ActionIcon, Box, Container, Grid, Group, Portal, Stack } from '@mantine/core';
+import { PropsWithChildren, useEffect, useMemo, useState } from 'react';
+import { IconListDetails } from '@tabler/icons-react';
 import PlayerButtons from '../PlayerButtons';
 import PlayerTitle from '../PlayerTitle';
 import Queue from '../Queue';
@@ -32,23 +31,26 @@ function copyStyles(sourceDoc: Document, targetDoc: Document) {
 }
 
 function Popup({ children }: PropsWithChildren<object>) {
-  const containerEl = document.createElement('div');
+  const containerEl = useMemo(() => document.createElement('div'), []);
 
   useEffect(() => {
-    const popup = window.open('', '', `width=${window.outerWidth},height=${window.outerHeight},popup`);
-    if (popup) {
-      const closePopup = () => popup.close();
-      window.addEventListener('unload', closePopup);
-
-      popup.document.body.appendChild(containerEl);
-      popup.document.title = 'Twitch React Queue — Player';
-      setTimeout(() => copyStyles(document, popup.document), 100);
-
-      return () => {
-        window.removeEventListener('unload', closePopup);
-        popup.close();
-      };
+    const popup = window.open('', '', `width=720,height=${window.outerHeight},popup`);
+    if (!popup) {
+      return;
     }
+
+    const closePopup = () => popup.close();
+    window.addEventListener('unload', closePopup);
+
+    popup.document.body.appendChild(containerEl);
+    popup.document.title = 'Twitch React Queue — Queue';
+    const styleTimeout = window.setTimeout(() => copyStyles(document, popup.document), 100);
+
+    return () => {
+      window.clearTimeout(styleTimeout);
+      window.removeEventListener('unload', closePopup);
+      popup.close();
+    };
   }, [containerEl]);
 
   return <Portal target={containerEl}>{children}</Portal>;
@@ -56,41 +58,42 @@ function Popup({ children }: PropsWithChildren<object>) {
 
 function PopupContent() {
   return (
-    <AppLayout noNav>
-      <Container fluid py="md" sx={{ height: '100%' }}>
-        <Stack justify="flex-start" sx={{ height: '100%' }}>
-          <Player />
-          <PlayerTitle />
-        </Stack>
-      </Container>
-    </AppLayout>
+    <Container fluid p="md" sx={{ height: '100%' }}>
+      <Stack justify="flex-start" sx={{ height: '100%' }}>
+        <Group position="apart" align="flex-start" className="player-meta-group">
+          <PlayerTitle className="player-title" />
+          <PlayerButtons className="player-buttons" />
+        </Group>
+        <QueueControlPanel />
+        <Grid pt="sm" sx={{ flex: 1, overflow: 'auto', alignContent: 'flex-start' }}>
+          <Queue wrapper={({ children }) => <Grid.Col span={12} p={0} className="fullscreen-queue-col">{children}</Grid.Col>} />
+        </Grid>
+      </Stack>
+    </Container>
   );
 }
 
 function FullscreenWithPopupLayout() {
-  const [key, setKey] = useState(randomId());
+  const [popupKey, setPopupKey] = useState(0);
 
   return (
-    <Fragment key={key}>
-      <Container fluid py="md">
-        <Button variant="default" onClick={() => setKey(randomId())}>
-          Reload layout
-        </Button>
-        <Container size="xl">
-          <Group position="apart" align="flex-end" pb="sm">
-            <PlayerTitle />
-            <PlayerButtons />
-          </Group>
-          <QueueControlPanel />
-          <Grid pt="sm">
-            <Queue card wrapper={({ children }) => <Grid.Col span={2}>{children}</Grid.Col>} />
-          </Grid>
-        </Container>
-      </Container>
-      <Popup>
+    <>
+      <Box className="fullscreen-player-layout">
+        <Player className="fullscreen-player" />
+        <ActionIcon
+          className="fullscreen-show-queue"
+          aria-label="Show queue"
+          onClick={() => setPopupKey((key) => key + 1)}
+          variant="light"
+          size="lg"
+        >
+          <IconListDetails size={20} />
+        </ActionIcon>
+      </Box>
+      <Popup key={popupKey}>
         <PopupContent />
       </Popup>
-    </Fragment>
+    </>
   );
 }
 

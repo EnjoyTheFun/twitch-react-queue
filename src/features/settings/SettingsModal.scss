@@ -34,7 +34,48 @@
   width: 100%;
   padding: 8px 12px;
   border-radius: 6px;
-  transition: background 120ms ease, color 120ms ease;
+  border: 1px solid transparent;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.settings-nav-item:hover {
+  border-color: rgba(134, 142, 150, 0.25);
+  background: rgba(134, 142, 150, 0.12) !important;
+}
+
+.settings-form {
+  .mantine-Button-root {
+    border-radius: 8px;
+    color: var(--mantine-color-text);
+    transition: background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+  }
+
+  .settings-cancel-button,
+  .settings-danger-button {
+    border: 1px solid rgba(250, 82, 82, 0.4);
+    background: linear-gradient(115deg, rgba(250, 82, 82, 0.16), rgba(224, 49, 49, 0.08));
+    color: var(--mantine-color-text);
+  }
+
+  .settings-cancel-button:hover:not(:disabled),
+  .settings-danger-button:hover:not(:disabled) {
+    border-color: rgba(250, 82, 82, 0.62);
+    background: linear-gradient(115deg, rgba(250, 82, 82, 0.24), rgba(224, 49, 49, 0.14));
+    box-shadow: 0 2px 8px rgba(250, 82, 82, 0.14);
+  }
+
+  .mantine-Switch-input {
+    border-radius: 4px !important;
+  }
+
+  .mantine-Switch-input::before {
+    border-radius: 3px !important;
+  }
+
+  .mantine-Switch-input:checked {
+    background-color: #364fc7 !important;
+    border-color: #364fc7 !important;
+  }
 }
 
 .settings-content {
@@ -43,6 +84,38 @@
   height: 60vh;
   overflow-y: auto;
   padding-right: 12px;
+}
+
+.settings-save-button,
+.modal-primary-button,
+.modal-cancel-button {
+  border-radius: 8px;
+  color: var(--mantine-color-text);
+  transition: background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.settings-save-button,
+.modal-primary-button {
+  border: 1px solid rgba(54, 79, 199, 0.34);
+  background: linear-gradient(115deg, rgba(54, 79, 199, 0.14), rgba(145, 110, 230, 0.08));
+}
+
+.settings-save-button:hover:not(:disabled),
+.modal-primary-button:hover:not(:disabled) {
+  border-color: rgba(54, 79, 199, 0.55);
+  background: linear-gradient(115deg, rgba(54, 79, 199, 0.22), rgba(145, 110, 230, 0.13));
+  box-shadow: 0 2px 8px rgba(54, 79, 199, 0.14);
+}
+
+.modal-cancel-button {
+  border: 1px solid rgba(250, 82, 82, 0.4);
+  background: linear-gradient(115deg, rgba(250, 82, 82, 0.16), rgba(224, 49, 49, 0.08));
+}
+
+.modal-cancel-button:hover:not(:disabled) {
+  border-color: rgba(250, 82, 82, 0.62);
+  background: linear-gradient(115deg, rgba(250, 82, 82, 0.24), rgba(224, 49, 49, 0.14));
+  box-shadow: 0 2px 8px rgba(250, 82, 82, 0.14);
 }
 
 @media (max-width: 700px) {

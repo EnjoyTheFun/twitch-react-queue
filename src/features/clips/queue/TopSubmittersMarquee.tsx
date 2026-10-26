@@ -42,7 +42,7 @@ const TopSubmittersMarquee = ({ count = 3 }: TopSubmittersMarqueeProps) => {
   if (!interleaved || interleaved.length === 0) return null;
 
   return (
-    <Box sx={{ overflow: 'hidden', width: '100%', mt: 8, borderRadius: 8, padding: '6px 10px', border: `1px solid ${theme.colorScheme === 'dark' ? '#2b2b2b' : '#e9ecef'}` }}>
+    <Box style={{ overflow: 'hidden', width: '100%', marginTop: 8, borderRadius: 8, padding: '6px 10px', border: `1px solid ${theme.colorScheme === 'dark' ? '#2b2b2b' : '#e9ecef'}` }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <Box
           sx={{
@@ -66,6 +66,7 @@ const TopSubmittersMarquee = ({ count = 3 }: TopSubmittersMarqueeProps) => {
           variant="light"
           onClick={handleReset}
           title="Reset"
+          style={{ border: '1px solid rgba(134, 142, 150, 0.35)', borderRadius: 8, flexShrink: 0 }}
         >
           <IconRefresh size={14} />
         </ActionIcon>

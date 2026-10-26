@@ -59,23 +59,25 @@ export const isLinkResponse = (response: OEmbedResponse): response is OEmbedLink
   return response.type === 'link';
 };
 
-export const validateOEmbedResponse = (data: any): data is OEmbedResponse => {
+export const validateOEmbedResponse = (data: unknown): data is OEmbedResponse => {
   if (!data || typeof data !== 'object') return false;
-  if (!data.type || !data.version) return false;
+
+  const response = data as Record<string, unknown>;
+  if (typeof response.type !== 'string' || typeof response.version !== 'string') return false;
 
   const validTypes = ['video', 'photo', 'rich', 'link'];
-  if (!validTypes.includes(data.type)) return false;
+  if (!validTypes.includes(response.type)) return false;
 
-  if (data.type === 'video' || data.type === 'rich') {
-    return typeof data.html === 'string' &&
-           typeof data.width === 'number' &&
-           typeof data.height === 'number';
+  if (response.type === 'video' || response.type === 'rich') {
+    return typeof response.html === 'string' &&
+           typeof response.width === 'number' &&
+           typeof response.height === 'number';
   }
 
-  if (data.type === 'photo') {
-    return typeof data.url === 'string' &&
-           typeof data.width === 'number' &&
-           typeof data.height === 'number';
+  if (response.type === 'photo') {
+    return typeof response.url === 'string' &&
+           typeof response.width === 'number' &&
+           typeof response.height === 'number';
   }
 
   return true;

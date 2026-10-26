@@ -5,6 +5,16 @@ const calculateTotalQueueLength = (watchedCount: number, queueIds: string[]) => 
   return watchedCount + queueIds.length;
 };
 
+const getNextActiveSequence = (state: ClipQueueState, excludingId?: string): number => {
+  const activeIds = [...state.queueIds, ...(state.currentId ? [state.currentId] : [])]
+    .filter((id) => id !== excludingId);
+  const maxSeq = activeIds.reduce((max, id) => {
+    const seq = state.byId[id]?.seq;
+    return typeof seq === 'number' && Number.isFinite(seq) && seq > max ? seq : max;
+  }, 0);
+  return maxSeq + 1;
+};
+
 export const addClipToQueue = (state: ClipQueueState, clip: Clip) => {
   const id = clip.id;
   const submitter = clip.submitters[0];
@@ -19,11 +29,13 @@ export const addClipToQueue = (state: ClipQueueState, clip: Clip) => {
     if (state.queueIds.includes(id)) {
       const hasSubmitterAlready = rememberedClip.submitters.some((name) => name.toLowerCase() === normalizedSubmitter);
       const mergedNotes = clip.notes ? { ...rememberedClip.notes, ...clip.notes } : rememberedClip.notes;
+      const submissionSource = rememberedClip.submissionSource || clip.submissionSource;
       if (!hasSubmitterAlready) {
         rememberedClip = {
           ...rememberedClip,
           submitters: [...rememberedClip.submitters, submitter],
           notes: mergedNotes,
+          submissionSource,
         };
         state.byId[id] = rememberedClip;
         if (state.reorderOnDuplicate !== false) {
@@ -39,8 +51,8 @@ export const addClipToQueue = (state: ClipQueueState, clip: Clip) => {
             state.queueIds.push(id);
           }
         }
-      } else if (mergedNotes !== rememberedClip.notes) {
-        state.byId[id] = { ...rememberedClip, notes: mergedNotes };
+      } else if (mergedNotes !== rememberedClip.notes || submissionSource !== rememberedClip.submissionSource) {
+        state.byId[id] = { ...rememberedClip, notes: mergedNotes, submissionSource };
       }
 
       return;
@@ -54,12 +66,11 @@ export const addClipToQueue = (state: ClipQueueState, clip: Clip) => {
     !state.clipLimit ||
     calculateTotalQueueLength(state.watchedClipCount, state.queueIds) < state.clipLimit
   ) {
+    const seq = getNextActiveSequence(state, id);
     state.queueIds.push(id);
-    const clipWithSeq = { ...clip };
-    if (!clipWithSeq.seq) {
-      clipWithSeq.seq = state.nextSeq;
-      state.nextSeq += 1;
-    }
+    const clipWithSeq = { ...(state.byId[id] || {}), ...clip };
+    clipWithSeq.seq = seq;
+    state.nextSeq = clipWithSeq.seq + 1;
     state.byId[id] = clipWithSeq;
   }
 };
@@ -73,6 +84,7 @@ export const removeClipFromQueue = (state: ClipQueueState, id: string) => {
       state.queueIds.splice(index, 1);
     }
   }
+  state.nextSeq = getNextActiveSequence(state);
   if ((!state.currentId || state.currentId === undefined) && state.queueIds.length === 0) {
     state.nextSeq = 1;
     state.watchedClipCount = 0;
@@ -94,7 +106,7 @@ export const addClipToHistory = (state: ClipQueueState, id?: string) => {
     }
     state.historyIds.unshift(id);
 
-    const MAX_HISTORY_ENTRIES = 300;
+    const MAX_HISTORY_ENTRIES = 180;
     if (state.historyIds.length > MAX_HISTORY_ENTRIES) {
       const removed = state.historyIds.splice(MAX_HISTORY_ENTRIES);
 
@@ -132,6 +144,19 @@ export const updateClip = (state: ClipQueueState, id: string | undefined, clipUp
 };
 
 export const createReducers = () => ({
+  queueItemsReordered: (
+    state: ClipQueueState,
+    { payload }: PayloadAction<{ sourceId: string; targetId: string; position: 'before' | 'after' }>
+  ) => {
+    const sourceIndex = state.queueIds.indexOf(payload.sourceId);
+    let targetIndex = state.queueIds.indexOf(payload.targetId);
+    if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) return;
+
+    state.queueIds.splice(sourceIndex, 1);
+    if (sourceIndex < targetIndex) targetIndex -= 1;
+    if (payload.position === 'after') targetIndex += 1;
+    state.queueIds.splice(targetIndex, 0, payload.sourceId);
+  },
   queueCleared: (state: ClipQueueState) => {
     state.queueIds.forEach((id) => {
       delete state.byId[id];
@@ -143,6 +168,10 @@ export const createReducers = () => ({
     state.watchedClipCount = 0;
     state.watchedHistory = [];
     state.nextSeq = 1;
+  },
+  historyCleared: (state: ClipQueueState) => {
+    state.historyIds = [];
+    state.watchedHistory = state.currentId ? [state.currentId] : [];
   },
   memoryPurged: (state: ClipQueueState) => {
     const memory = state.byId;
@@ -245,6 +274,7 @@ export const createReducers = () => ({
         ...clip,
         submitters,
         notes,
+        submissionSource: state.byId[clip.id].submissionSource || clip.submissionSource,
       });
     }
   },
@@ -311,12 +341,18 @@ export const createReducers = () => ({
     delete state.byId[payload];
   },
   currentClipReplaced: (state: ClipQueueState, { payload }: PayloadAction<string>) => {
+    if (state.currentId === payload) {
+      state.queueIds = state.queueIds.filter((id) => id !== payload);
+      return;
+    }
+
     const index = state.queueIds.indexOf(payload);
     if (index > -1) {
-      state.queueIds.splice(index, 1);
+      state.queueIds = state.queueIds.filter((id) => id !== payload);
 
       if (payload) {
         addClipToHistory(state, payload);
+        state.watchedHistory = state.watchedHistory.filter((id) => id !== payload);
         state.watchedHistory.push(payload);
       }
 
@@ -338,6 +374,7 @@ export const createReducers = () => ({
       updateClip(state, state.currentId, { status: 'watched', rememberedAt: new Date().toISOString() });
       state.autoplayTimeoutHandle = undefined;
       state.currentSkipVoters = [];
+      state.nextSeq = getNextActiveSequence(state);
     }
   },
   currentClipForceReplaced: (state: ClipQueueState, { payload }: PayloadAction<Clip>) => {
@@ -345,38 +382,22 @@ export const createReducers = () => ({
     if (!incomingId) return;
 
     const previousCurrent = state.currentId;
+    const wasQueued = state.queueIds.includes(incomingId);
+    const wasCurrent = previousCurrent === incomingId;
+    const existingClip = state.byId[incomingId];
+    const clipWithSeq: Clip = wasQueued || wasCurrent
+      ? { ...(existingClip || payload) }
+      : { ...existingClip, ...payload };
+    const hasValidSequence = typeof clipWithSeq.seq === 'number'
+      && Number.isFinite(clipWithSeq.seq)
+      && clipWithSeq.seq > 0;
 
-    const clipWithSeq: Clip = { ...payload };
-    if (!clipWithSeq.seq) {
-      clipWithSeq.seq = state.nextSeq;
-      state.nextSeq += 1;
+    if ((!wasQueued && !wasCurrent) || !hasValidSequence) {
+      clipWithSeq.seq = getNextActiveSequence(state, wasQueued || wasCurrent ? incomingId : undefined);
     }
 
     state.byId[incomingId] = clipWithSeq;
-
-    state.queueIds = state.queueIds.filter((id) => id !== incomingId);
-
-    if (previousCurrent && previousCurrent !== incomingId) {
-      const previousClip = state.byId[previousCurrent];
-      if (previousClip) {
-        previousClip.status = undefined;
-        previousClip.rememberedAt = undefined;
-      }
-
-      state.queueIds = state.queueIds.filter((id) => id !== previousCurrent);
-      state.historyIds = state.historyIds.filter((id) => id !== previousCurrent);
-      state.watchedHistory = state.watchedHistory.filter((id) => id !== previousCurrent);
-
-      if (previousClip) {
-        if (!previousClip.seq) {
-          previousClip.seq = state.nextSeq;
-          state.nextSeq += 1;
-        }
-        state.queueIds.unshift(previousCurrent);
-      }
-    }
-
-    state.historyIds = state.historyIds.filter((id) => id !== incomingId);
+    state.queueIds = state.queueIds.filter((id) => id !== incomingId && id !== previousCurrent);
     addClipToHistory(state, incomingId);
 
     state.watchedHistory = state.watchedHistory.filter((id) => id !== incomingId);
@@ -402,6 +423,7 @@ export const createReducers = () => ({
     state.currentId = incomingId;
     state.autoplayTimeoutHandle = undefined;
     state.currentSkipVoters = [];
+    state.nextSeq = getNextActiveSequence(state);
   },
   isOpenChanged: (state: ClipQueueState, { payload }: PayloadAction<boolean>) => {
     state.isOpen = payload;
@@ -515,7 +537,8 @@ export const createReducers = () => ({
   loadClipFromHistory: (state: ClipQueueState, { payload }: PayloadAction<string>) => {
     const clipId = payload;
 
-    if (!state.byId[clipId]) return;
+    if (!state.byId[clipId] || state.currentId === clipId) return;
+    const wasQueued = state.queueIds.includes(clipId);
 
     if (state.currentId && state.currentId !== clipId) {
       const existingIndex = state.queueIds.indexOf(state.currentId);
@@ -530,6 +553,12 @@ export const createReducers = () => ({
       state.queueIds.splice(queueIndex, 1);
     }
 
+    if (!wasQueued) {
+      const seq = getNextActiveSequence(state);
+      state.byId[clipId] = { ...state.byId[clipId], seq };
+      state.nextSeq = seq + 1;
+    }
+
     const historyIndex = state.watchedHistory.indexOf(clipId);
     if (historyIndex !== -1) {
       state.watchedHistory.splice(historyIndex, 1);
@@ -539,9 +568,8 @@ export const createReducers = () => ({
 
     state.watchedHistory.push(clipId);
 
-    if (!state.historyIds.includes(clipId)) {
-      state.historyIds.unshift(clipId);
-    }
+    state.historyIds = state.historyIds.filter((id) => id !== clipId);
+    state.historyIds.unshift(clipId);
 
     state.currentSkipVoters = [];
     state.autoplayTimeoutHandle = undefined;

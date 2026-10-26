@@ -2,22 +2,45 @@
   position: fixed;
   right: 24px;
   bottom: 24px;
-  z-index: 1200;
+  z-index: 100;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
 }
 
 .fab-main {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1001;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(34, 139, 230, 0.34);
+  background: linear-gradient(115deg, rgba(34, 139, 230, 0.92), rgba(25, 113, 194, 0.82));
+  box-shadow: 0 2px 10px rgba(34, 139, 230, 0.16);
   opacity: 0.3;
-  transition: opacity 180ms ease, transform 220ms ease;
+  transition: opacity 180ms ease, transform 220ms ease, box-shadow 220ms ease;
 }
 
 .fab-main:hover,
 .floating-import-menu:hover .fab-main {
   opacity: 1;
+}
+
+.fab-main:hover,
+.fab-main:focus-visible {
+  opacity: 1;
+  border-color: rgba(34, 139, 230, 0.55);
+  background: linear-gradient(115deg, #228be6, #1971c2);
+  box-shadow: 0 4px 12px rgba(34, 139, 230, 0.3);
+}
+
+.fab-main:focus-visible {
+  outline: 3px solid rgba(34, 139, 230, 0.45);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fab-main,
+  .fab-main .fab-plus {
+    transition: none !important;
+  }
 }
 
 @media (max-width: 768px) {

@@ -9,12 +9,11 @@ const MyCredits = ({ persist = true }: { persist?: boolean }) => {
   const className = `app-credits${persist ? '' : ' navbar'}`;
 
   return (
-    <Text color="dimmed" size="xs" weight={400} className={className}>
-      <Group spacing={1} sx={{ flexWrap: 'nowrap', minWidth: 0 }}>
-        <div>by</div>
-        <BrandButton href="https://twitch.tv/EnjoyTheFun" icon={twitchIcon}>
-          /
-        </BrandButton>
+    <Text size="xs" weight={500} className={className} sx={{ color: 'var(--mantine-color-dimmed)' }}>
+      <Group spacing={0} sx={{ flexWrap: 'nowrap', minWidth: 0 }}>
+        <span>by</span>
+        <BrandButton href="https://twitch.tv/EnjoyTheFun" icon={twitchIcon} />
+        <span aria-hidden="true" className="app-credits-separator">/</span>
         <BrandButton href="https://github.com/EnjoyTheFun" icon={githubIcon}>
           EnjoyTheFun
         </BrandButton>

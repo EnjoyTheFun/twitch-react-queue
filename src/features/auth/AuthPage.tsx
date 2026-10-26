@@ -1,5 +1,5 @@
 import { LoadingOverlay } from '@mantine/core';
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { selectAuthState, authenticateWithToken } from './authSlice';
@@ -10,27 +10,27 @@ function AuthPage() {
   const [returnUrl, setReturnUrl] = useState('/');
   const authState = useAppSelector(selectAuthState);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (location.hash) {
-      const { access_token, state } = location.hash
-        .substring(1)
-        .split('&')
-        .reduce((authInfo, s) => {
-          const parts = s.split('=');
-          authInfo[parts[0]] = decodeURIComponent(decodeURIComponent(parts[1]));
-          return authInfo;
-        }, {} as Record<string, any>) as { access_token: string; state: string };
+      const authInfo = new URLSearchParams(location.hash.substring(1));
+      const accessToken = authInfo.get('access_token');
+      const state = authInfo.get('state');
+
+      window.history.replaceState(
+        window.history.state,
+        document.title,
+        `${window.location.pathname}${window.location.search}`
+      );
 
       if (state) {
         setReturnUrl(state);
       }
 
-      if (access_token) {
-        dispatch(authenticateWithToken(access_token));
+      if (accessToken) {
+        dispatch(authenticateWithToken(accessToken));
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dispatch, location.hash]);
 
   switch (authState) {
     case 'authenticating':

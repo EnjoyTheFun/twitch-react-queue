@@ -23,7 +23,7 @@ export interface StreamableVideoData {
     mp4?: StreamableVideoFile;
     'mp4-mobile'?: StreamableVideoFile;
     original?: Partial<StreamableVideoFile>;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 

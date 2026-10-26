@@ -8,6 +8,7 @@ import {
   autoplayTimeoutHandleChanged,
   memoryClipRemoved,
 } from './clipQueueSlice';
+import clipProvider from './providers/providers';
 
 export const highlightClipFrame = createAsyncThunk<void, void, { state: RootState }>(
   'clipQueue/highlightClipFrame',
@@ -41,11 +42,36 @@ export const highlightClipByIndex = createAsyncThunk<void, string, { state: Root
   }
 );
 
+export const highlightClipByUrl = createAsyncThunk<void, string, { state: RootState }>(
+  'clipQueue/highlightClipByUrl',
+  async (url, { dispatch, getState }) => {
+    const clipId = clipProvider.getIdFromUrl(url);
+    if (clipId && getState().clipQueue.queueIds.includes(clipId)) {
+      dispatch(highlightClip(clipId));
+      setTimeout(() => {
+        dispatch(clearHighlight());
+      }, 3000);
+    }
+  }
+);
+
 export const bumpClipByIndex = createAsyncThunk<void, string, { state: RootState }>(
   'clipQueue/bumpClipByIndex',
   async (idxStr, { dispatch }) => {
     dispatch(bumpClipToTop(idxStr));
     dispatch(highlightClipFrame());
+  }
+);
+
+export const bumpClipByUrl = createAsyncThunk<void, string, { state: RootState }>(
+  'clipQueue/bumpClipByUrl',
+  async (url, { dispatch, getState }) => {
+    const clipId = clipProvider.getIdFromUrl(url);
+    const clip = clipId ? getState().clipQueue.byId[clipId] : undefined;
+    if (clip?.seq !== undefined) {
+      dispatch(bumpClipToTop(String(clip.seq)));
+      dispatch(highlightClipFrame());
+    }
   }
 );
 

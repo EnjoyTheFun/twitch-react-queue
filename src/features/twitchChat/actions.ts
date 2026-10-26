@@ -20,4 +20,4 @@ export const urlReceived = createAction<{
 }>('twitchChat/urlReceived');
 export const urlDeleted = createAction<string>('twitchChat/urlDeleted');
 export const userTimedOut = createAction<string>('twitchChat/userTimedOut');
-export const urlEnqueue = createAction<{ url: string; userstate: Userstate }>('twitchChat/urlEnqueue');
+export const urlEnqueue = createAction<{ url: string; userstate: Userstate; replaceAfterEnqueue?: boolean }>('twitchChat/urlEnqueue');

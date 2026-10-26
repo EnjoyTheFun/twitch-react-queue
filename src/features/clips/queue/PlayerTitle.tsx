@@ -14,6 +14,7 @@ const _nbsp = <>&nbsp;</>;
 
 function PlayerTitle({ className }: PlayerTitleProps) {
   const currentClip = useAppSelector(selectCurrentClip);
+  const title = currentClip?.title;
   const theme = useMantineTheme();
   const submitter = currentClip?.submitters?.[0];
   const chatUser = useAppSelector((s) => (submitter ? s.chatUsers[submitter.toLowerCase()] : undefined));
@@ -53,11 +54,23 @@ function PlayerTitle({ className }: PlayerTitleProps) {
 
   return (
     <Box className={className} sx={{ strong: { fontWeight: 600 }, flex: 1, minWidth: 0, overflow: 'hidden' }}>
-      <Text size="xl" weight={700} lineClamp={1}>
-        {currentClip?.title ?? _nbsp}
+      <Text
+        title={title}
+        size="xl"
+        weight={700}
+        sx={{ display: 'block', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}
+      >
+        {title ?? _nbsp}
       </Text>
-      <Text sx={{ display: 'flex', alignItems: 'center', gap: '.25rem' }} color="dimmed" size="sm" lineClamp={1}>
-        <Platform platform={currentClip?.Platform} />
+      <Text
+        className="player-title-info"
+        color={theme.colorScheme === 'dark' ? theme.colors.dark[1] : theme.colors.gray[7]}
+        size="sm"
+        sx={{ display: 'block', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}
+      >
+        <span style={{ display: 'inline-flex', marginRight: 4, position: 'relative', top: 2 }}>
+          <Platform platform={currentClip?.Platform} size={14} />
+        </span>
         <strong>{currentClip?.author ?? _nbsp}</strong>
         {currentClip?.category && (
           <>

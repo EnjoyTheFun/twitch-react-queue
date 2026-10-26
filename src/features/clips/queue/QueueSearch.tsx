@@ -1,7 +1,6 @@
 import { TextInput, ActionIcon, ScrollArea, Stack } from '@mantine/core';
 import { IconSearch, IconX } from '@tabler/icons-react';
 import { useState, useCallback, useMemo } from 'react';
-import { useModals } from '@mantine/modals';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { selectQueueClips, currentClipReplaced } from '../clipQueueSlice';
 import type { Clip } from '../clipQueueSlice';
@@ -113,21 +112,5 @@ function QueueSearchModal({ closeModal }: { closeModal: () => void }) {
     </Stack>
   );
 }
-
-export const useQueueSearchModal = () => {
-  const modals = useModals();
-
-  const openQueueSearchModal = () => {
-    const id = modals.openModal({
-      children: <QueueSearchModal closeModal={() => modals.closeModal(id)} />,
-      closeOnClickOutside: true,
-      closeOnEscape: true,
-      size: 'lg',
-      withCloseButton: false,
-    });
-  };
-
-  return { openQueueSearchModal };
-};
 
 export default QueueSearchModal;

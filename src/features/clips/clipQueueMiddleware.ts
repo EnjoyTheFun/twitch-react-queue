@@ -1,10 +1,10 @@
-import { isAnyOf, Middleware } from '@reduxjs/toolkit';
+import { isAnyOf, Middleware, type UnknownAction } from '@reduxjs/toolkit';
 import { formatISO } from 'date-fns';
 import { REHYDRATE } from 'redux-persist';
 import { RootState, AppMiddlewareAPI } from '../../app/store';
 import { createLogger } from '../../common/logging';
 import { authenticateWithToken } from '../auth/authSlice';
-import { settingsChanged } from '../settings/settingsSlice';
+import { selectQueueAdditionFeedDurationSeconds, settingsChanged } from '../settings/settingsSlice';
 import { urlDeleted, urlReceived, urlEnqueue } from '../twitchChat/actions';
 import {
   clipStubReceived,
@@ -20,21 +20,50 @@ import {
   autoplayUrlFailed,
   autoplayUrlReceived,
 } from './clipQueueSlice';
+import { addQueueAdditionFeedItem as addFeedItem } from './queue/queueAdditionFeedStore';
 import { applyCustomizations } from './customization/customization';
 import clipProvider from './providers/providers';
 
 const logger = createLogger('ClipQueueMiddleware');
 
+const announceSuccessfulAddition = (
+  storeAPI: AppMiddlewareAPI,
+  clipId: string,
+  wasAlreadyQueued: boolean
+) => {
+  const state = storeAPI.getState();
+  if (wasAlreadyQueued) return;
+  if (state.settings.showQueueAdditionFeed !== true) return;
+
+  const queueState = state.clipQueue;
+  const clip = queueState.byId[clipId];
+  const submitter = clip?.submitters[0];
+  if (!queueState.queueIds.includes(clipId) || typeof clip?.seq !== 'number' || !submitter) return;
+
+  addFeedItem({
+    sequence: clip.seq,
+    title: clip.title?.trim() || 'Untitled media',
+    submitter,
+  }, selectQueueAdditionFeedDurationSeconds(state) * 1000);
+};
+
 const createClipQueueMiddleware = (): Middleware<object, RootState> => {
   return (storeAPI: AppMiddlewareAPI) => {
-    return (next) => (action: any) => {
-      if (action.type === REHYDRATE && action.key === 'clipQueue' && action.payload) {
-        clipProvider.setProviders(action.payload.providers);
-        // Restore any reddit->other-provider mappings from persisted clips
-        clipProvider.restoreResolvedRedditMap(action.payload.byId);
-      } else if (action.type === REHYDRATE && action.key === 'settings' && action.payload) {
-        if (action.payload.allowRedditNsfw !== undefined) {
-          clipProvider.setAllowRedditNsfw(action.payload.allowRedditNsfw);
+    return (next) => (incomingAction: unknown) => {
+      const action = incomingAction as UnknownAction & { key?: string };
+      if (action.type === REHYDRATE && action.key === 'clipQueue' && action.payload && typeof action.payload === 'object') {
+        const payload = action.payload as Record<string, unknown>;
+        const providers = Array.isArray(payload.providers)
+          ? payload.providers.filter((provider): provider is string => typeof provider === 'string')
+          : [];
+        clipProvider.setProviders(providers);
+        if (payload.byId && typeof payload.byId === 'object') {
+          clipProvider.restoreResolvedRedditMap(payload.byId as Record<string, Clip>);
+        }
+      } else if (action.type === REHYDRATE && action.key === 'settings' && action.payload && typeof action.payload === 'object') {
+        const payload = action.payload as Record<string, unknown>;
+        if (typeof payload.allowRedditNsfw === 'boolean') {
+          clipProvider.setAllowRedditNsfw(payload.allowRedditNsfw);
         }
       } else if (urlReceived.match(action)) {
         const { url, userstate, fromRedemption, sourceType, note } = action.payload;
@@ -83,6 +112,14 @@ const createClipQueueMiddleware = (): Middleware<object, RootState> => {
         const id = clipProvider.getIdFromUrl(url);
         if (id) {
           const clip: Clip | undefined = storeAPI.getState().clipQueue.byId[id];
+          const queueState = storeAPI.getState().clipQueue;
+          const wasAlreadyQueued = queueState.queueIds.includes(id);
+          const isRememberedClip =
+            !!clip &&
+            !queueState.queueIds.includes(id) &&
+            queueState.currentId !== id;
+          const shouldRefreshRememberedClip =
+            isRememberedClip && (!clip.title || !clip.thumbnailUrl || !clip.author);
           const shouldRefreshExistingRedditClip =
             id.startsWith('reddit:') &&
             (!!clip && (!clip.thumbnailUrl || !clip.author || clip.author === 'reddit' || !clip.title || /^Reddit post\s+/i.test(clip.title)));
@@ -92,10 +129,11 @@ const createClipQueueMiddleware = (): Middleware<object, RootState> => {
             submitters: [sender],
             url,
             timestamp: formatISO(new Date()),
+            submissionSource: resolvedSourceType === 'standard' ? undefined : resolvedSourceType,
             notes: note ? { [sender.toLowerCase()]: note } : undefined,
           }));
 
-          if (!clip || shouldRefreshExistingRedditClip) {
+          if (!clip || shouldRefreshRememberedClip || shouldRefreshExistingRedditClip) {
             clipProvider
               .getClipById(id)
               .then((clip) => {
@@ -108,6 +146,7 @@ const createClipQueueMiddleware = (): Middleware<object, RootState> => {
                     return;
                   }
                   storeAPI.dispatch(clipDetailsReceived(clip));
+                  announceSuccessfulAddition(storeAPI, id, wasAlreadyQueued);
                 } else {
                   storeAPI.dispatch(clipDetailsFailed(id));
                 }
@@ -119,7 +158,7 @@ const createClipQueueMiddleware = (): Middleware<object, RootState> => {
           }
         }
       } else if (urlEnqueue.match(action)) {
-        const { url, userstate } = action.payload;
+        const { url, userstate, replaceAfterEnqueue } = action.payload;
         const sender = userstate.username;
         const blockedSubmitters = storeAPI.getState().settings.blockedSubmitters || [];
         const senderNorm = (sender || '').toLowerCase();
@@ -134,13 +173,24 @@ const createClipQueueMiddleware = (): Middleware<object, RootState> => {
         const id = clipProvider.getIdFromUrl(url);
         if (id) {
           const clip: Clip | undefined = storeAPI.getState().clipQueue.byId[id];
+          const queueState = storeAPI.getState().clipQueue;
+          const wasAlreadyQueued = queueState.queueIds.includes(id);
+          const isRememberedClip =
+            !!clip &&
+            !queueState.queueIds.includes(id) &&
+            queueState.currentId !== id;
+          const shouldRefreshRememberedClip =
+            isRememberedClip && (!clip.title || !clip.thumbnailUrl || !clip.author);
           const shouldRefreshExistingRedditClip =
             id.startsWith('reddit:') &&
             (!!clip && (!clip.thumbnailUrl || !clip.author || clip.author === 'reddit' || !clip.title || /^Reddit post\s+/i.test(clip.title)));
 
           storeAPI.dispatch(clipStubReceived({ id, submitters: [sender], url, timestamp: formatISO(new Date()) }));
 
-          if (!clip || shouldRefreshExistingRedditClip) {
+          const wasEnqueued = storeAPI.getState().clipQueue.queueIds.includes(id);
+          if (replaceAfterEnqueue && !wasEnqueued) return next(action);
+
+          if (!clip || shouldRefreshRememberedClip || shouldRefreshExistingRedditClip) {
             clipProvider
               .getClipById(id)
               .then((clip) => {
@@ -153,6 +203,10 @@ const createClipQueueMiddleware = (): Middleware<object, RootState> => {
                     return;
                   }
                   storeAPI.dispatch(clipDetailsReceived(clip));
+                  announceSuccessfulAddition(storeAPI, id, wasAlreadyQueued);
+                  if (replaceAfterEnqueue && storeAPI.getState().clipQueue.queueIds.includes(id)) {
+                    storeAPI.dispatch(currentClipReplaced(id));
+                  }
                 } else {
                   storeAPI.dispatch(clipDetailsFailed(id));
                 }
@@ -161,6 +215,8 @@ const createClipQueueMiddleware = (): Middleware<object, RootState> => {
                 logger.error(e);
                 storeAPI.dispatch(clipDetailsFailed(id));
               });
+          } else if (replaceAfterEnqueue) {
+            storeAPI.dispatch(currentClipReplaced(id));
           }
         }
       } else if (urlDeleted.match(action)) {
@@ -189,10 +245,10 @@ const createClipQueueMiddleware = (): Middleware<object, RootState> => {
               storeAPI.dispatch(currentClipWatched());
               return next(action);
             }
-            const handle = setTimeout(() => {
+            const handle = window.setTimeout(() => {
               storeAPI.dispatch(currentClipWatched());
             }, delay);
-            action.payload.handle = handle as any;
+            action.payload.handle = handle;
           } else {
             const handle = storeAPI.getState().clipQueue.autoplayTimeoutHandle;
             clearTimeout(handle);

@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { persistReducer } from 'redux-persist';
+import type { PersistedState, PersistState } from 'redux-persist';
 import storage from 'redux-persist-indexeddb-storage';
 import { legacyDataMigrated } from '../migration/legacyMigration';
 import { settingsChanged } from '../settings/settingsSlice';
@@ -47,7 +48,9 @@ export {
 export {
   highlightClipFrame,
   highlightClipByIndex,
+  highlightClipByUrl,
   bumpClipByIndex,
+  bumpClipByUrl,
   setProviders,
   checkSkipVotes,
   pruneOldMemory,
@@ -128,6 +131,7 @@ const clipQueueSlice = createSlice({
 
 export const {
   queueCleared,
+  historyCleared,
   memoryPurged,
   currentClipWatched,
   currentClipSkipped,
@@ -138,6 +142,7 @@ export const {
   clipDetailsFailed,
   clipUpvoted,
   queueClipRemoved,
+  queueItemsReordered,
   queueClipRemoveByIndex,
   memoryClipRemoved,
   isOpenChanged,
@@ -164,46 +169,46 @@ const clipQueueReducer = persistReducer(
   {
     key: 'clipQueue',
     storage: storage('twitch-react-queue'),
-    version: 2,
+    version: 3,
     blacklist: ['isOpen'],
-    migrate: (state: any) => {
-      if (!state) return Promise.resolve(initialState);
+    migrate: (state: PersistedState) => {
+      if (!state) return Promise.resolve(undefined);
 
-      if (state._persist?.version === 1 || !state.nextSeq) {
-        let maxSeq = 0;
-
-        if (state.byId) {
-          for (const clip of Object.values(state.byId)) {
-            if ((clip as any).seq && (clip as any).seq > maxSeq) {
-              maxSeq = (clip as any).seq;
-            }
-          }
-        }
-
-        let nextSeq = maxSeq + 1;
-
-        if (state.queueIds && Array.isArray(state.queueIds)) {
-          state.queueIds.forEach((id: string) => {
-            if (state.byId[id] && !state.byId[id].seq) {
-              state.byId[id].seq = nextSeq;
-              nextSeq += 1;
-            }
+      const persistedState = state as unknown as Record<string, unknown> & { _persist: PersistState };
+      if (persistedState._persist.version < 3 || typeof persistedState.nextSeq !== 'number') {
+        const byId = persistedState.byId && typeof persistedState.byId === 'object'
+          ? persistedState.byId as Record<string, unknown>
+          : undefined;
+        const activeClips = byId
+          ? [
+            ...(Array.isArray(persistedState.queueIds)
+              ? persistedState.queueIds.map((id) => typeof id === 'string' ? byId[id] : undefined)
+              : []),
+            typeof persistedState.currentId === 'string' ? byId[persistedState.currentId] : undefined,
+          ]
+          : [];
+        const sortableActiveClips = activeClips
+          .filter((clip): clip is Record<string, unknown> => !!clip && typeof clip === 'object')
+          .sort((left, right) => {
+            const leftSeq = typeof left.seq === 'number' && Number.isFinite(left.seq) && left.seq > 0
+              ? left.seq
+              : Number.MAX_SAFE_INTEGER;
+            const rightSeq = typeof right.seq === 'number' && Number.isFinite(right.seq) && right.seq > 0
+              ? right.seq
+              : Number.MAX_SAFE_INTEGER;
+            return leftSeq - rightSeq;
           });
-        }
-
-        if (state.currentId && state.byId[state.currentId] && !state.byId[state.currentId].seq) {
-          state.byId[state.currentId].seq = nextSeq;
-          nextSeq += 1;
-        }
-
-        state.nextSeq = nextSeq;
+        sortableActiveClips.forEach((clip, index) => {
+          clip.seq = index + 1;
+        });
+        persistedState.nextSeq = sortableActiveClips.length + 1;
       }
 
-      if (typeof state.totalMediaWatched !== 'number') {
-        state.totalMediaWatched = 0;
+      if (typeof persistedState.totalMediaWatched !== 'number') {
+        persistedState.totalMediaWatched = 0;
       }
 
-      return Promise.resolve(state);
+      return Promise.resolve(persistedState);
     },
   },
   clipQueueSlice.reducer

@@ -43,8 +43,9 @@ function SubmitterNote() {
   const border = isDark ? theme.colors.dark[4] : theme.colors.gray[3];
 
   return (
-    <Box sx={{ position: 'relative' }}>
+    <Box className="submitter-note-control" sx={{ position: 'relative', flex: '0 0 auto' }}>
       <Button
+        className="player-info-icon-button"
         size="xs"
         variant="default"
         px={8}
@@ -82,7 +83,11 @@ function SubmitterNote() {
             overflowY: 'auto',
           }}
         >
-          <Text size="sm" color="dimmed" sx={{ fontStyle: 'italic', textAlign: 'center' }}>
+          <Text
+            size="sm"
+            color={isDark ? theme.colors.dark[1] : theme.colors.gray[7]}
+            sx={{ fontStyle: 'italic', textAlign: 'center' }}
+          >
             {submitter && (
               <Text component="span" size="sm" weight={600} sx={{ fontStyle: 'normal' }}>
                 {submitter}:{' '}
@@ -97,4 +102,3 @@ function SubmitterNote() {
 }
 
 export default SubmitterNote;
-

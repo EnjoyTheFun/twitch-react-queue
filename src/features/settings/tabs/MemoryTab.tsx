@@ -14,7 +14,7 @@ function MemoryTab({ form }: SettingsTabProps) {
       </Text>
       <Group>
         <Text size="sm">Memory contains <b>{historyIds.length}</b> media</Text>
-        <Button color="red" size="xs" onClick={() => dispatch(memoryPurged())}>
+        <Button className="settings-danger-button" color="red" size="xs" onClick={() => dispatch(memoryPurged())}>
           Purge memory
         </Button>
       </Group>

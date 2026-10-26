@@ -1,10 +1,9 @@
 import { Stack, Loader } from '@mantine/core';
-import { useEffect, useState, useCallback } from 'react';
+import { Suspense, lazy, useEffect, useState, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import type { Clip } from '../clipQueueSlice';
 import {
   autoplayTimeoutHandleChanged,
-  currentClipWatched,
   selectAutoplayEnabled,
   selectAutoplayTimeoutHandle,
   selectCurrentClip,
@@ -15,14 +14,17 @@ import {
 } from '../clipQueueSlice';
 import clipProvider from '../providers/providers';
 import AutoplayOverlay from './AutoplayOverlay';
-import VideoPlayer from './players/VideoPlayer';
 import TikTokPlayer from './players/TikTokPlayer';
 import TwitterImagePlayer from './players/TwitterImagePlayer';
 import InstagramEmbedWithTimeout from './players/InstagramEmbed';
 import XEmbedWithTimeout from './players/XEmbed';
+import TimedIframe from './players/TimedIframe';
 import StreamablePlayer from './players/StreamablePlayer';
+import TwitchVodPlayer from './players/TwitchVodPlayer';
 import { useRef } from 'react';
 import { preloadImage, preloadVideo, preloadHlsManifest, preloadGenericHead, PreloadHandle } from './preloadMedia';
+
+const VideoPlayer = lazy(() => import('./players/VideoPlayer'));
 
 interface PlayerProps {
   className?: string;
@@ -53,22 +55,47 @@ const getPlayerComponent = (
 
   switch (Platform) {
     case 'YouTube':
-    case 'Twitch': return autoplayEnabled ? (
-      <VideoPlayer
-        key={`${id}-${videoSrc}-${autoplayEnabled}`}
-        src={videoSrc}
-        onEnded={handleEnded}
-      />
-    ) : (
-      <iframe
-        key={`${id}-${autoplayEnabled}`}
-        src={clipProvider.getEmbedUrl(id) || embedUrl}
-        title={title}
-        style={{ height: '100%', width: '100%' }}
-        frameBorder="0"
-        allow="autoplay"
-        allowFullScreen
-      />)
+      return autoplayEnabled ? (
+        <VideoPlayer
+          key={`${id}-${videoSrc}-${autoplayEnabled}`}
+          src={videoSrc}
+          onEnded={handleEnded}
+        />
+      ) : (
+        <iframe
+          key={`${id}-${autoplayEnabled}`}
+          src={clipProvider.getEmbedUrl(id) || embedUrl}
+          title={title}
+          style={{ height: '100%', width: '100%' }}
+          frameBorder="0"
+          allow="autoplay"
+          allowFullScreen
+        />)
+    case 'Twitch':
+      if (id.startsWith('twitch-vod:') && autoplayEnabled) {
+        return <TwitchVodPlayer
+          key={id}
+          src={clipProvider.getEmbedUrl(id) || embedUrl}
+          onEnded={handleEnded}
+        />;
+      }
+      return autoplayEnabled ? (
+        <VideoPlayer
+          key={`${id}-${videoSrc}-${autoplayEnabled}`}
+          src={videoSrc}
+          onEnded={handleEnded}
+        />
+      ) : (
+        <iframe
+          key={`${id}-${autoplayEnabled}`}
+          src={clipProvider.getEmbedUrl(id) || embedUrl}
+          title={title}
+          style={{ height: '100%', width: '100%' }}
+          frameBorder="0"
+          allow="autoplay"
+          allowFullScreen
+        />
+      );
     case 'Streamable':
       return autoplayEnabled ? (
         <StreamablePlayer
@@ -111,14 +138,12 @@ const getPlayerComponent = (
 
       if (isRedditPermalink) {
         return (
-          <iframe
+          <TimedIframe
             key={`${id}-${autoplayEnabled}`}
             src={clipProvider.getEmbedUrl(id) || videoSrc}
             title={title}
-            style={{ height: '100%', width: '100%' }}
-            frameBorder="0"
-            allow="autoplay"
-            allowFullScreen
+            autoplayEnabled={autoplayEnabled && !!nextClipId}
+            dispatch={dispatch}
           />
         );
       }
@@ -197,6 +222,7 @@ function Player({ className }: PlayerProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showLoader, setShowLoader] = useState<boolean>(false);
   const skipVoteCount = useAppSelector(selectSkipVoteCount);
+  const skipThreshold = useAppSelector((state) => state.settings.skipThreshold ?? 20);
   const loaderTimerRef = useRef<number | null>(null);
 
 
@@ -210,12 +236,6 @@ function Player({ className }: PlayerProps) {
       setVideoSrc(undefined);
       setError(null);
       setIsLoading(false);
-      return;
-    }
-
-    if (autoplayEnabled && nextClipId && currentClip.id?.startsWith('twitch-vod:')) {
-      // skip autoplay for twitch VODs
-      dispatch(currentClipWatched());
       return;
     }
 
@@ -273,7 +293,7 @@ function Player({ className }: PlayerProps) {
       }
       setShowLoader(false);
     };
-  }, [currentClip, autoplayEnabled, dispatch, nextClipId]);
+  }, [currentClip, autoplayEnabled, dispatch]);
 
   const preloadRef = useRef<PreloadHandle | null>(null);
   const preloadAbortRef = useRef<AbortController | null>(null);
@@ -334,22 +354,23 @@ function Player({ className }: PlayerProps) {
   return (
     <Stack
       align="center"
-      sx={{ background: 'black', width: '100%', aspectRatio: '16 / 9', position: 'relative', flex: '0 0 auto' }}
-      className={className}
+      sx={{ background: 'black', width: '100%', aspectRatio: '16 / 9', position: 'relative', flex: '0 0 auto', borderRadius: 12, overflow: 'hidden' }}
+      className={['queue-player-surface', className].filter(Boolean).join(' ')}
     >
       {error ? (
         <div style={{ color: 'red' }}>{error}</div>
       ) : isLoading && showLoader ? (
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)'
-        }}>
-          <Loader size="xl" color="white" />
+        <div className="player-loading-indicator">
+          <Loader size={48} variant="oval" color="indigo" />
         </div>
       ) : videoSrc || !autoplayEnabled ? (
-        player
+        <Suspense fallback={
+          <div className="player-loading-indicator">
+            <Loader size={48} variant="oval" color="indigo" />
+          </div>
+        }>
+          {player}
+        </Suspense>
       ) : (
         <div></div>
       )}
@@ -361,7 +382,8 @@ function Player({ className }: PlayerProps) {
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 3,
-            background: 'rgba(0, 0, 0, 0.6)',
+            background: 'rgba(0, 0, 0, 0.4)',
+            backdropFilter: 'blur(4px)',
             color: 'white',
             padding: '6px 10px',
             borderRadius: '0 0 12px 12px',
@@ -370,7 +392,7 @@ function Player({ className }: PlayerProps) {
           }}
           aria-live="polite"
         >
-          Skip votes: {skipVoteCount}
+          Skip votes: {skipVoteCount}/{skipThreshold}
         </div>
       )}
       <AutoplayOverlay

@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { IconMoonStars, IconSettings, IconLogout, IconChevronDown, IconToggleLeftFilled, IconToggleRightFilled, IconCrown } from '@tabler/icons-react';
 import { selectUsername, selectProfilePictureUrl, logout } from '../features/auth/authSlice';
 import { isOpenChanged, selectIsOpen } from '../features/clips/clipQueueSlice';
-import useSettingsModal from '../features/settings/SettingsModal';
+import useSettingsModal from '../features/settings/useSettingsModal';
 import { useAppDispatch, useAppSelector } from './hooks';
 
 const AppMenu = () => {
@@ -37,17 +37,12 @@ const AppMenu = () => {
       position="bottom"
       placement="end"
       closeOnItemClick={true}
+      classNames={{ body: 'app-menu-dropdown' }}
       control={
         <UnstyledButton
+          className="app-menu-trigger"
           sx={(theme) => ({
             padding: theme.spacing.xs,
-
-            '&:hover': {
-              backgroundColor:
-                theme.colorScheme === 'dark'
-                  ? theme.fn.rgba(theme.colors[theme.primaryColor][9], 0.35)
-                  : theme.fn.rgba(theme.colors.gray[0], 0.35),
-            },
           })}
         >
           <Group sx={{ minWidth: 0, gap: 8, alignItems: 'center', flexWrap: 'nowrap' }}>
@@ -74,7 +69,7 @@ const AppMenu = () => {
       <Menu.Item
         icon={<IconMoonStars size={14} />}
         onClick={() => toggleColorScheme()}
-        rightSection={<Switch size="xs" checked={colorScheme === 'dark'} readOnly />}
+        rightSection={<Switch className="app-menu-switch" size="xs" checked={colorScheme === 'dark'} readOnly />}
       >
         Dark mode
       </Menu.Item>

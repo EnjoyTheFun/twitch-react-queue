@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ActionIcon, ActionIconProps, Button, Group, Header, Space, Text, ThemeIcon, Box, SegmentedControl, Tooltip, Sx } from '@mantine/core';
+import { useEffect, useState } from 'react';
+import { ActionIcon, ActionIconProps, Button, Group, Header, Space, Text, ThemeIcon, Box, Tooltip, Sx, useMantineColorScheme } from '@mantine/core';
 import { IconHome, IconList, IconHistory, IconCrown, IconPlugConnectedX } from '@tabler/icons-react';
 import { PropsWithChildren } from 'react';
 import { NavLinkProps, useLocation } from 'react-router-dom';
@@ -10,7 +10,7 @@ import IfAuthenticated from '../features/auth/IfAuthenticated';
 import { useAppDispatch, useAppSelector } from './hooks';
 import { login } from '../features/auth/authSlice';
 import AppMenu from './AppMenu';
-import { isOpenChanged, selectIsOpen } from '../features/clips/clipQueueSlice';
+import { isOpenChanged, selectIsOpen, selectLayout } from '../features/clips/clipQueueSlice';
 import { selectChatConnectionStatus } from '../features/twitchChat/chatConnectionSlice';
 
 const TitleIcon = () => {
@@ -21,14 +21,18 @@ const TitleIcon = () => {
   );
 };
 
-const TitleText = () => (
-  <Group direction="column" spacing={0} className="app-title-section">
-    <Text size="xl" weight={800}>
-      React Queue
-    </Text>
-    <MyCredits persist={false} />
-  </Group>
-);
+const TitleText = () => {
+  const { colorScheme } = useMantineColorScheme();
+
+  return (
+    <Group direction="column" spacing={0} className="app-title-section">
+      <Text size="xl" weight={800} color={colorScheme === 'dark' ? 'white' : 'dark'} className="app-title-wordmark">
+        React Queue
+      </Text>
+      <MyCredits persist={false} />
+    </Group>
+  );
+};
 
 const NavBarIcon = ({ children, ...props }: PropsWithChildren<ActionIconProps<'button'>>) => (
   <ActionIcon variant="hover" size="lg" {...props}>
@@ -45,10 +49,7 @@ const NavBarButton = ({ children, type: _type, className: _className, style: _st
       aria-label={label}
       {...props}
       className="nav-link"
-      sx={sx}
-      activeStyle={({ isActive }: { isActive: boolean }) => ({
-        borderBottom: isActive ? '1px solid' : undefined,
-      })}
+      sx={{ width: 75, justifyContent: 'center', ...sx }}
     >
       {icon && <span className="nav-icon" aria-hidden>{icon}</span>}
       <span className="nav-text">{children}</span>
@@ -61,7 +62,16 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const isOpen = useAppSelector(selectIsOpen);
+  const layout = useAppSelector(selectLayout);
   const chatConnectionStatus = useAppSelector(selectChatConnectionStatus);
+
+  useEffect(() => {
+    if (location.pathname.startsWith('/queue')) {
+      setCollapsed(layout === 'fullscreen');
+    } else {
+      setCollapsed(false);
+    }
+  }, [layout, location.pathname]);
 
   const handleLogin = () => {
     dispatch(login(location.pathname));
@@ -71,8 +81,8 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
     setCollapsed(prev => !prev);
   };
 
-  const handleQueueToggle = (state: string) => {
-    dispatch(isOpenChanged(state === 'open'));
+  const handleQueueToggle = () => {
+    dispatch(isOpenChanged(!isOpen));
   };
 
   return (
@@ -88,7 +98,7 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
                 spacing={0}
                 sx={{
                   display: 'flex',
-                  gap: 0,
+                  gap: 6,
                   flexWrap: 'nowrap',
                   overflow: 'visible',
                   alignItems: 'center',
@@ -117,7 +127,9 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
             otherwise={
               <Group sx={{ flexWrap: 'nowrap', gap: '0.5rem' }}>
                 <ColorSchemeSwitch component={NavBarIcon} />
-                <Button onClick={handleLogin}>Login with Twitch</Button>
+                <Button onClick={handleLogin} variant="subtle" className="nav-link login-button">
+                  Login with Twitch
+                </Button>
               </Group>
             }
           >
@@ -138,44 +150,21 @@ const AppHeader = ({ noNav = false }: { noNav?: boolean }) => {
                   }
                 })}
               >
-                <Text className="status-label hide-on-mobile" size="sm" weight={600} sx={{ lineHeight: 1, fontSize: '1rem' }}>Status:</Text>
-                <SegmentedControl
-                  size="sm"
-                  sx={{
-                    display: 'flex',
-                    width: '176px',
-                    '& .mantine-SegmentedControl-control': {
-                      display: 'flex',
-                      width: '100%'
-                    },
-                    '& .mantine-SegmentedControl-item': {
-                      flex: '1 1 0% !important',
-                      width: '50% !important',
-                      minWidth: 0,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      paddingLeft: '6px',
-                      paddingRight: '6px'
-                    },
-                    '& .mantine-SegmentedControl-item button, & .mantine-SegmentedControl-item [role="button"]': {
-                      width: '100% !important',
-                      display: 'block'
-                    },
-                    '& .mantine-SegmentedControl-label': {
-                      fontSize: '0.9rem',
-                      fontWeight: 600,
-                      textAlign: 'center',
-                      width: '100%'
-                    }
-                  }}
-                  value={isOpen ? 'open' : 'closed'}
-                  data={[
-                    { label: 'Closed', value: 'closed' },
-                    { label: 'Open', value: 'open' },
-                  ]}
-                  onChange={handleQueueToggle}
-                />
+                <Button
+                  size="xs"
+                  variant="light"
+                  color={isOpen ? 'teal' : 'gray'}
+                  className={`queue-status-pill ${isOpen ? 'is-open' : 'is-closed'}`}
+                  onClick={handleQueueToggle}
+                  aria-pressed={isOpen}
+                  title={`Click to ${isOpen ? 'close' : 'open'} the queue`}
+                  sx={{ borderRadius: 10, height: 36, width: 158, paddingLeft: 12, paddingRight: 12, textTransform: 'none' }}
+                >
+                  <span className="queue-status-label">{isOpen ? 'Queue Open' : 'Queue Closed'}</span>
+                  <span className="queue-status-switch" aria-hidden="true">
+                    <span className="queue-status-dot" />
+                  </span>
+                </Button>
               </Group>
 
               {chatConnectionStatus === 'disconnected' && (

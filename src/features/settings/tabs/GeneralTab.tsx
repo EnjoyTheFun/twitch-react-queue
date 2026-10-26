@@ -32,14 +32,14 @@ function GeneralTab({ form }: SettingsTabProps) {
         </Text>
         <NumberInput
           required
-          min={30}
-          max={85}
+          min={1}
+          max={99}
           step={1}
           value={form.values.playerPercentDefault}
           onChange={(v) => form.setFieldValue('playerPercentDefault', v ?? 79)}
           styles={{ root: { display: 'inline-block' }, input: { width: 70 } }}
         />
-        <Button size="xs" onClick={() => {
+        <Button className="settings-danger-button" size="xs" onClick={() => {
           dispatch(settingsChanged({ playerPercentDefault: 79 }));
           form.setFieldValue('playerPercentDefault', 79);
         }}>Reset</Button>
